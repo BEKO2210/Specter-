@@ -12,6 +12,7 @@ import html
 from pathlib import Path
 from typing import Any
 
+from ._brand_asset import SPECTER_MARK_DATA_URI
 from .assets import AssetGraph
 from .attack_paths import AttackPath
 from .bsi import map_findings
@@ -20,12 +21,10 @@ from .findings import FindingsStore, Severity
 from .remediation import remediation_for
 from .report import _long_term, _quick_wins, _top_risks
 
-# Kompaktes Marken-Icon (hexagonales S) inline - keine externe Datei nötig.
-_MARK_SVG = (
-    '<svg viewBox="0 0 128 128" width="40" height="40" role="img" aria-label="Specter">'
-    '<path d="M64 8L112 36V62.5H92V48.3L64 32.1L36 48.3V62.5H16V36L64 8Z" fill="#0D1B2A"/>'
-    '<path d="M112 65.5V92L64 120L16 92V65.5H36V79.7L64 95.9L92 79.7V65.5H112Z" fill="#14B8A6"/>'
-    '</svg>'
+# Exaktes Specter-Mark (aus dem Brand-Board) inline eingebettet - self-contained.
+_MARK_IMG = (
+    f'<img src="{SPECTER_MARK_DATA_URI}" alt="Specter" '
+    'width="38" height="46" style="display:block">'
 )
 
 # Schweregrad -> CSS-Klasse (Farbcode im Report).
@@ -112,7 +111,7 @@ def build_html(
     p.append(f"<style>{_CSS}</style></head><body><div class='wrap'>")
 
     # Kopf
-    p.append("<header class='brand'>" + _MARK_SVG +
+    p.append("<header class='brand'>" + _MARK_IMG +
              "<div><div class='name'>Specter</div>"
              "<div class='sub'>Defensive Security Intelligence</div></div></header>")
     p.append(f"<div class='meta'>Sicherheitsbericht &middot; <strong>{_e(eng.name)}</strong><br>"

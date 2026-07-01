@@ -4,14 +4,14 @@ Specter ist ein seriöses B2B-SaaS-/Security-System. Die Marke soll nicht verspi
 
 ## Logo-Dateien
 
-Alle Marken-Assets liegen unter `docs/brand/`:
+Alle Marken-Assets liegen unter `docs/brand/` und sind **exakt aus dem
+Brand-Board** übernommen (pixelgenau, inkl. 3D-Faltung des Marks):
 
-- `docs/brand/specter-logo.svg` – Hauptlogo für helle Hintergründe
-- `docs/brand/specter-logo-white.svg` – Logo für dunkle Hintergründe ohne Fläche
-- `docs/brand/specter-logo-reversed.svg` – Logo auf dunkler Markenfläche
-- `docs/brand/specter-mark.svg` – Icon/Marke ohne Wortmarke
-- `docs/brand/specter-mark-mono.svg` – einfarbige Version für Sonderfälle
-- `docs/brand/favicon.svg` – Favicon/App-Icon-Basis
+- `docs/brand/specter-logo.png` – Hauptlogo (Mark + Wortmarke) für helle Hintergründe
+- `docs/brand/specter-logo-reversed.png` – Logo auf dunkler Markenfläche
+- `docs/brand/specter-mark.png` – Icon/Marke ohne Wortmarke
+- `docs/brand/favicon.png` – Favicon/App-Icon (128×128)
+- `docs/brand/specter-brand-board.png` – vollständiges Brand-Board (Referenz)
 
 ## Farben
 

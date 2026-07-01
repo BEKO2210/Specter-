@@ -38,6 +38,15 @@ def test_html_is_wellformed_document():
     assert "Specter" in html and "Defensive Security Intelligence" in html
 
 
+def test_html_embeds_exact_brand_mark():
+    # Der Report bettet das exakte Specter-Mark (Board) als Data-URI ein.
+    from specter._brand_asset import SPECTER_MARK_DATA_URI
+    html = build_html(_cfg(), AssetGraph(), _store(), [])
+    assert SPECTER_MARK_DATA_URI in html
+    assert SPECTER_MARK_DATA_URI.startswith("data:image/png;base64,")
+    assert 'alt="Specter"' in html
+
+
 def test_html_contains_all_sections():
     cfg = _cfg()
     store = _store(
