@@ -8,6 +8,7 @@ from ..audit import AuditLog
 from ..config import Config
 from ..remediation import draft_pr
 from ..report import write_reports
+from ..report_export import write_html
 from ..state import EngagementState
 from .base import ToolResult
 
@@ -49,10 +50,15 @@ class GenerateReportTool:
             self.config, self.state.assets, self.state.findings,
             self.state.attack_paths, scanner_runs=self.state.scanner_runs,
         )
+        html_path = write_html(
+            self.config, self.state.assets, self.state.findings,
+            self.state.attack_paths, scanner_runs=self.state.scanner_runs,
+        )
         self.audit.record(
             "generate_report",
             markdown=str(paths["markdown"]),
             json=str(paths["json"]),
+            html=str(html_path),
             findings=len(self.state.findings),
             attack_paths=len(self.state.attack_paths),
         )
@@ -60,6 +66,7 @@ class GenerateReportTool:
             "Bericht geschrieben:",
             f"  Markdown: {paths['markdown']}",
             f"  JSON:     {paths['json']}",
+            f"  HTML:     {html_path}  (im Browser -> Drucken -> Als PDF speichern)",
             f"Findings: {len(self.state.findings)}  ·  "
             f"Angriffspfade: {len(self.state.attack_paths)}",
         ]

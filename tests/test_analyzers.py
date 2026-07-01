@@ -7,6 +7,7 @@ import json
 from specter.analyzers.active_directory import (
     analyze_ad, normalize_bloodhound_users,
 )
+from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.findings import Severity
 
@@ -180,3 +181,108 @@ def test_exchange_clean():
                         "X-Frame-Options": "DENY",
                         "X-Content-Type-Options": "nosniff"}}
     assert analyze_exchange(data) == []
+
+
+# ============================== Entra ID / M365 ===========================
+
+def test_entra_no_baseline_protection():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": False,
+            "conditional_access_policies": []}
+    findings = analyze_entra(data)
+    titles = " ".join(f.title for f in findings)
+    assert "Weder Security Defaults noch Conditional Access" in titles
+    assert "Keine MFA-Erzwingung" in titles
+
+
+def test_entra_legacy_auth_not_blocked():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "legacy_auth_allowed": True,
+            "conditional_access_policies": [
+                {"name": "MFA", "state": "enabled", "requires_mfa": True,
+                 "blocks_legacy_auth": False}]}
+    findings = analyze_entra(data)
+    assert any("Legacy-Authentifizierung nicht blockiert" in f.title for f in findings)
+
+
+def test_entra_too_many_global_admins():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [
+                {"state": "enabled", "requires_mfa": True}],
+            "roles": {"Global Administrator": [f"a{i}@x" for i in range(9)]}}
+    findings = analyze_entra(data)
+    assert any("Zu viele Konten in 'Global Administrator'" in f.title for f in findings)
+
+
+def test_entra_privileged_without_mfa_is_critical():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "users": [{"upn": "admin@x", "enabled": True, "privileged": True,
+                       "mfa_registered": False}]}
+    findings = analyze_entra(data)
+    crit = [f for f in findings if f.severity is Severity.KRITISCH]
+    assert crit and "ohne MFA" in crit[0].title
+
+
+def test_entra_normal_user_without_mfa_is_medium():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "users": [{"upn": "user@x", "enabled": True, "mfa_registered": False}]}
+    findings = analyze_entra(data)
+    assert any(f.severity is Severity.MITTEL and "ohne MFA" in f.title for f in findings)
+
+
+def test_entra_stale_guest():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "users": [{"upn": "gast@extern", "enabled": True, "guest": True,
+                       "mfa_registered": True, "last_sign_in_days": 200}]}
+    findings = analyze_entra(data)
+    assert any("Inaktives Gastkonto" in f.title for f in findings)
+
+
+def test_entra_overprivileged_app():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "app_registrations": [
+                {"name": "Legacy Sync", "admin_consent": True,
+                 "high_privilege_permissions": ["Directory.ReadWrite.All"]}]}
+    findings = analyze_entra(data)
+    assert any("Ueberprivilegierte App" in f.title for f in findings)
+
+
+def test_entra_anonymous_sharing():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "sharing": {"anonymous_links_enabled": True}}
+    findings = analyze_entra(data)
+    assert any(f.category == "personal_data" for f in findings)
+
+
+def test_entra_invalid_input_and_non_list_role():
+    assert analyze_entra("x") == []
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "roles": {"Global Administrator": "kaputt"}}
+    assert analyze_entra(data) == []
+
+
+def test_entra_non_dict_app_ignored():
+    # Fehlerhafte App-Struktur (kein Dict) wird robust uebersprungen.
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
+            "app_registrations": ["kaputt", None]}
+    assert analyze_entra(data) == []
+
+
+def test_entra_clean_tenant():
+    data = {"tenant": "contoso.de", "security_defaults_enabled": True,
+            "legacy_auth_allowed": False,
+            "conditional_access_policies": [
+                {"name": "Block Legacy + MFA", "state": "enabled",
+                 "requires_mfa": True, "blocks_legacy_auth": True}],
+            "roles": {"Global Administrator": ["a@x", "b@x"]},
+            "users": [{"upn": "admin@x", "enabled": True, "privileged": True,
+                       "mfa_registered": True}],
+            "app_registrations": [],
+            "sharing": {"anonymous_links_enabled": False}}
+    assert analyze_entra(data) == []

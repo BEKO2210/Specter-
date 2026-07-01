@@ -1,0 +1,24 @@
+{
+  "tenant": "mustermann.onmicrosoft.com",
+  "security_defaults_enabled": false,
+  "legacy_auth_allowed": true,
+  "conditional_access_policies": [
+    { "name": "Nur Reporting", "state": "reportOnly", "requires_mfa": true }
+  ],
+  "roles": {
+    "Global Administrator": [
+      "admin@mustermann.de", "it@mustermann.de", "chef@mustermann.de",
+      "extern-dienstleister@fremd.de", "backup@mustermann.de",
+      "test@mustermann.de", "alt-admin@mustermann.de"
+    ]
+  },
+  "users": [
+    { "upn": "admin@mustermann.de", "enabled": true, "privileged": true, "mfa_registered": false },
+    { "upn": "vertrieb@mustermann.de", "enabled": true, "mfa_registered": false },
+    { "upn": "gast@partnerfirma.de", "enabled": true, "guest": true, "mfa_registered": true, "last_sign_in_days": 240 }
+  ],
+  "app_registrations": [
+    { "name": "Alt-Sync-Tool", "admin_consent": true, "high_privilege_permissions": ["Directory.ReadWrite.All", "Mail.Read"] }
+  ],
+  "sharing": { "anonymous_links_enabled": true }
+}
