@@ -44,6 +44,8 @@ def build_registry(
 ) -> dict[str, Tool]:
     """Erzeugt alle verfuegbaren Tools und gibt sie als Name->Tool-Map zurueck."""
     # Import hier, um Zirkularimporte zu vermeiden.
+    from .analyze_ad import AnalyzeAdTool
+    from .analyze_exchange import AnalyzeExchangeTool
     from .code_scan import CodeScanTool
     from .correlate_paths import CorrelatePathsTool
     from .generate_report import GenerateReportTool
@@ -51,14 +53,19 @@ def build_registry(
     from .record_finding import RecordFindingTool
     from .register_asset import RegisterAssetTool
     from .run_command import RunCommandTool
+    from .run_scanner import RunScannerTool
 
     tools: list[Tool] = [
         # Recon / Augen
         RegisterAssetTool(state, audit),
         ReadFileTool(config, policy, audit),
         CodeScanTool(config, policy, audit, state),
+        # Offline-Analyse bereitgestellter Daten (AD/Exchange)
+        AnalyzeAdTool(config, policy, audit, state),
+        AnalyzeExchangeTool(config, policy, audit, state),
         # Aktiv / Haende
         RunCommandTool(config, policy, audit),
+        RunScannerTool(config, policy, audit, state),
         # Findings-Analyse -> Korrelation -> Fix & Report
         RecordFindingTool(state, audit),
         CorrelatePathsTool(state, audit),

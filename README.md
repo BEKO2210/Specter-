@@ -68,28 +68,79 @@ specter/
 ├── findings.py        # Finding-Modell, Schweregrade, Store
 ├── attack_paths.py    # regelbasierte Angriffspfad-Korrelation
 ├── remediation.py     # Gegenmaßnahmen + Draft-PR-Generierung
-├── report.py          # Bericht (Markdown + JSON), DE / BSI / DSGVO
+├── report.py          # produktionsreifer Bericht (Markdown + JSON)
+├── bsi.py             # BSI-IT-Grundschutz-Mapping
+├── analyzers/         # Offline-Analyse bereitgestellter Exporte
+│   ├── active_directory.py   # AD-Risiken (Policy, Gruppen, Kerberos …)
+│   └── exchange.py           # Exchange-Risiken (Version, ECP, TLS, Header)
+├── scanners/          # sichere Wrapper aktiver Scanner
+│   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
+│   ├── nmap.py               # nmap-Wrapper
+│   └── nikto.py              # nikto-Wrapper
 └── tools/
-    ├── register_asset.py   # Recon: Asset erfassen
-    ├── read_file.py        # White-Box: Datei lesen
-    ├── code_scan.py        # statische Muster + Auto-Findings ("scan_code")
-    ├── run_command.py      # Terminal-Befehle (Allowlist + Scope + Timeout)
-    ├── record_finding.py   # Finding strukturiert erfassen
-    ├── correlate_paths.py  # Angriffspfade korrelieren
-    └── generate_report.py  # Bericht + Draft-PRs erzeugen
+    ├── register_asset.py   ├── read_file.py       ├── code_scan.py
+    ├── analyze_ad.py       ├── analyze_exchange.py
+    ├── run_command.py      ├── run_scanner.py
+    ├── record_finding.py   ├── correlate_paths.py └── generate_report.py
 ```
 
-### Die sieben Werkzeuge
+### Die zehn Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
 | `register_asset` | Recon | Asset im Graph erfassen (+ Kanten) |
 | `read_file` | Prüfen | Datei lesen (nur im Datei-Scope) |
 | `scan_code` | Prüfen | Muster-Scan, erfasst Findings automatisch |
+| `analyze_ad` | Prüfen | Active-Directory-Export offline analysieren |
+| `analyze_exchange` | Prüfen | Exchange-Daten offline/passiv analysieren |
 | `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
+| `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
 | `correlate_paths` | Korrelation | Findings → Angriffspfade |
 | `generate_report` | Fix & Bericht | Report (MD/JSON) + Draft-PR-Texte |
+
+---
+
+## Windows-Umgebungen: AD- & Exchange-Analyse (offline, defensiv)
+
+Für den Mittelstand besonders relevant. Beide Analyzer werten **ausschließlich
+bereitgestellte lokale Exportdateien** aus — **keine** Live-Verbindung, keine
+Credential-Nutzung, keine Ausnutzung.
+
+- **`analyze_ad`** (`analyzers/active_directory.py`) — erkennt schwache Passwort-/
+  Lockout-Policy, zu große privilegierte Gruppen, veraltete/deaktivierte Konten,
+  Service-Accounts mit SPN (Kerberoasting-Exposition), AS-REP-Roasting, altes
+  krbtgt-Passwort (Golden-Ticket-Risiko), AdminSDHolder-Reste. Akzeptiert die
+  dokumentierte JSON-Struktur oder einen **BloodHound-`users`-Export**.
+- **`analyze_exchange`** (`analyzers/exchange.py`) — veraltete Version
+  (ProxyLogon/ProxyShell-Ära anhand der Build-Nummer), extern erreichbares **ECP**,
+  OWA/Autodiscover, schwache TLS-Protokolle, fehlende Sicherheits-Header.
+
+Beispiel-Exporte: `examples/data/ad_export.example.json`,
+`examples/data/exchange.example.json`.
+
+## Aktive Scanner (nmap/nikto) — sicher gekapselt
+
+`run_scanner` führt nur freigegebene Scanner aus. Jeder Lauf ist mehrfach
+abgesichert:
+
+- **Freigabe-Pflicht:** deaktiviert, bis `scanners.<name>.enabled: true` in
+  `scope.yaml` (fail-closed).
+- **Ziel im Scope:** Host muss im Netzwerk-Scope liegen.
+- **Strikte Argument-Allowlist:** gefährliche Flags (Evasion, Spoofing, DoS,
+  Dateiausgabe) sind **immer** blockiert; aggressive Flags nur mit
+  `allow_aggressive: true`; sonst nur explizit freigegebene Flags.
+- **Kein `shell=True`**, hartes Timeout, begrenzte Ausgabe, saubere
+  Fehlerbehandlung. Ergebnisse werden als Findings übernommen.
+
+## Bericht & BSI-IT-Grundschutz
+
+`generate_report` erzeugt einen **produktionsreifen** Bericht (Markdown + JSON) mit:
+Executive Summary, Risiko-Einstufung, Angriffspfaden, **Quick Wins**,
+langfristigen Maßnahmen, technischen Findings mit Evidenz,
+**BSI-IT-Grundschutz-Mapping** (Finding-ID, Risiko, Bereich, Maßnahme, BSI-Bezug,
+Priorität, Evidenz, Einschränkungen), Scanner-Ergebnissen, Scope-Hinweisen,
+Limitierungen und nächsten Schritten.
 
 ---
 
@@ -149,12 +200,16 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**158 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**255 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation, Report-Generierung
-- alle sieben Werkzeuge (Erfolgs- und Fehlerpfade)
+- alle zehn Werkzeuge (Erfolgs- und Fehlerpfade)
+- AD-/Exchange-Analyzer (jede Regel + Fehlerfälle, BloodHound-Normalisierung)
+- Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
+  Truncation, Parser (mit gemocktem Subprozess)
+- BSI-IT-Grundschutz-Mapping und alle Report-Abschnitte
 - die vollständige Agenten-Schleife mit simuliertem LLM (kein API-Key nötig)
 - ein **Integrationstest** mit echtem `curl` gegen einen lokalen Server
 

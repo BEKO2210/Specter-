@@ -1,0 +1,35 @@
+{
+  "domain": "mustermann.local",
+  "password_policy": {
+    "min_length": 8,
+    "complexity": false,
+    "max_age_days": 0,
+    "lockout_threshold": 0,
+    "history_length": 3
+  },
+  "krbtgt_password_age_days": 1450,
+  "privileged_groups": {
+    "Domain Admins": [
+      "administrator", "m.mueller", "s.schmidt", "backup-admin",
+      "svc-veeam", "j.klein", "a.wagner", "it-praktikant", "alt-admin"
+    ]
+  },
+  "users": [
+    {
+      "name": "svc-mssql", "enabled": true, "privileged": true,
+      "password_never_expires": true,
+      "service_principal_names": ["MSSQL/db01.mustermann.local"],
+      "kerberos_preauth": true, "groups": ["Domain Admins"]
+    },
+    {
+      "name": "m.weber", "enabled": true, "last_logon_days": 410,
+      "kerberos_preauth": false, "groups": ["Vertrieb"]
+    },
+    {
+      "name": "ex-admin", "enabled": false, "groups": ["Domain Admins"]
+    },
+    {
+      "name": "a.fischer", "enabled": true, "admin_count": 1, "groups": []
+    }
+  ]
+}

@@ -23,6 +23,28 @@ class Engagement:
 
 
 @dataclass
+class ScannerPolicy:
+    """Freigabe- und Sicherheitsregeln fuer einen aktiven Scanner (z. B. nmap)."""
+
+    enabled: bool = False
+    allow_aggressive: bool = False
+    extra_allowed_flags: list[str] = field(default_factory=list)
+    timeout_seconds: int = 300
+    max_output_bytes: int = 200_000
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> "ScannerPolicy":
+        data = data or {}
+        return cls(
+            enabled=bool(data.get("enabled", False)),
+            allow_aggressive=bool(data.get("allow_aggressive", False)),
+            extra_allowed_flags=[str(f) for f in (data.get("extra_allowed_flags") or [])],
+            timeout_seconds=int(data.get("timeout_seconds", 300)),
+            max_output_bytes=int(data.get("max_output_bytes", 200_000)),
+        )
+
+
+@dataclass
 class Config:
     """Aufbereitete, validierte Konfiguration des Agenten."""
 
@@ -36,7 +58,12 @@ class Config:
     require_approval: bool
     max_iterations: int
     model: str
+    scanners: dict[str, ScannerPolicy] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
+
+    def scanner_policy(self, name: str) -> ScannerPolicy:
+        """Policy fuer einen Scanner; Default = deaktiviert (fail-closed)."""
+        return self.scanners.get(name, ScannerPolicy())
 
     @classmethod
     def load(cls, path: str | Path) -> "Config":
@@ -71,11 +98,16 @@ class Config:
         filesystem = data.get("filesystem") or {}
         commands = data.get("commands") or {}
         runtime = data.get("runtime") or {}
+        scanners_raw = data.get("scanners") or {}
 
         allowed_paths = [
             Path(pth).expanduser().resolve()
             for pth in (filesystem.get("allowed_paths") or [])
         ]
+        scanners = {
+            str(name): ScannerPolicy.from_dict(cfg)
+            for name, cfg in scanners_raw.items()
+        }
 
         return cls(
             engagement=engagement,
@@ -88,6 +120,7 @@ class Config:
             require_approval=bool(runtime.get("require_approval", True)),
             max_iterations=int(runtime.get("max_iterations", 25)),
             model=str(runtime.get("model", "claude-sonnet-5")),
+            scanners=scanners,
             raw=data,
         )
 

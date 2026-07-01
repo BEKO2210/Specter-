@@ -18,7 +18,6 @@ from .llm import AnthropicLLM
 from .safety import SafetyPolicy
 from .state import EngagementState
 from .tools import build_registry
-from .tools.run_command import RunCommandTool
 
 SYSTEM_PROMPT = """Du bist Specter, ein autonomer Assistent fuer AUTORISIERTES \
 Pentesting und Code-Sicherheitsanalyse (Defensive Security, deutscher Markt).
@@ -29,11 +28,14 @@ Autorisiert durch: {authorized_by} (Ref: {authorization_ref})
 Arbeite in fuenf Phasen (wie eine professionelle Pruefung):
 1. RECON: Ziele und Bausteine aufklaeren und mit `register_asset` im Asset-Graph \
 erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
-2. PRUEFEN: statisch mit `scan_code`/`read_file`, aktiv - nur bei Bedarf und mit \
-Begruendung - mit `run_command`. Nur freigegebene Ziele.
+2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-Daten \
+offline mit `analyze_ad` (Active-Directory-Export) und `analyze_exchange` \
+(Exchange-Daten); aktiv - nur bei Bedarf, mit Begruendung und nur gegen \
+freigegebene Ziele - mit `run_command` oder dem sicheren `run_scanner` \
+(nmap/nikto, muss in scope.yaml aktiviert sein).
 3. FINDINGS: jede belegte Schwachstelle mit `record_finding` strukturiert \
 erfassen (Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner). Verifiziere \
-automatisch erfasste Static-Scan-Kandidaten, bevor du dich darauf stuetzt.
+automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stuetzt.
 4. KORRELATION: mit `correlate_paths` die Findings zu Angriffspfaden \
 (toxischen Kombinationen) verketten.
 5. FIX & BERICHT: mit `generate_report` (include_pr_drafts=true) den Bericht \
@@ -69,11 +71,12 @@ class SecurityAgent:
         self.state = state or EngagementState()
         self.tools = build_registry(config, self.policy, audit, self.state)
 
-        # Freigabe-Callback in das aktive Befehlstool injizieren.
+        # Freigabe-Callback in alle aktiven Werkzeuge injizieren
+        # (Human-in-the-loop vor jedem Eingriff in fremde Systeme).
         if approval_fn is not None:
-            cmd_tool = self.tools.get("run_command")
-            if isinstance(cmd_tool, RunCommandTool):
-                cmd_tool.approval_fn = approval_fn
+            for tool in self.tools.values():
+                if getattr(tool, "active", False) and hasattr(tool, "approval_fn"):
+                    tool.approval_fn = approval_fn
 
     @property
     def _system(self) -> str:

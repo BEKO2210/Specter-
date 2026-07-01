@@ -46,7 +46,8 @@ class GenerateReportTool:
     def run(self, arguments: dict[str, Any]) -> ToolResult:
         include_drafts = bool(arguments.get("include_pr_drafts", False))
         paths = write_reports(
-            self.config, self.state.assets, self.state.findings, self.state.attack_paths
+            self.config, self.state.assets, self.state.findings,
+            self.state.attack_paths, scanner_runs=self.state.scanner_runs,
         )
         self.audit.record(
             "generate_report",

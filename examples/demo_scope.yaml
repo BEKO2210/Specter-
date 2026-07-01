@@ -17,6 +17,7 @@ network:
 filesystem:
   allowed_paths:
     - "examples/vulnerable_app"
+    - "examples/data"
   max_file_bytes: 1000000
 
 commands:
@@ -29,3 +30,10 @@ runtime:
   require_approval: false
   max_iterations: 25
   model: "claude-sonnet-5"
+
+# nmap ist im Demo-Scope freigegeben (laeuft nur, wenn nmap installiert ist).
+scanners:
+  nmap:
+    enabled: true
+    allow_aggressive: false
+    timeout_seconds: 60
