@@ -149,7 +149,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**102 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**158 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
@@ -157,6 +157,25 @@ python -m pytest
 - alle sieben Werkzeuge (Erfolgs- und Fehlerpfade)
 - die vollständige Agenten-Schleife mit simuliertem LLM (kein API-Key nötig)
 - ein **Integrationstest** mit echtem `curl` gegen einen lokalen Server
+
+### Mittelstand-Testszenario „Mustermann GmbH"
+
+Eine realistische Fixture (`tests/fixtures/mittelstand/`) bildet die typische
+Angriffsfläche eines deutschen Mittelständlers ab — Webshop (PHP), Kunden-API
+(Python), ERP/DATEV-Anbindung (Java), Infrastruktur (RDP/DB offen, alte Images),
+personenbezogene Daten (DSGVO) und veraltete Komponenten. Darauf laufen:
+
+- **Szenario-Tests** (`test_mittelstand_scenario.py`) — volles Engagement mit den
+  echten Mittelstands-Angriffspfaden: **Domänenübernahme über offenen RDP-Zugang**,
+  **DSGVO-meldepflichtiger Datenabfluss (Art. 33/34)**, **Ausnutzung veralteter
+  Komponenten**, Webshop-SQLi → Kundendaten.
+- **Harte/adversariale Tests** (`test_hard_adversarial.py`) — Scope-Ausbruchsversuche:
+  Symlink-Traversal, Dezimal-/Oktal-IP-Umgehung, Homoglyph-Hosts, IPv6-Klammern,
+  Command-Chaining, URL-Userinfo-Bypass, Prefix-Verwechslung.
+- **Stress-/Performance-Tests** (`test_stress_performance.py`) — 300-Dateien-Scan,
+  Korrelation über hunderte Findings, ReDoS-Schutz.
+- **Muster-Präzisionstests** (`test_scan_patterns.py`) — je Schwachstellenklasse
+  ein positiver Fall plus Falsch-Positiv-Kontrolle.
 
 CI (GitHub Actions, `.github/workflows/ci.yml`) führt die Suite auf Python 3.11
 und 3.12 aus.

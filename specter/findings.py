@@ -65,6 +65,11 @@ CATEGORIES: dict[str, str] = {
     "deserialization": "Unsichere Deserialisierung",
     "exposed_service": "Exponierter Dienst/Port",
     "sensitive_data": "Sensible Daten erreichbar",
+    # Fuer den deutschen Mittelstand besonders relevant:
+    "remote_access": "Exponierter Fernzugang (RDP/VPN)",
+    "default_credentials": "Standard-/Default-Zugangsdaten",
+    "outdated_component": "Veraltete Komponente/Abhaengigkeit (bekannte CVE)",
+    "personal_data": "Personenbezogene Daten (DSGVO-relevant)",
     "other": "Sonstiges",
 }
 

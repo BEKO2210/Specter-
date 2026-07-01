@@ -1,0 +1,23 @@
+# ABSICHTLICH VERWUNDBAR - Test-Fixture (Mustermann GmbH Infrastruktur).
+# Nicht in Produktion verwenden.
+version: "3"
+services:
+  db:
+    image: mysql:5.6            # veraltete Version
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "0.0.0.0:3306:3306"     # DB direkt aus dem Internet erreichbar
+
+  rdp-gateway:
+    image: linuxserver/rdesktop
+    ports:
+      - "0.0.0.0:3389:3389"     # RDP offen ins Internet
+
+  app:
+    image: php:5.6-apache       # veraltete Version
+    environment:
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: admin      # Default-Zugangsdaten
+    ports:
+      - "80:80"

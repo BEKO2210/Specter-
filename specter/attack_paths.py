@@ -151,11 +151,125 @@ def _rule_cloud_public_data(
     return paths
 
 
+def _rule_remote_access_domain(
+    findings: list[Finding], graph: AssetGraph
+) -> list[AttackPath]:
+    """Exponierter Fernzugang (RDP/VPN) + Credential -> interner Zugriff / Domaene.
+
+    Der klassische Ransomware-Einstieg im Mittelstand: ein offener RDP-/VPN-Zugang
+    plus ein geleaktes oder Default-Credential fuehrt zur Domaenenuebernahme.
+    """
+    remote = _has(findings, "remote_access")
+    creds = (
+        _has(findings, "secret_exposure")
+        + _has(findings, "default_credentials")
+        + _has(findings, "auth_weakness")
+    )
+    if not remote or not creds:
+        return []
+    paths: list[AttackPath] = []
+    for rem in remote:
+        cred = creds[0]
+        paths.append(
+            AttackPath(
+                title="Domänenübernahme über exponierten Fernzugang",
+                severity=Severity.KRITISCH,
+                steps=[
+                    f"Fernzugang identifizieren: {rem.location or rem.asset} ({rem.title})",
+                    f"Zugangsdaten verwenden: {cred.title}",
+                    "Im internen Netz Fuß fassen und Rechte ausweiten (Domain Admin)",
+                    "Netzwerkweite Kompromittierung / Ransomware-Ausbringung möglich",
+                ],
+                finding_ids=[rem.id, cred.id],
+                rationale=(
+                    "Offene RDP-/VPN-Zugänge sind der häufigste Ransomware-"
+                    "Einstieg im Mittelstand; zusammen mit schwachen oder "
+                    "geleakten Zugangsdaten führt das direkt ins interne Netz."
+                ),
+            )
+        )
+    return paths
+
+
+def _rule_dsgvo_breach(
+    findings: list[Finding], graph: AssetGraph
+) -> list[AttackPath]:
+    """Personenbezogene Daten + Injection/Zugriffsfehler/Fehlkonfig -> DSGVO-Meldung."""
+    pii = _has(findings, "personal_data") + _has(findings, "sensitive_data")
+    vectors = (
+        _has(findings, "injection")
+        + _has(findings, "access_control")
+        + _has(findings, "cloud_storage")
+        + _has(findings, "misconfiguration")
+    )
+    if not pii or not vectors:
+        return []
+    vec = vectors[0]
+    data = pii[0]
+    return [
+        AttackPath(
+            title="DSGVO-meldepflichtiger Datenabfluss (Art. 33/34)",
+            severity=Severity.KRITISCH,
+            steps=[
+                f"Schwachstelle ausnutzen: {vec.title} ({vec.location or vec.asset})",
+                f"Zugriff auf personenbezogene Daten: {data.asset}",
+                "Datenabfluss -> Meldepflicht binnen 72 h an die Aufsichtsbehörde",
+            ],
+            finding_ids=[vec.id, data.id],
+            rationale=(
+                "Ein Abfluss personenbezogener Daten löst nach Art. 33/34 DSGVO "
+                "eine Melde- und ggf. Benachrichtigungspflicht aus (Bußgeldrisiko "
+                "bis 4 % des Jahresumsatzes)."
+            ),
+        )
+    ]
+
+
+def _rule_outdated_exploit(
+    findings: list[Finding], graph: AssetGraph
+) -> list[AttackPath]:
+    """Veraltete Komponente + erreichbar von aussen -> Ausnutzung bekannter CVE."""
+    outdated = _has(findings, "outdated_component")
+    reachable = _has(findings, "exposed_service") + _has(findings, "remote_access")
+    if not outdated:
+        return []
+    paths: list[AttackPath] = []
+    for comp in outdated:
+        target = reachable[0] if reachable else None
+        steps = [
+            f"Veraltete Komponente erkennen: {comp.title} ({comp.location or comp.asset})",
+            "Öffentlich bekannte Schwachstelle (CVE/Exploit) recherchieren",
+        ]
+        ids = [comp.id]
+        if target:
+            steps.append(f"Gegen erreichbaren Dienst ausnutzen: {target.location or target.asset}")
+            ids.append(target.id)
+        else:
+            steps.append("Bei Erreichbarkeit ausnutzen (Foothold)")
+        paths.append(
+            AttackPath(
+                title="Ausnutzung bekannter Schwachstelle in veralteter Komponente",
+                severity=Severity.KRITISCH if reachable else Severity.HOCH,
+                steps=steps,
+                finding_ids=ids,
+                rationale=(
+                    "Veraltete, von außen erreichbare Komponenten (z. B. altes "
+                    "Exchange, Log4j, alte VPN-Gateways) haben oft öffentlich "
+                    "verfügbare Exploits."
+                ),
+            )
+        )
+    return paths
+
+
 DEFAULT_RULES: list[Rule] = [
     _rule_secret_to_service,
     _rule_injection_to_data,
     _rule_auth_to_access,
     _rule_cloud_public_data,
+    _rule_remote_access_domain,
+    _rule_dsgvo_breach,
+    _rule_outdated_exploit,
 ]
 
 

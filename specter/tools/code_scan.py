@@ -40,6 +40,13 @@ PATTERNS: list[Pattern] = [
         re.compile(r"(?i)aws_secret_access_key\s*[:=]"),
         "AWS-Secret im Klartext", Severity.HOCH, "secret_exposure", "CWE-798"),
     Pattern(
+        # Unquotierte Secrets in .env/Config-Dateien (haeufig im Mittelstand).
+        # Wert beginnt NICHT mit Anführungszeichen (sonst greift das quotierte
+        # Muster) und enthaelt keine Klammer (kein Funktionsaufruf).
+        re.compile(r"""(?i)(password|passwd|secret|api[_-]?key|access[_-]?key|jwt[_-]?secret|client[_-]?secret|token)\s*[:=]\s*[A-Za-z0-9._+\-!@#$%^&*/]{6,}"""),
+        "Moeglicherweise fest kodiertes Secret (unquotiert)", Severity.HOCH,
+        "secret_exposure", "CWE-798"),
+    Pattern(
         re.compile(r"\beval\s*\(|\bexec\s*\("),
         "Dynamische Codeausfuehrung (eval/exec)", Severity.HOCH,
         "injection", "CWE-95"),
@@ -67,11 +74,31 @@ PATTERNS: list[Pattern] = [
         re.compile(r"DEBUG\s*=\s*True"),
         "Debug-Modus aktiviert (Produktionsrisiko)", Severity.NIEDRIG,
         "misconfiguration", "CWE-489"),
+    # Mittelstand-spezifisch:
+    Pattern(
+        re.compile(r"""(?i)\b(admin|administrator|root|user|test)\b\s*[:=]\s*['"]?(admin|root|password|passwort|123456|changeme|geheim|test|default)['"]?"""),
+        "Standard-/Default-Zugangsdaten", Severity.HOCH,
+        "default_credentials", "CWE-1392"),
+    Pattern(
+        re.compile(r"(?i)\b(IBAN|BIC|Steuernummer|Steuer-ID|USt-IdNr|Sozialversicherungsnummer|Personalausweis|Kreditkarte|Gesundheitsdaten|Geburtsdatum)\b"),
+        "Personenbezogene Daten im Code (DSGVO)", Severity.MITTEL,
+        "personal_data", "CWE-359"),
+    Pattern(
+        re.compile(r"(?i)\b(log4j|struts2?|openssl[/-]?1\.0|jquery[/-]?1\.|angularjs|php[/-]?5\.|python[/-]?2\.7|tls\s*1\.0|sslv3)\b"),
+        "Hinweis auf veraltete Komponente (bekannte CVEs moeglich)", Severity.MITTEL,
+        "outdated_component", "CWE-1104"),
 ]
 
 DEFAULT_EXTENSIONS = {
     ".py", ".js", ".ts", ".jsx", ".tsx", ".java", ".php", ".rb", ".go",
     ".c", ".cpp", ".cs", ".yml", ".yaml", ".env", ".ini", ".conf", ".sh",
+    ".txt", ".md", ".xml", ".json", ".properties", ".tf",
+}
+
+# Dateien ohne (aussagekraeftige) Endung, die dennoch gescannt werden.
+SCANNED_FILENAMES = {
+    "Dockerfile", "docker-compose.yml", "docker-compose.yaml",
+    ".env", ".env.local", ".env.prod", "web.config", ".htpasswd",
 }
 
 
@@ -183,5 +210,7 @@ class CodeScanTool:
 
     def _iter_files(self, root: Path):
         for path in sorted(root.rglob("*")):
-            if path.is_file() and path.suffix.lower() in DEFAULT_EXTENSIONS:
+            if not path.is_file():
+                continue
+            if path.suffix.lower() in DEFAULT_EXTENSIONS or path.name in SCANNED_FILENAMES:
                 yield path

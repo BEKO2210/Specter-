@@ -3,6 +3,9 @@
 *.env
 scope.yaml
 !scope.example.yaml
+# Ausnahme: bewusst verwundbare Test-Fixtures (enthalten nur Dummy-Werte)
+!tests/fixtures/**/.env
+!tests/fixtures/**/*.env
 
 # Audit-Logs und Berichte (können sensible Daten enthalten)
 audit/
