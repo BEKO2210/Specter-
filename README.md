@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="docs/brand/specter-logo.png" alt="Specter" width="380">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/specter-logo-white-transparent.png">
+    <img src="docs/brand/specter-logo-transparent.png" alt="Specter" width="380">
+  </picture>
 </p>
 
 <p align="center"><strong>Autonomer, defensiver Sicherheits-Agent für autorisiertes Pentesting und Code-Auditing.</strong></p>

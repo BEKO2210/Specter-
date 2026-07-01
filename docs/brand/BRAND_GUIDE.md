@@ -13,6 +13,15 @@ Brand-Board** übernommen (pixelgenau, inkl. 3D-Faltung des Marks):
 - `docs/brand/favicon.png` – Favicon/App-Icon (128×128)
 - `docs/brand/specter-brand-board.png` – vollständiges Brand-Board (Referenz)
 
+**Transparente Varianten** (kein Hintergrund – für Folien, Präsentationen, Overlays):
+
+- `docs/brand/specter-logo-transparent.png` – Logo (navy) für **helle** Hintergründe
+- `docs/brand/specter-logo-white-transparent.png` – Logo (weiß) für **dunkle** Hintergründe
+- `docs/brand/specter-mark-transparent.png` – nur Mark, transparent
+
+Regel: Auf hellen Flächen die navy-Variante, auf dunklen die weiße Variante
+verwenden. Das README schaltet per `prefers-color-scheme` automatisch um.
+
 ## Farben
 
 | Token | Hex | Nutzung |
