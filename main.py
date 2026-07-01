@@ -107,7 +107,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Angriffspfade: {len(state.attack_paths)}")
 
     report_paths = write_reports(
-        config, state.assets, state.findings, state.attack_paths
+        config, state.assets, state.findings, state.attack_paths,
+        scanner_runs=state.scanner_runs,
     )
     print(f"\nBericht (Markdown): {report_paths['markdown']}")
     print(f"Bericht (JSON):     {report_paths['json']}")

@@ -1,8 +1,9 @@
-"""Report-Generierung (Markdown + JSON), auf Deutsch und auditierbar.
+"""Produktionsreifer Sicherheitsbericht (Markdown + JSON), auf Deutsch.
 
-Fasst Asset-Graph, Findings und Angriffspfade zu einem Bericht zusammen -
-das Deliverable der Pruefung. An deutschen Rahmenwerken orientiert
-(BSI IT-Grundschutz, DSGVO-Hinweise), severity-sortiert und mit Evidenz.
+Aufbau (kundentauglich fuer den Mittelstand):
+  Executive Summary, Risiko-Einstufung, Angriffspfade, Quick Wins,
+  langfristige Massnahmen, technische Findings mit Evidenz, BSI-IT-Grundschutz-
+  Mapping, Scanner-Ergebnisse, Scope-Hinweise, Limitierungen, naechste Schritte.
 """
 
 from __future__ import annotations
@@ -14,73 +15,163 @@ from typing import Any
 
 from .assets import AssetGraph
 from .attack_paths import AttackPath
+from .bsi import map_findings, priority_label
 from .config import Config
-from .findings import FindingsStore, Severity
+from .findings import Finding, FindingsStore, Severity
 from .remediation import remediation_for
+
+# Kategorien, die typischerweise schnell behebbar sind (Quick Wins).
+QUICK_WIN_CATEGORIES = {
+    "default_credentials", "secret_exposure", "misconfiguration",
+    "transport_security", "outdated_component", "remote_access",
+}
+
+# Langfristige, strategische Massnahmen je vorkommender Kategorie.
+LONG_TERM_MEASURES: dict[str, str] = {
+    "outdated_component": "Patch- und Schwachstellenmanagement etablieren (BSI OPS.1.1.3), inkl. Software-Inventar (SBOM).",
+    "auth_weakness": "Identitaets- und Berechtigungsmanagement haerten, MFA flaechendeckend (BSI ORP.4).",
+    "access_control": "Least-Privilege und regelmaessige Berechtigungs-Rezertifizierung (BSI ORP.4).",
+    "default_credentials": "Zentrales Passwort-/Secret-Management und MFA (BSI ORP.4).",
+    "secret_exposure": "Secret-Management (Vault) und Entfernen von Secrets aus Code/Repos (BSI ORP.4).",
+    "personal_data": "Datenschutz-Managementsystem und Verschluesselungskonzept (DSGVO, BSI CON.2).",
+    "sensitive_data": "Datenklassifizierung und Zugriffskontrolle fuer sensible Daten (BSI CON.2).",
+    "injection": "Sicheren Entwicklungsprozess mit SAST/DAST und Code-Reviews (BSI APP.3.1).",
+    "deserialization": "Sichere Datenverarbeitung und Eingabevalidierung (BSI APP.3.1).",
+    "exposed_service": "Netzsegmentierung und striktes Firewall-Regelwerk (BSI NET.1.1).",
+    "remote_access": "Zero-Trust-Fernzugang mit MFA statt offenem RDP/VPN (BSI OPS.1.2.5).",
+    "crypto_weakness": "Kryptokonzept nach BSI CON.1 umsetzen.",
+    "transport_security": "TLS-Haertung und Kryptokonzept (BSI CON.1).",
+    "cloud_storage": "Cloud-Sicherheitskonzept und sichere Grundkonfiguration (BSI OPS.2.2).",
+}
 
 
 def _now_iso() -> str:
     return _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
-def build_markdown(
-    config: Config,
-    assets: AssetGraph,
-    findings: FindingsStore,
-    paths: list[AttackPath],
-    generated_at: str | None = None,
-) -> str:
+def _top_risks(findings: FindingsStore, limit: int = 5) -> list[Finding]:
+    return [f for f in findings.all() if f.severity >= Severity.HOCH][:limit]
+
+
+def _quick_wins(findings: FindingsStore) -> list[Finding]:
+    return [
+        f for f in findings.all()
+        if f.severity >= Severity.HOCH and f.category in QUICK_WIN_CATEGORIES
+    ]
+
+
+def _long_term(findings: FindingsStore) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for f in findings.all():
+        measure = LONG_TERM_MEASURES.get(f.category)
+        if measure and measure not in seen:
+            seen.add(measure)
+            out.append(measure)
+    return out
+
+
+# ------------------------------- Abschnitte -------------------------------
+
+def _section_header(config: Config, ts: str) -> list[str]:
     eng = config.engagement
-    ts = generated_at or _now_iso()
+    return [
+        f"# Sicherheitsbericht - {eng.name}",
+        "",
+        f"- **Erstellt:** {ts}",
+        f"- **Autorisiert durch:** {eng.authorized_by}",
+        f"- **Referenz:** {eng.authorization_ref}",
+        "- **Werkzeug:** Specter (autorisierte, defensive Sicherheitspruefung)",
+        "",
+    ]
+
+
+def _section_executive(config: Config, assets: AssetGraph, findings: FindingsStore,
+                       paths: list[AttackPath]) -> list[str]:
     counts = findings.counts()
     total = len(findings)
-
-    lines: list[str] = []
-    lines.append(f"# Sicherheitsbericht - {eng.name}")
-    lines.append("")
-    lines.append(f"- **Erstellt:** {ts}")
-    lines.append(f"- **Autorisiert durch:** {eng.authorized_by}")
-    lines.append(f"- **Referenz:** {eng.authorization_ref}")
-    lines.append(f"- **Werkzeug:** Specter (autorisierte Sicherheitspruefung)")
-    lines.append("")
-
-    # Management Summary
-    lines.append("## Management-Zusammenfassung")
-    lines.append("")
+    krit = counts.get("Kritisch", 0)
+    hoch = counts.get("Hoch", 0)
+    lines = ["## Executive Summary (Management-Zusammenfassung)", ""]
     lines.append(
-        f"Es wurden **{total} Finding(s)** und **{len(paths)} Angriffspfad(e)** "
-        f"ueber **{len(assets)} Asset(s)** identifiziert."
+        f"Im autorisierten Pruefumfang wurden **{total} Finding(s)** und "
+        f"**{len(paths)} Angriffspfad(e)** ueber **{len(assets)} Asset(s)** "
+        f"identifiziert, davon **{krit} kritische** und **{hoch} hohe** Risiken."
     )
     lines.append("")
-    lines.append("| Schweregrad | Anzahl |")
-    lines.append("|---|---|")
+    top = _top_risks(findings)
+    if top:
+        lines.append("**Wichtigste Risiken:**")
+        for f in top:
+            lines.append(f"- [{f.severity.label}] {f.title} ({f.asset})")
+        lines.append("")
+    if krit or hoch:
+        lines.append(
+            "> Handlungsempfehlung: Kritische und hohe Risiken sowie die unten "
+            "genannten Quick Wins kurzfristig beheben, danach die strategischen "
+            "Massnahmen umsetzen."
+        )
+        lines.append("")
+    return lines
+
+
+def _section_risk_rating(findings: FindingsStore) -> list[str]:
+    counts = findings.counts()
+    lines = ["## Risiko-Einstufung", "", "| Schweregrad | Anzahl |", "|---|---|"]
     for sev in reversed(Severity):
         lines.append(f"| {sev.label} | {counts.get(sev.label, 0)} |")
     lines.append("")
+    return lines
 
-    # Angriffspfade zuerst - das ist der Kern (toxische Kombinationen).
-    lines.append("## Angriffspfade (toxische Kombinationen)")
-    lines.append("")
+
+def _section_attack_paths(paths: list[AttackPath]) -> list[str]:
+    lines = ["## Angriffspfade (toxische Kombinationen)", ""]
     if not paths:
-        lines.append("_Keine korrelierten Angriffspfade._")
-    else:
-        for i, p in enumerate(paths, start=1):
-            lines.append(f"### AP-{i}: {p.title}  ·  Schweregrad: {p.severity.label}")
-            lines.append("")
-            for step_no, step in enumerate(p.steps, start=1):
-                lines.append(f"{step_no}. {step}")
-            lines.append("")
-            if p.rationale:
-                lines.append(f"> {p.rationale}")
-            if p.finding_ids:
-                lines.append(f"> Findings: {', '.join(p.finding_ids)}")
-            lines.append("")
+        lines += ["_Keine korrelierten Angriffspfade._", ""]
+        return lines
+    for i, p in enumerate(paths, start=1):
+        lines.append(f"### AP-{i}: {p.title}  ·  Schweregrad: {p.severity.label}")
+        lines.append("")
+        for step_no, step in enumerate(p.steps, start=1):
+            lines.append(f"{step_no}. {step}")
+        lines.append("")
+        if p.rationale:
+            lines.append(f"> {p.rationale}")
+        if p.finding_ids:
+            lines.append(f"> Findings: {', '.join(p.finding_ids)}")
+        lines.append("")
+    return lines
 
-    # Findings
-    lines.append("## Findings (nach Schweregrad)")
+
+def _section_quick_wins(findings: FindingsStore) -> list[str]:
+    lines = ["## Quick Wins (kurzfristig, hohe Wirkung)", ""]
+    wins = _quick_wins(findings)
+    if not wins:
+        lines += ["_Keine unmittelbaren Quick Wins identifiziert._", ""]
+        return lines
+    for f in wins:
+        lines.append(f"- **{f.title}** ({f.asset}): {remediation_for(f)}")
     lines.append("")
-    if total == 0:
-        lines.append("_Keine Findings erfasst._")
+    return lines
+
+
+def _section_long_term(findings: FindingsStore) -> list[str]:
+    lines = ["## Langfristige Massnahmen", ""]
+    measures = _long_term(findings)
+    if not measures:
+        lines += ["_Keine strategischen Massnahmen abgeleitet._", ""]
+        return lines
+    for m in measures:
+        lines.append(f"- {m}")
+    lines.append("")
+    return lines
+
+
+def _section_findings(findings: FindingsStore) -> list[str]:
+    lines = ["## Technische Findings (nach Schweregrad)", ""]
+    if len(findings) == 0:
+        lines += ["_Keine Findings erfasst._", ""]
+        return lines
     for f in findings.all():
         cwe = f" · {f.cwe}" if f.cwe else ""
         lines.append(f"### {f.id}: {f.title}")
@@ -92,21 +183,118 @@ def build_markdown(
         lines.append(f"- **Asset:** {f.asset}  ·  **Fundstelle:** {f.location or 'n/a'}")
         lines.append(f"- **Owner:** {f.owner or 'noch zuzuweisen'}  ·  **Quelle:** {f.source}")
         if f.evidence:
-            lines.append("")
-            lines.append("**Beleg:**")
-            lines.append("```")
-            lines.append(f.evidence.strip())
-            lines.append("```")
-        lines.append("")
-        lines.append(f"**Gegenmassnahme:** {remediation_for(f)}")
-        lines.append("")
+            lines += ["", "**Beleg:**", "```", f.evidence.strip(), "```"]
+        lines += ["", f"**Gegenmassnahme:** {remediation_for(f)}", ""]
+    return lines
 
-    lines.append("---")
-    lines.append(
-        "_Hinweis: Dieser Bericht dokumentiert eine autorisierte Pruefung. "
-        "Findings sind nach Stand der Technik zu beheben; sensible Daten sind "
-        "gemaess DSGVO und BSI IT-Grundschutz zu schuetzen._"
-    )
+
+def _section_bsi(findings: FindingsStore) -> list[str]:
+    lines = [
+        "## BSI-IT-Grundschutz-Mapping", "",
+        "Zuordnung der Findings zu Bausteinen des BSI IT-Grundschutz-Kompendiums "
+        "(sachkundige Orientierung, kein zertifizierter Konformitaetsnachweis).",
+        "",
+    ]
+    mappings = map_findings(findings.all())
+    if not mappings:
+        lines += ["_Keine Findings zum Mappen._", ""]
+        return lines
+    lines.append("| Finding | Risiko | Bereich | BSI-Bezug | Prioritaet |")
+    lines.append("|---|---|---|---|---|")
+    for m in mappings:
+        risiko = m.risiko.replace("|", "/")
+        bereich = m.bereich.replace("|", "/")
+        lines.append(
+            f"| {m.finding_id} | {risiko} | {bereich} | {m.bsi_bezug} | {m.prioritaet} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _section_scanners(scanner_runs: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Scanner-Ergebnisse", ""]
+    if not scanner_runs:
+        lines += ["_Keine aktiven Scanner ausgefuehrt._", ""]
+        return lines
+    lines.append("| Scanner | Ziel | Findings | Exit | Hinweis |")
+    lines.append("|---|---|---|---|---|")
+    for run in scanner_runs:
+        hinweis = run.get("error") or ("gekuerzt" if run.get("truncated") else "-")
+        lines.append(
+            f"| {run.get('scanner')} | {run.get('target')} | "
+            f"{run.get('finding_count', 0)} | {run.get('returncode')} | {hinweis} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _section_scope(config: Config) -> list[str]:
+    targets = ", ".join(config.allowed_targets) or "(keine)"
+    paths = ", ".join(p.name for p in config.allowed_paths) or "(keine)"
+    enabled_scanners = [n for n, p in config.scanners.items() if p.enabled] or ["(keine)"]
+    return [
+        "## Scope-Hinweise", "",
+        f"- **Freigegebene Netzwerk-Ziele:** {targets}",
+        f"- **Freigegebene Datei-Bereiche:** {paths}",
+        f"- **Aktive Scanner freigegeben:** {', '.join(enabled_scanners)}",
+        "- Aktionen ausserhalb dieses Rahmens wurden technisch verweigert (fail-closed).",
+        "",
+    ]
+
+
+def _section_limitations() -> list[str]:
+    return [
+        "## Limitierungen", "",
+        "- Die Ergebnisse sind eine Momentaufnahme zum Pruefzeitpunkt.",
+        "- Statische Code-Treffer sind Kandidaten und manuell zu verifizieren.",
+        "- AD-/Exchange-Bewertungen beruhen auf bereitgestellten Exportdaten "
+        "(kein Live-Abgleich); es erfolgte keine Ausnutzung von Schwachstellen.",
+        "- Es wurden keine destruktiven Tests, keine Credential-Nutzung und keine "
+        "Angriffe gegen produktive Systeme durchgefuehrt.",
+        "",
+    ]
+
+
+def _section_next_steps() -> list[str]:
+    return [
+        "## Naechste Schritte", "",
+        "1. Kritische/hohe Findings und Quick Wins kurzfristig beheben.",
+        "2. Angriffspfade priorisiert schliessen (an der schwaechsten Stelle beginnen).",
+        "3. Strategische (langfristige) Massnahmen einplanen.",
+        "4. Nach der Behebung gezielten Nachtest (Re-Test) durchfuehren.",
+        "",
+        "---",
+        "_Dieser Bericht dokumentiert eine autorisierte, defensive Pruefung. "
+        "Findings sind nach Stand der Technik zu beheben; personenbezogene Daten "
+        "sind gemaess DSGVO und BSI IT-Grundschutz zu schuetzen._",
+    ]
+
+
+# ------------------------------- Aufbau -----------------------------------
+
+def build_markdown(
+    config: Config,
+    assets: AssetGraph,
+    findings: FindingsStore,
+    paths: list[AttackPath],
+    generated_at: str | None = None,
+    scanner_runs: list[dict[str, Any]] | None = None,
+) -> str:
+    ts = generated_at or _now_iso()
+    scanner_runs = scanner_runs or []
+    lines: list[str] = []
+    lines += _section_header(config, ts)
+    lines += _section_executive(config, assets, findings, paths)
+    lines += _section_risk_rating(findings)
+    lines += _section_attack_paths(paths)
+    lines += _section_quick_wins(findings)
+    lines += _section_long_term(findings)
+    lines += _section_findings(findings)
+    lines += _section_bsi(findings)
+    lines += _section_scanners(scanner_runs)
+    lines += _section_scope(config)
+    lines += _section_limitations()
+    lines += _section_next_steps()
     return "\n".join(lines)
 
 
@@ -116,8 +304,10 @@ def build_json(
     findings: FindingsStore,
     paths: list[AttackPath],
     generated_at: str | None = None,
+    scanner_runs: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     eng = config.engagement
+    scanner_runs = scanner_runs or []
     return {
         "engagement": {
             "name": eng.name,
@@ -130,11 +320,21 @@ def build_json(
             "findings": len(findings),
             "attack_paths": len(paths),
             "severity_counts": findings.counts(),
+            "quick_wins": len(_quick_wins(findings)),
         },
         "assets": [a.to_dict() for a in assets.assets()],
         "edges": [e.to_dict() for e in assets.edges()],
         "findings": [f.to_dict() for f in findings.all()],
         "attack_paths": [p.to_dict() for p in paths],
+        "quick_wins": [f.id for f in _quick_wins(findings)],
+        "long_term_measures": _long_term(findings),
+        "bsi_mapping": [m.to_dict() for m in map_findings(findings.all())],
+        "scanner_runs": scanner_runs,
+        "scope": {
+            "allowed_targets": config.allowed_targets,
+            "allowed_paths": [str(p) for p in config.allowed_paths],
+            "enabled_scanners": [n for n, p in config.scanners.items() if p.enabled],
+        },
     }
 
 
@@ -144,6 +344,7 @@ def write_reports(
     findings: FindingsStore,
     paths: list[AttackPath],
     directory: str | Path = "reports",
+    scanner_runs: list[dict[str, Any]] | None = None,
 ) -> dict[str, Path]:
     """Schreibt Markdown- und JSON-Report und gibt die Pfade zurueck."""
     out = Path(directory)
@@ -155,13 +356,13 @@ def write_reports(
     json_path = out / f"specter-report-{stamp}.json"
 
     md_path.write_text(
-        build_markdown(config, assets, findings, paths, ts), encoding="utf-8"
+        build_markdown(config, assets, findings, paths, ts, scanner_runs),
+        encoding="utf-8",
     )
     json_path.write_text(
         json.dumps(
-            build_json(config, assets, findings, paths, ts),
-            ensure_ascii=False,
-            indent=2,
+            build_json(config, assets, findings, paths, ts, scanner_runs),
+            ensure_ascii=False, indent=2,
         ),
         encoding="utf-8",
     )

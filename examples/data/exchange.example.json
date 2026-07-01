@@ -1,0 +1,15 @@
+{
+  "host": "mail.mustermann.de",
+  "product": "Exchange 2016",
+  "build": "15.1.2044.4",
+  "external_services": ["OWA", "ECP", "Autodiscover"],
+  "tls": {
+    "protocols": ["TLSv1.0", "TLSv1.2"]
+  },
+  "headers": {
+    "Strict-Transport-Security": null,
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-Content-Type-Options": null
+  },
+  "server_header": "Microsoft-IIS/10.0"
+}

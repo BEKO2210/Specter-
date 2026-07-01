@@ -68,3 +68,27 @@ runtime:
   require_approval: true
   max_iterations: 25
   model: "claude-sonnet-5"
+
+# ---------------------------------------------------------------------------
+# AKTIVE SCANNER (nmap/nikto)
+# Jeder Scanner ist per Default DEAKTIVIERT (fail-closed) und laeuft nur, wenn
+# er hier ausdruecklich freigegeben ist - nur gegen Ziele im Netzwerk-Scope,
+# mit strikt gepruefter Argumentliste, ohne Shell, mit Timeout.
+#   allow_aggressive: aktiviert intrusivere (aber weiterhin nicht-destruktive)
+#                     Optionen wie Versions-Deeptests. Standard: false.
+#   extra_allowed_flags: exakt freigegebene Zusatz-Flags (uebersteuert das
+#                     Default-Verbot NUR fuer genau dieses Token).
+# Gefaehrliche Flags (Evasion, Spoofing, DoS, Dateiausgabe) sind immer blockiert.
+# ---------------------------------------------------------------------------
+scanners:
+  nmap:
+    enabled: false
+    allow_aggressive: false
+    extra_allowed_flags: []          # z. B. ["--script=http-title"]
+    timeout_seconds: 300
+    max_output_bytes: 200000
+  nikto:
+    enabled: false
+    allow_aggressive: false
+    timeout_seconds: 600
+    max_output_bytes: 200000

@@ -6,7 +6,7 @@ import datetime as _dt
 
 import pytest
 
-from specter.config import Config, ScopeError
+from specter.config import Config, ScannerPolicy, ScopeError
 
 
 def _write(path, text):
@@ -99,6 +99,53 @@ engagement:
     assert cfg.require_approval is True          # sicherer Default
     assert cfg.max_iterations == 25
     assert cfg.model == "claude-sonnet-5"
+
+
+def test_scanners_parsed(tmp_path):
+    p = _write(tmp_path / "s.yaml", """
+engagement:
+  name: X
+  authorized_by: Y
+  authorization_ref: R
+scanners:
+  nmap:
+    enabled: true
+    allow_aggressive: false
+    extra_allowed_flags: ["--script=http-title"]
+    timeout_seconds: 120
+    max_output_bytes: 50000
+  nikto:
+    enabled: false
+""")
+    cfg = Config.load(p)
+    nmap = cfg.scanner_policy("nmap")
+    assert nmap.enabled is True
+    assert nmap.allow_aggressive is False
+    assert nmap.extra_allowed_flags == ["--script=http-title"]
+    assert nmap.timeout_seconds == 120
+    assert nmap.max_output_bytes == 50000
+    assert cfg.scanner_policy("nikto").enabled is False
+
+
+def test_scanner_policy_default_disabled(tmp_path):
+    p = _write(tmp_path / "s.yaml", """
+engagement:
+  name: X
+  authorized_by: Y
+  authorization_ref: R
+""")
+    cfg = Config.load(p)
+    # Nicht konfigurierter Scanner ist per Default deaktiviert (fail-closed).
+    pol = cfg.scanner_policy("nmap")
+    assert pol.enabled is False
+    assert pol.allow_aggressive is False
+
+
+def test_scanner_policy_from_dict_defaults():
+    pol = ScannerPolicy.from_dict(None)
+    assert pol.enabled is False
+    assert pol.extra_allowed_flags == []
+    assert pol.timeout_seconds == 300
 
 
 def test_valid_until_future_ok(tmp_path):
