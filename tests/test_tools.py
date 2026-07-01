@@ -34,6 +34,7 @@ def test_registry_has_all_tools(kit):
         "register_asset", "read_file", "scan_code", "run_command",
         "record_finding", "correlate_paths", "generate_report",
         "analyze_ad", "analyze_exchange", "analyze_entra", "run_scanner",
+        "retest",
     }
     for t in tools.values():
         assert "name" in t.spec and "input_schema" in t.spec

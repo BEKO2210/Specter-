@@ -49,10 +49,12 @@ class GenerateReportTool:
         paths = write_reports(
             self.config, self.state.assets, self.state.findings,
             self.state.attack_paths, scanner_runs=self.state.scanner_runs,
+            delta=self.state.delta,
         )
         html_path = write_html(
             self.config, self.state.assets, self.state.findings,
             self.state.attack_paths, scanner_runs=self.state.scanner_runs,
+            delta=self.state.delta,
         )
         self.audit.record(
             "generate_report",

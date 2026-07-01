@@ -86,16 +86,18 @@ specter/
 │   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
 │   ├── nmap.py               # nmap-Wrapper
 │   └── nikto.py              # nikto-Wrapper
+├── choke_points.py    # engste Behebungsstellen (Greedy-Hitting-Set)
+├── retest.py          # Re-Test/Delta gegen früheren Bericht
 ├── report.py          # produktionsreifer Bericht (Markdown + JSON)
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
 └── tools/
     ├── register_asset.py   ├── read_file.py       ├── code_scan.py
     ├── analyze_ad.py       ├── analyze_exchange.py ├── analyze_entra.py
-    ├── run_command.py      ├── run_scanner.py
+    ├── run_command.py      ├── run_scanner.py      ├── retest.py
     ├── record_finding.py   ├── correlate_paths.py  └── generate_report.py
 ```
 
-### Die elf Werkzeuge
+### Die zwölf Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -109,6 +111,7 @@ specter/
 | `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
 | `correlate_paths` | Korrelation | Findings → Angriffspfade (aggregiert) |
+| `retest` | Korrelation | Gegen früheren Bericht vergleichen (behoben/neu/offen) |
 | `generate_report` | Fix & Bericht | Report (Markdown/JSON/HTML) + Draft-PR-Texte |
 
 ---
@@ -167,6 +170,19 @@ Scope-Hinweisen, Limitierungen und nächsten Schritten.
   zusätzliche Abhängigkeit.
 - **Kompakte Angriffspfade:** Gleichartige Pfade werden zu Sammelpfaden
   verdichtet (mit Anzahl der Kombinationen) — kürzere, lesbarere Berichte.
+- **Choke Points (engste Behebungsstellen):** Der Bericht nennt die Findings,
+  deren Behebung die meisten Angriffspfade auf einmal bricht (Greedy-Hitting-Set,
+  `choke_points.py`) — „behebe zuerst X, das schließt N Pfade".
+- **Re-Test / Delta:** Bei einer Folgeprüfung vergleicht `retest` die aktuellen
+  Findings mit einem früheren JSON-Bericht und weist **behoben / neu / weiterhin
+  offen** samt Alter aus (`retest.py`) — komplett offline, Abgleich über die
+  stabile Finding-ID.
+
+```bash
+# Folgeprüfung mit Vergleich gegen den letzten Bericht
+python main.py --scope scope.yaml \
+  --objective "Prüfe ./targets erneut und vergleiche mit reports/specter-report-ALT.json (retest)."
+```
 
 ---
 
@@ -226,12 +242,13 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**287 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**313 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
-- alle elf Werkzeuge (Erfolgs- und Fehlerpfade)
+- **Choke-Point-Analyse** (Greedy-Hitting-Set) und **Re-Test/Delta** (behoben/neu/offen)
+- alle zwölf Werkzeuge (Erfolgs- und Fehlerpfade)
 - AD-/Exchange-/Entra-ID-Analyzer (jede Regel + Fehlerfälle, BloodHound)
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)

@@ -16,6 +16,7 @@ from typing import Any
 from .assets import AssetGraph
 from .attack_paths import AttackPath
 from .bsi import map_findings, priority_label
+from .choke_points import compute_choke_points
 from .config import Config
 from .findings import Finding, FindingsStore, Severity
 from .remediation import remediation_for
@@ -143,6 +144,53 @@ def _section_attack_paths(paths: list[AttackPath]) -> list[str]:
         if p.finding_ids:
             lines.append(f"> Findings: {', '.join(p.finding_ids)}")
         lines.append("")
+    return lines
+
+
+def _section_delta(delta: Any) -> list[str]:
+    if delta is None:
+        return []
+    seit = f" seit {delta.previous_date}" if delta.previous_date else ""
+    alter = f" (vor {delta.aging_days} Tagen)" if delta.aging_days is not None else ""
+    lines = [f"## Re-Test / Veraenderung{seit}{alter}", ""]
+    lines.append(
+        f"- **Behoben:** {len(delta.resolved)}  ·  **Neu:** {len(delta.new)}  "
+        f"·  **Weiterhin offen:** {len(delta.still_open)}"
+    )
+    lines.append("")
+    if delta.resolved:
+        lines.append("**Behoben seit dem letzten Bericht:**")
+        for r in delta.resolved:
+            lines.append(f"- {r.get('title', r.get('id'))} ({r.get('severity', '')})")
+        lines.append("")
+    if delta.new:
+        lines.append("**Neu hinzugekommen:**")
+        for f in delta.new:
+            lines.append(f"- [{f.severity.label}] {f.title} ({f.asset})")
+        lines.append("")
+    return lines
+
+
+def _section_choke_points(findings: FindingsStore, paths: list[AttackPath]) -> list[str]:
+    lines = ["## Choke Points (engste Behebungsstellen)", ""]
+    chokes = compute_choke_points(paths)
+    if not chokes:
+        lines += ["_Keine Choke Points (keine korrelierten Angriffspfade)._", ""]
+        return lines
+    lines.append(
+        "Diese Findings zuerst beheben - jedes bricht mehrere Angriffspfade auf "
+        "einmal (nach Wirkung geordnet):"
+    )
+    lines.append("")
+    for cp in chokes:
+        f = findings.get(cp.finding_id)
+        titel = f.title if f else cp.finding_id
+        asset = f" ({f.asset})" if f else ""
+        lines.append(
+            f"- **{titel}**{asset} [`{cp.finding_id}`] → bricht "
+            f"{cp.paths_broken} Angriffspfad(e)"
+        )
+    lines.append("")
     return lines
 
 
@@ -282,14 +330,17 @@ def build_markdown(
     paths: list[AttackPath],
     generated_at: str | None = None,
     scanner_runs: list[dict[str, Any]] | None = None,
+    delta: Any = None,
 ) -> str:
     ts = generated_at or _now_iso()
     scanner_runs = scanner_runs or []
     lines: list[str] = []
     lines += _section_header(config, ts)
     lines += _section_executive(config, assets, findings, paths)
+    lines += _section_delta(delta)
     lines += _section_risk_rating(findings)
     lines += _section_attack_paths(paths)
+    lines += _section_choke_points(findings, paths)
     lines += _section_quick_wins(findings)
     lines += _section_long_term(findings)
     lines += _section_findings(findings)
@@ -308,6 +359,7 @@ def build_json(
     paths: list[AttackPath],
     generated_at: str | None = None,
     scanner_runs: list[dict[str, Any]] | None = None,
+    delta: Any = None,
 ) -> dict[str, Any]:
     eng = config.engagement
     scanner_runs = scanner_runs or []
@@ -329,6 +381,7 @@ def build_json(
         "edges": [e.to_dict() for e in assets.edges()],
         "findings": [f.to_dict() for f in findings.all()],
         "attack_paths": [p.to_dict() for p in paths],
+        "choke_points": [c.to_dict() for c in compute_choke_points(paths)],
         "quick_wins": [f.id for f in _quick_wins(findings)],
         "long_term_measures": _long_term(findings),
         "bsi_mapping": [m.to_dict() for m in map_findings(findings.all())],
@@ -338,6 +391,7 @@ def build_json(
             "allowed_paths": [str(p) for p in config.allowed_paths],
             "enabled_scanners": [n for n, p in config.scanners.items() if p.enabled],
         },
+        "retest": delta.to_dict() if delta is not None else None,
     }
 
 
@@ -348,6 +402,7 @@ def write_reports(
     paths: list[AttackPath],
     directory: str | Path = "reports",
     scanner_runs: list[dict[str, Any]] | None = None,
+    delta: Any = None,
 ) -> dict[str, Path]:
     """Schreibt Markdown- und JSON-Report und gibt die Pfade zurueck."""
     out = Path(directory)
@@ -359,12 +414,12 @@ def write_reports(
     json_path = out / f"specter-report-{stamp}.json"
 
     md_path.write_text(
-        build_markdown(config, assets, findings, paths, ts, scanner_runs),
+        build_markdown(config, assets, findings, paths, ts, scanner_runs, delta),
         encoding="utf-8",
     )
     json_path.write_text(
         json.dumps(
-            build_json(config, assets, findings, paths, ts, scanner_runs),
+            build_json(config, assets, findings, paths, ts, scanner_runs, delta),
             ensure_ascii=False, indent=2,
         ),
         encoding="utf-8",

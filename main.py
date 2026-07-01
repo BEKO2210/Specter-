@@ -109,11 +109,11 @@ def main(argv: list[str] | None = None) -> int:
 
     report_paths = write_reports(
         config, state.assets, state.findings, state.attack_paths,
-        scanner_runs=state.scanner_runs,
+        scanner_runs=state.scanner_runs, delta=state.delta,
     )
     html_path = write_html(
         config, state.assets, state.findings, state.attack_paths,
-        scanner_runs=state.scanner_runs,
+        scanner_runs=state.scanner_runs, delta=state.delta,
     )
     print(f"\nBericht (Markdown): {report_paths['markdown']}")
     print(f"Bericht (JSON):     {report_paths['json']}")

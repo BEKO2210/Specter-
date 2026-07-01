@@ -38,7 +38,8 @@ aktiviert sein).
 erfassen (Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner). Verifiziere \
 automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stuetzt.
 4. KORRELATION: mit `correlate_paths` die Findings zu Angriffspfaden \
-(toxischen Kombinationen) verketten.
+(toxischen Kombinationen) verketten. Bei einer Folgepruefung optional mit \
+`retest` gegen einen frueheren JSON-Bericht vergleichen (behoben/neu/offen).
 5. FIX & BERICHT: mit `generate_report` (include_pr_drafts=true) den Bericht \
 und die Fix-/Pull-Request-Vorschlaege erzeugen.
 

@@ -111,6 +111,33 @@ def test_html_print_css_present():
     assert "page-break" in html
 
 
+def test_html_delta_section():
+    from specter.findings import Finding
+    from specter.retest import compute_delta
+    old = Finding("Behobenes Problem", "misconfiguration", "mittel", "srv")
+    previous = {"generated_at": "2026-06-01 10:00", "findings": [old.to_dict()]}
+    current = _store(Finding("Neues Problem", "injection", "hoch", "api"))
+    import datetime as _dt
+    delta = compute_delta(previous, current, today=_dt.date(2026, 7, 1))
+    html = build_html(_cfg(), AssetGraph(), current, [], delta=delta)
+    assert "Re-Test / Veränderung" in html
+    assert "Behobenes Problem" in html
+    assert "Neues Problem" in html
+
+
+def test_html_choke_points_section():
+    from specter.findings import Finding
+    from specter.attack_paths import correlate
+    store = _store(
+        Finding("K1", "secret_exposure", "hoch", "app", location="a:1"),
+        Finding("SSH", "exposed_service", "hoch", "host", location="h:22"),
+    )
+    paths = correlate(store, AssetGraph())
+    html = build_html(_cfg(), AssetGraph(), store, paths)
+    assert "Choke Points" in html
+    assert "bricht" in html
+
+
 def test_html_bsi_table():
     store = _store(Finding("SQLi", "injection", "hoch", "api", location="a:1"))
     html = build_html(_cfg(), AssetGraph(), store, [])
