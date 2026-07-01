@@ -14,9 +14,12 @@ import argparse
 import sys
 
 from specter.agent import SecurityAgent
+from specter.attack_paths import correlate
 from specter.audit import AuditLog
 from specter.config import Config, ScopeError
 from specter.llm import AnthropicLLM, LLMError
+from specter.report import write_reports
+from specter.state import EngagementState
 
 
 def _make_approval_fn(require_approval: bool):
@@ -75,7 +78,8 @@ def main(argv: list[str] | None = None) -> int:
         return 3
 
     audit = AuditLog()
-    agent = SecurityAgent(config, llm, audit, approval_fn=approval_fn)
+    state = EngagementState()
+    agent = SecurityAgent(config, llm, audit, approval_fn=approval_fn, state=state)
 
     try:
         summary = agent.run(args.objective)
@@ -90,7 +94,24 @@ def main(argv: list[str] | None = None) -> int:
     print(" ERGEBNIS")
     print("=" * 70)
     print(summary or "(keine Zusammenfassung)")
-    print(f"\nAudit-Log: {audit.path}")
+
+    # Ergebnis-Uebersicht + garantierter Abschlussbericht aus dem Zustand.
+    counts = state.findings.counts()
+    print(
+        f"\nAssets: {len(state.assets)}  ·  Findings: {len(state.findings)}  "
+        f"(Kritisch {counts.get('Kritisch', 0)}, Hoch {counts.get('Hoch', 0)}, "
+        f"Mittel {counts.get('Mittel', 0)})"
+    )
+    if not state.attack_paths and len(state.findings):
+        state.attack_paths = correlate(state.findings, state.assets)
+    print(f"Angriffspfade: {len(state.attack_paths)}")
+
+    report_paths = write_reports(
+        config, state.assets, state.findings, state.attack_paths
+    )
+    print(f"\nBericht (Markdown): {report_paths['markdown']}")
+    print(f"Bericht (JSON):     {report_paths['json']}")
+    print(f"Audit-Log:          {audit.path}")
     return 0
 
 
