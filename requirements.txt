@@ -1,0 +1,6 @@
+# Specter - Autonomous Security Agent
+# Core dependencies
+
+anthropic>=0.40.0       # Anthropic API client (tool/function calling)
+PyYAML>=6.0             # Scope- und Konfigurationsdateien
+rich>=13.0              # Lesbare Terminal-Ausgabe (Reports, Logs)
