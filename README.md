@@ -1,6 +1,11 @@
-# Specter
+<p align="center">
+  <img src="docs/brand/specter-logo.svg" alt="Specter" width="360">
+</p>
 
-**Autonomer Sicherheits-Agent für autorisiertes Pentesting und Code-Auditing.**
+<p align="center"><strong>Autonomer, defensiver Sicherheits-Agent für autorisiertes Pentesting und Code-Auditing.</strong></p>
+
+---
+
 
 Specter verbindet ein Sprachmodell (Anthropic Claude, Tool/Function Calling) mit
 realen Analyse-Werkzeugen — Dateizugriff, statischer Code-Scan und
