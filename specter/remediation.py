@@ -58,6 +58,26 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "Sensible Daten verschluesseln, Zugriff protokollieren und nach "
         "Least-Privilege einschraenken (DSGVO-Konformitaet pruefen)."
     ),
+    "remote_access": (
+        "Fernzugang (RDP/VPN) nie direkt ins Internet. MFA erzwingen, hinter "
+        "VPN/Zero-Trust-Gateway legen, auf benoetigte Quell-IPs beschraenken, "
+        "Accounts nach Fehlversuchen sperren und Zugriffe protokollieren."
+    ),
+    "default_credentials": (
+        "Alle Standard-/Default-Zugangsdaten aendern, ungenutzte Konten "
+        "deaktivieren, starke Passwort-Richtlinie und MFA durchsetzen."
+    ),
+    "outdated_component": (
+        "Komponente auf eine unterstuetzte, gepatchte Version aktualisieren. "
+        "Patch-Management und ein Software-Inventar (SBOM) etablieren; "
+        "veraltete, nicht mehr benoetigte Dienste abschalten."
+    ),
+    "personal_data": (
+        "Personenbezogene Daten nach DSGVO schuetzen: Datenminimierung, "
+        "Verschluesselung, Pseudonymisierung, Zugriff nach Least-Privilege, "
+        "Loeschkonzept und Verarbeitungsverzeichnis. Besondere Kategorien "
+        "(Art. 9 DSGVO) gesondert schuetzen."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 

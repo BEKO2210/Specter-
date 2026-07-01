@@ -37,3 +37,30 @@ def config(tmp_path) -> Config:
 @pytest.fixture
 def targets_dir(config) -> Path:
     return config.allowed_paths[0]
+
+
+MITTELSTAND_FIXTURE = Path(__file__).parent / "fixtures" / "mittelstand"
+
+
+def mittelstand_config() -> Config:
+    """Config, deren Datei-Scope auf die Muster-GmbH-Fixture zeigt."""
+    return Config(
+        engagement=Engagement(
+            "Pentest Mustermann GmbH", "Geschaeftsfuehrung Mustermann GmbH",
+            "BEAUFTRAGUNG-2026-042", None,
+        ),
+        allowed_targets=["127.0.0.1", "10.10.0.0/16"],
+        forbidden_targets=["169.254.169.254"],
+        allowed_paths=[MITTELSTAND_FIXTURE.resolve()],
+        max_file_bytes=1_000_000,
+        allowed_binaries=["curl", "nmap"],
+        command_timeout=30,
+        require_approval=False,
+        max_iterations=30,
+        model="claude-sonnet-5",
+    )
+
+
+@pytest.fixture
+def ms_config() -> Config:
+    return mittelstand_config()

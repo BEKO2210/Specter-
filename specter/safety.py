@@ -121,8 +121,12 @@ class SafetyPolicy:
         target = target.strip()
         if "://" in target:
             parsed = urlparse(target)
-            return parsed.hostname or target
-        # host:port abtrennen (aber IPv6 nicht kaputt machen)
+            host = parsed.hostname or target
+            return host.strip("[]")
+        # Geklammerte IPv6-Adresse, evtl. mit Port: [::1]:8080 -> ::1
+        if target.startswith("["):
+            return target[1:].split("]", 1)[0]
+        # host:port abtrennen (aber ungeklammertes IPv6 nicht kaputt machen)
         if target.count(":") == 1:
             return target.split(":", 1)[0]
         return target
