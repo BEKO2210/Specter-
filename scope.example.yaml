@@ -1,0 +1,70 @@
+# =============================================================================
+# Specter - Scope- und Autorisierungsdatei (Beispiel)
+# =============================================================================
+#
+# Diese Datei definiert den ERLAUBTEN Rahmen ("Rules of Engagement").
+# Der Agent verweigert JEDE Aktion gegen Ziele, die hier nicht freigegeben sind.
+#
+# WICHTIG (Deutschland/EU):
+#   Aktive Scans und Exploit-Tests gegen fremde Systeme sind ohne
+#   schriftliche Genehmigung strafbar (§202a-c, §303a-b StGB - "Hackerparagraf").
+#   Trage hier NUR Systeme ein, für die du eine unterschriebene
+#   Pentest-Beauftragung / Einwilligung des Eigentümers hast.
+#
+# Kopiere diese Datei nach `scope.yaml` und passe sie an.
+# =============================================================================
+
+engagement:
+  # Freitext zur Nachverfolgbarkeit - erscheint in jedem Audit-Log-Eintrag.
+  name: "Beispiel-Engagement Firma XY"
+  authorized_by: "Max Mustermann, IT-Leitung Firma XY"
+  authorization_ref: "Beauftragung-2026-001"       # Aktenzeichen/Vertrag
+  valid_until: "2026-12-31"                          # Nach diesem Datum: Stopp
+
+# ---------------------------------------------------------------------------
+# NETZWERK-SCOPE: Welche Hosts/Netze darf der Agent aktiv scannen?
+# Nur exakte IPs, Hostnamen oder CIDR-Bereiche. Leere Liste = kein aktiver Scan.
+# ---------------------------------------------------------------------------
+network:
+  allowed_targets:
+    - "127.0.0.1"           # localhost (Test-Server)
+    - "192.168.56.0/24"     # z. B. isoliertes Test-Labor
+    # - "scanme.nmap.org"   # offizielles Test-Ziel von Nmap
+  # Explizit gesperrt - hat IMMER Vorrang vor allowed_targets.
+  forbidden_targets:
+    - "169.254.169.254"     # Cloud-Metadata-Endpoint (Schutz vor SSRF-Unfällen)
+
+# ---------------------------------------------------------------------------
+# DATEI-SCOPE (White-Box / Code-Audit): Welche Verzeichnisse darf der Agent lesen?
+# Pfade werden aufgelöst; Zugriffe außerhalb werden verweigert (Schutz vor
+# Directory-Traversal wie ../../etc/shadow).
+# ---------------------------------------------------------------------------
+filesystem:
+  allowed_paths:
+    - "./targets"           # Lege den zu prüfenden Quellcode hier ab
+  max_file_bytes: 1000000   # Max. Dateigröße pro Lesevorgang (1 MB)
+
+# ---------------------------------------------------------------------------
+# BEFEHLS-SCOPE: Welche Terminal-Tools darf der Agent ausführen?
+# Nur die Programme aus dieser Allowlist sind erlaubt (kein beliebiges Shell).
+# ---------------------------------------------------------------------------
+commands:
+  allowed_binaries:
+    - "nmap"
+    - "whatweb"
+    - "nikto"
+    - "curl"
+    - "dig"
+    - "host"
+  timeout_seconds: 300      # Hartes Zeitlimit pro Befehl
+
+# ---------------------------------------------------------------------------
+# BETRIEBSMODUS
+#   require_approval: true  -> jede aktive Aktion (Scan/Befehl) muss im
+#                              Terminal manuell bestätigt werden (Human-in-the-loop).
+#   max_iterations         -> Obergrenze für die Agenten-Schleife (Kostenschutz).
+# ---------------------------------------------------------------------------
+runtime:
+  require_approval: true
+  max_iterations: 25
+  model: "claude-sonnet-5"

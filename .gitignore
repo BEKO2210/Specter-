@@ -1,0 +1,23 @@
+# Secrets / Konfiguration
+.env
+*.env
+scope.yaml
+!scope.example.yaml
+
+# Audit-Logs und Berichte (können sensible Daten enthalten)
+audit/
+reports/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
