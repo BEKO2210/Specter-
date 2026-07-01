@@ -45,6 +45,7 @@ def build_registry(
     """Erzeugt alle verfuegbaren Tools und gibt sie als Name->Tool-Map zurueck."""
     # Import hier, um Zirkularimporte zu vermeiden.
     from .analyze_ad import AnalyzeAdTool
+    from .analyze_aws import AnalyzeAwsTool
     from .analyze_entra import AnalyzeEntraTool
     from .analyze_exchange import AnalyzeExchangeTool
     from .code_scan import CodeScanTool
@@ -66,6 +67,7 @@ def build_registry(
         AnalyzeAdTool(config, policy, audit, state),
         AnalyzeExchangeTool(config, policy, audit, state),
         AnalyzeEntraTool(config, policy, audit, state),
+        AnalyzeAwsTool(config, policy, audit, state),
         # Aktiv / Haende
         RunCommandTool(config, policy, audit),
         RunScannerTool(config, policy, audit, state),

@@ -18,6 +18,7 @@ from .attack_paths import AttackPath
 from .bsi import map_findings, priority_label
 from .choke_points import compute_choke_points
 from .config import Config
+from .cvss import cvss_rating, cvss_score
 from .findings import Finding, FindingsStore, Severity
 from .remediation import remediation_for
 
@@ -225,10 +226,12 @@ def _section_findings(findings: FindingsStore) -> list[str]:
         return lines
     for f in findings.all():
         cwe = f" · {f.cwe}" if f.cwe else ""
+        score = cvss_score(f.category, f.severity)
         lines.append(f"### {f.id}: {f.title}")
         lines.append("")
         lines.append(
             f"- **Schweregrad:** {f.severity.label}{cwe}  ·  "
+            f"**CVSS-Lite:** {score:.1f} ({cvss_rating(score)})  ·  "
             f"**Kategorie:** {f.category_label}  ·  **Status:** {f.status}"
         )
         lines.append(f"- **Asset:** {f.asset}  ·  **Fundstelle:** {f.location or 'n/a'}")
@@ -376,10 +379,21 @@ def build_json(
             "attack_paths": len(paths),
             "severity_counts": findings.counts(),
             "quick_wins": len(_quick_wins(findings)),
+            "max_cvss": max(
+                (cvss_score(f.category, f.severity) for f in findings.all()),
+                default=0.0,
+            ),
         },
         "assets": [a.to_dict() for a in assets.assets()],
         "edges": [e.to_dict() for e in assets.edges()],
-        "findings": [f.to_dict() for f in findings.all()],
+        "findings": [
+            {
+                **f.to_dict(),
+                "cvss": cvss_score(f.category, f.severity),
+                "cvss_rating": cvss_rating(cvss_score(f.category, f.severity)),
+            }
+            for f in findings.all()
+        ],
         "attack_paths": [p.to_dict() for p in paths],
         "choke_points": [c.to_dict() for c in compute_choke_points(paths)],
         "quick_wins": [f.id for f in _quick_wins(findings)],

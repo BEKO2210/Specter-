@@ -138,6 +138,13 @@ def test_html_choke_points_section():
     assert "bricht" in html
 
 
+def test_html_shows_cvss():
+    from specter.findings import Finding
+    store = _store(Finding("SQLi", "injection", "kritisch", "api"))
+    html = build_html(_cfg(), AssetGraph(), store, [])
+    assert "CVSS-Lite:" in html
+
+
 def test_html_bsi_table():
     store = _store(Finding("SQLi", "injection", "hoch", "api", location="a:1"))
     html = build_html(_cfg(), AssetGraph(), store, [])
