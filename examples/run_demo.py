@@ -131,6 +131,8 @@ def main() -> int:
         {"path": str(data_dir / "exchange.example.json")}).content)
     print(tools["analyze_entra"].run(
         {"path": str(data_dir / "entra_export.example.json")}).content)
+    print(tools["analyze_aws"].run(
+        {"path": str(data_dir / "aws_export.example.json")}).content)
 
     print("\n--- Phase 4: ANGRIFFSPFAD-KORRELATION ---")
     print(tools["correlate_paths"].run({}).content)

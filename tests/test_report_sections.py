@@ -115,6 +115,17 @@ def test_scope_section_reflects_config():
     assert "nmap" in md          # aktivierter Scanner
 
 
+def test_cvss_in_markdown_and_json():
+    cfg = _cfg()
+    store = _store(Finding("SQLi", "injection", "kritisch", "api", location="a:1"))
+    md = build_markdown(cfg, AssetGraph(), store, [])
+    assert "CVSS-Lite:" in md
+    data = build_json(cfg, AssetGraph(), store, [])
+    assert data["findings"][0]["cvss"] >= 9.0
+    assert data["findings"][0]["cvss_rating"] == "Kritisch"
+    assert data["summary"]["max_cvss"] >= 9.0
+
+
 def test_bsi_table_in_json():
     cfg = _cfg()
     store = _store(Finding("SQLi", "injection", "hoch", "api", location="a:1"))

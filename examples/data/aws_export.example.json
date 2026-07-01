@@ -1,0 +1,31 @@
+{
+  "account_id": "123456789012",
+  "root_account": { "mfa_enabled": false, "access_keys": 1 },
+  "password_policy": { "minimum_length": 8, "require_symbols": false, "max_age_days": 0 },
+  "users": [
+    {
+      "name": "deploy-bot",
+      "console_access": true,
+      "mfa_enabled": false,
+      "attached_policies": ["AdministratorAccess"],
+      "access_keys": [{ "age_days": 430, "last_used_days": 380 }]
+    },
+    {
+      "name": "backup-service",
+      "console_access": false,
+      "mfa_enabled": true,
+      "access_keys": [{ "age_days": 20, "last_used_days": 2 }]
+    }
+  ],
+  "roles": [
+    { "name": "ci-deploy", "trust": "*", "attached_policies": ["AdministratorAccess"] }
+  ],
+  "s3_buckets": [
+    { "name": "mustermann-kunden-backups", "public": true, "encryption": false },
+    { "name": "mustermann-logs", "public": false, "encryption": true }
+  ],
+  "security_groups": [
+    { "name": "db-sg", "open_to_world_ports": [3306, 22] },
+    { "name": "web-sg", "open_to_world_ports": [80, 443] }
+  ]
+}

@@ -18,6 +18,7 @@ from .attack_paths import AttackPath
 from .bsi import map_findings
 from .choke_points import compute_choke_points
 from .config import Config
+from .cvss import cvss_rating, cvss_score
 from .findings import FindingsStore, Severity
 from .remediation import remediation_for
 from .report import _long_term, _quick_wins, _top_risks
@@ -218,9 +219,11 @@ def build_html(
         p.append("<p class='muted'>Keine Findings erfasst.</p>")
     for f in findings.all():
         cwe = f" &middot; {_e(f.cwe)}" if f.cwe else ""
+        score = cvss_score(f.category, f.severity)
         p.append("<div class='finding'>")
         p.append(f"<div class='head'><h3>{_e(f.id)}: {_e(f.title)}</h3>{_badge(f.severity)}</div>")
-        p.append(f"<div class='muted'>Kategorie: {_e(f.category_label)}{cwe} &middot; "
+        p.append(f"<div class='muted'>CVSS-Lite: {score:.1f} ({_e(cvss_rating(score))}) &middot; "
+                 f"Kategorie: {_e(f.category_label)}{cwe} &middot; "
                  f"Asset: {_e(f.asset)} &middot; Fundstelle: {_e(f.location or 'n/a')} &middot; "
                  f"Quelle: {_e(f.source)}</div>")
         if f.evidence:

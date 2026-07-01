@@ -76,12 +76,13 @@ specter/
 ├── findings.py        # Finding-Modell, Schweregrade, Store
 ├── attack_paths.py    # regelbasierte Angriffspfad-Korrelation
 ├── remediation.py     # Gegenmaßnahmen + Draft-PR-Generierung
-├── report.py          # produktionsreifer Bericht (Markdown + JSON)
 ├── bsi.py             # BSI-IT-Grundschutz-Mapping
+├── cvss.py            # CVSS-Lite-Score (numerisch) je Finding
 ├── analyzers/         # Offline-Analyse bereitgestellter Exporte
 │   ├── active_directory.py   # AD-Risiken (Policy, Gruppen, Kerberos …)
 │   ├── exchange.py           # Exchange-Risiken (Version, ECP, TLS, Header)
-│   └── entra_id.py           # Entra-ID/M365-Risiken (MFA, CA, Legacy-Auth …)
+│   ├── entra_id.py           # Entra-ID/M365-Risiken (MFA, CA, Legacy-Auth …)
+│   └── aws.py                # AWS-Risiken (IAM, S3, Security-Groups, Root)
 ├── scanners/          # sichere Wrapper aktiver Scanner
 │   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
 │   ├── nmap.py               # nmap-Wrapper
@@ -93,11 +94,12 @@ specter/
 └── tools/
     ├── register_asset.py   ├── read_file.py       ├── code_scan.py
     ├── analyze_ad.py       ├── analyze_exchange.py ├── analyze_entra.py
-    ├── run_command.py      ├── run_scanner.py      ├── retest.py
-    ├── record_finding.py   ├── correlate_paths.py  └── generate_report.py
+    ├── analyze_aws.py      ├── run_command.py      ├── run_scanner.py
+    ├── record_finding.py   ├── correlate_paths.py  ├── retest.py
+    └── generate_report.py
 ```
 
-### Die zwölf Werkzeuge
+### Die dreizehn Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -107,6 +109,7 @@ specter/
 | `analyze_ad` | Prüfen | Active-Directory-Export offline analysieren |
 | `analyze_exchange` | Prüfen | Exchange-Daten offline/passiv analysieren |
 | `analyze_entra` | Prüfen | Entra-ID/M365-Export offline analysieren |
+| `analyze_aws` | Prüfen | AWS-Export (IAM/S3/Security-Groups) offline analysieren |
 | `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
 | `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
@@ -116,9 +119,9 @@ specter/
 
 ---
 
-## Windows & Cloud: AD-, Exchange- & Entra-ID/M365-Analyse (offline, defensiv)
+## Windows & Cloud: AD-, Exchange-, Entra-ID/M365- & AWS-Analyse (offline, defensiv)
 
-Für den Mittelstand besonders relevant. Alle drei Analyzer werten **ausschließlich
+Für den Mittelstand besonders relevant. Alle vier Analyzer werten **ausschließlich
 bereitgestellte lokale Exportdateien** aus — **keine** Live-Verbindung, keine
 Credential-Nutzung, keine Ausnutzung.
 
@@ -134,12 +137,16 @@ Credential-Nutzung, keine Ausnutzung.
   Access, aktive **Legacy-Authentifizierung**, zu viele Global Admins, privilegierte
   Konten **ohne MFA**, überprivilegierte App-Registrierungen (Admin-Consent),
   inaktive Gastkonten, anonyme SharePoint-/OneDrive-Freigaben (DSGVO).
+- **`analyze_aws`** (`analyzers/aws.py`) — **Root ohne MFA / mit Access-Keys**,
+  schwache IAM-Passwort-Policy, überprivilegierte IAM-User/Rollen (Admin,
+  `trust='*'`), alte/ungenutzte Access-Keys, **öffentliche/unverschlüsselte
+  S3-Buckets**, Security-Groups mit `0.0.0.0/0` auf sensiblen Ports.
+
+Jedes Finding erhält zusätzlich einen numerischen **CVSS-Lite-Score** (0–10,
+`cvss.py`) mit CVSS-v3.1-Qualitätsstufe — transparent im Bericht ausgewiesen.
 
 Beispiel-Exporte: `examples/data/ad_export.example.json`,
-`exchange.example.json`, `entra_export.example.json`.
-
-Beispiel-Exporte: `examples/data/ad_export.example.json`,
-`examples/data/exchange.example.json`.
+`exchange.example.json`, `entra_export.example.json`, `aws_export.example.json`.
 
 ## Aktive Scanner (nmap/nikto) — sicher gekapselt
 
@@ -242,14 +249,14 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**313 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**339 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
 - **Choke-Point-Analyse** (Greedy-Hitting-Set) und **Re-Test/Delta** (behoben/neu/offen)
-- alle zwölf Werkzeuge (Erfolgs- und Fehlerpfade)
-- AD-/Exchange-/Entra-ID-Analyzer (jede Regel + Fehlerfälle, BloodHound)
+- alle dreizehn Werkzeuge (Erfolgs- und Fehlerpfade)
+- AD-/Exchange-/Entra-ID-/AWS-Analyzer (jede Regel + Fehlerfälle, BloodHound), CVSS-Lite
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)
 - BSI-IT-Grundschutz-Mapping sowie Markdown- und HTML-Report (alle Abschnitte,

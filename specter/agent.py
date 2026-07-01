@@ -30,7 +30,8 @@ Arbeite in fuenf Phasen (wie eine professionelle Pruefung):
 erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
 2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-/Cloud-Daten \
 offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
-(Exchange-Daten) und `analyze_entra` (Entra-ID/Microsoft-365-Export); aktiv - \
+(Exchange-Daten), `analyze_entra` (Entra-ID/Microsoft-365-Export) und \
+`analyze_aws` (AWS-Export: IAM/S3/Security-Groups); aktiv - \
 nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).

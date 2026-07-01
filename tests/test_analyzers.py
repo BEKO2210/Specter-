@@ -7,6 +7,7 @@ import json
 from specter.analyzers.active_directory import (
     analyze_ad, normalize_bloodhound_users,
 )
+from specter.analyzers.aws import analyze_aws
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.findings import Severity
@@ -272,6 +273,85 @@ def test_entra_non_dict_app_ignored():
             "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
             "app_registrations": ["kaputt", None]}
     assert analyze_entra(data) == []
+
+
+# ================================== AWS ===================================
+
+def test_aws_root_without_mfa_and_keys():
+    findings = analyze_aws({"account_id": "123", "root_account": {
+        "mfa_enabled": False, "access_keys": 1}})
+    titles = " ".join(f.title for f in findings)
+    assert "Root-Konto ohne MFA" in titles
+    assert "Access-Keys" in titles
+    assert all(f.severity is Severity.KRITISCH for f in findings)
+
+
+def test_aws_weak_password_policy():
+    findings = analyze_aws({"account_id": "123", "password_policy": {
+        "minimum_length": 8, "require_symbols": False, "max_age_days": 0}})
+    assert any("Passwort-Policy" in f.title or "Passwoerter" in f.title for f in findings)
+
+
+def test_aws_overprivileged_user_and_no_mfa():
+    findings = analyze_aws({"account_id": "123", "users": [{
+        "name": "deploy", "console_access": True, "mfa_enabled": False,
+        "attached_policies": ["AdministratorAccess"]}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Konsolenzugriff ohne MFA" in titles
+    assert "Ueberprivilegierter IAM-User" in titles
+
+
+def test_aws_old_and_unused_access_key():
+    findings = analyze_aws({"account_id": "123", "users": [{
+        "name": "svc", "access_keys": [{"age_days": 400, "last_used_days": 300}]}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Alter Access-Key" in titles
+    assert "Ungenutzter Access-Key" in titles
+
+
+def test_aws_role_wildcard_trust():
+    findings = analyze_aws({"account_id": "123", "roles": [
+        {"name": "open", "trust": "*"},
+        {"name": "admin", "trust": "*", "attached_policies": ["AdministratorAccess"]}]})
+    sevs = {f.title: f.severity for f in findings}
+    assert any("beliebigem Prinzipal" in t for t in sevs)
+    assert any(s is Severity.KRITISCH for s in sevs.values())
+
+
+def test_aws_public_and_unencrypted_bucket():
+    findings = analyze_aws({"account_id": "123", "s3_buckets": [
+        {"name": "kunden-backups", "public": True, "encryption": False}]})
+    cats = {f.category for f in findings}
+    assert "cloud_storage" in cats and "misconfiguration" in cats
+
+
+def test_aws_security_group_sensitive_port():
+    findings = analyze_aws({"account_id": "123", "security_groups": [
+        {"name": "db", "open_to_world_ports": [3306, 8080, "kaputt"]}]})
+    ports_hoch = [f for f in findings if f.severity is Severity.HOCH]
+    ports_mittel = [f for f in findings if f.severity is Severity.MITTEL]
+    assert ports_hoch and ports_mittel        # 3306 hoch, 8080 mittel, kaputt ignoriert
+
+
+def test_aws_non_dict_access_key_ignored():
+    findings = analyze_aws({"account_id": "123", "users": [{
+        "name": "svc", "access_keys": ["kaputt", None]}]})
+    assert findings == []
+
+
+def test_aws_role_normal_trust_no_finding():
+    findings = analyze_aws({"account_id": "123", "roles": [{
+        "name": "app", "trust": "arn:aws:iam::123:root",
+        "attached_policies": ["ReadOnlyAccess"]}]})
+    assert findings == []
+
+
+def test_aws_invalid_input_and_empty():
+    assert analyze_aws("x") == []
+    assert analyze_aws({}) == []
+    # Nicht-Dict-Elemente werden robust uebersprungen.
+    assert analyze_aws({"users": ["kaputt"], "roles": [None],
+                        "s3_buckets": [1], "security_groups": ["x"]}) == []
 
 
 def test_entra_clean_tenant():
