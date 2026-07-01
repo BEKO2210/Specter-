@@ -6,7 +6,7 @@ import datetime as _dt
 
 import pytest
 
-from specter.config import Config, ScannerPolicy, ScopeError
+from specter.config import Config, GitHubIntegration, ScannerPolicy, ScopeError
 
 
 def _write(path, text):
@@ -146,6 +146,45 @@ def test_scanner_policy_from_dict_defaults():
     assert pol.enabled is False
     assert pol.extra_allowed_flags == []
     assert pol.timeout_seconds == 300
+
+
+def test_github_integration_default_disabled(tmp_path):
+    p = _write(tmp_path / "s.yaml", """
+engagement:
+  name: X
+  authorized_by: Y
+  authorization_ref: R
+""")
+    cfg = Config.load(p)
+    assert cfg.github.enabled is False
+    assert cfg.github.base_branch == "main"
+    assert cfg.github.token_env == "GITHUB_TOKEN"
+
+
+def test_github_integration_parsed(tmp_path):
+    p = _write(tmp_path / "s.yaml", """
+engagement:
+  name: X
+  authorized_by: Y
+  authorization_ref: R
+integrations:
+  github:
+    enabled: true
+    repo: "muster/repo"
+    base_branch: "develop"
+    branch_prefix: "sec/"
+    token_env: "GH_PAT"
+""")
+    cfg = Config.load(p)
+    gh = cfg.github
+    assert gh.enabled is True and gh.repo == "muster/repo"
+    assert gh.base_branch == "develop" and gh.branch_prefix == "sec/"
+    assert gh.token_env == "GH_PAT"
+
+
+def test_github_integration_from_dict_defaults():
+    gh = GitHubIntegration.from_dict(None)
+    assert gh.enabled is False and gh.repo == "" and gh.base_branch == "main"
 
 
 def test_valid_until_future_ok(tmp_path):

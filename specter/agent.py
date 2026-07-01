@@ -42,7 +42,9 @@ automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stuetzt.
 (toxischen Kombinationen) verketten. Bei einer Folgepruefung optional mit \
 `retest` gegen einen frueheren JSON-Bericht vergleichen (behoben/neu/offen).
 5. FIX & BERICHT: mit `generate_report` (include_pr_drafts=true) den Bericht \
-und die Fix-/Pull-Request-Vorschlaege erzeugen.
+und die Fix-/Pull-Request-Vorschlaege erzeugen; mit `open_pull_requests` die \
+PR-Texte als Dateien schreiben (und nur bei Freigabe in scope.yaml echte \
+GitHub-Draft-PRs eroeffnen).
 
 Verbindliche Regeln:
 - Ausschliesslich im freigegebenen Scope arbeiten. Alle Werkzeuge setzen den \

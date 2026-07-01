@@ -45,6 +45,28 @@ class ScannerPolicy:
 
 
 @dataclass
+class GitHubIntegration:
+    """Opt-in-Integration zum Erstellen von Draft-Pull-Requests aus Findings."""
+
+    enabled: bool = False
+    repo: str = ""                       # "owner/name"
+    base_branch: str = "main"
+    branch_prefix: str = "specter/fix-"
+    token_env: str = "GITHUB_TOKEN"
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> "GitHubIntegration":
+        data = data or {}
+        return cls(
+            enabled=bool(data.get("enabled", False)),
+            repo=str(data.get("repo", "")),
+            base_branch=str(data.get("base_branch", "main")),
+            branch_prefix=str(data.get("branch_prefix", "specter/fix-")),
+            token_env=str(data.get("token_env", "GITHUB_TOKEN")),
+        )
+
+
+@dataclass
 class Config:
     """Aufbereitete, validierte Konfiguration des Agenten."""
 
@@ -59,6 +81,7 @@ class Config:
     max_iterations: int
     model: str
     scanners: dict[str, ScannerPolicy] = field(default_factory=dict)
+    github: GitHubIntegration = field(default_factory=GitHubIntegration)
     raw: dict[str, Any] = field(default_factory=dict)
 
     def scanner_policy(self, name: str) -> ScannerPolicy:
@@ -99,6 +122,7 @@ class Config:
         commands = data.get("commands") or {}
         runtime = data.get("runtime") or {}
         scanners_raw = data.get("scanners") or {}
+        integrations = data.get("integrations") or {}
 
         allowed_paths = [
             Path(pth).expanduser().resolve()
@@ -108,6 +132,7 @@ class Config:
             str(name): ScannerPolicy.from_dict(cfg)
             for name, cfg in scanners_raw.items()
         }
+        github = GitHubIntegration.from_dict(integrations.get("github"))
 
         return cls(
             engagement=engagement,
@@ -121,6 +146,7 @@ class Config:
             max_iterations=int(runtime.get("max_iterations", 25)),
             model=str(runtime.get("model", "claude-sonnet-5")),
             scanners=scanners,
+            github=github,
             raw=data,
         )
 
