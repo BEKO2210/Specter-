@@ -23,6 +23,8 @@ class AttackPath:
     steps: list[str]
     finding_ids: list[str] = field(default_factory=list)
     rationale: str = ""
+    # Anzahl gleichartiger Einzelpfade, die hier zusammengefasst sind (>=1).
+    instances: int = 1
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -32,6 +34,7 @@ class AttackPath:
             "steps": self.steps,
             "finding_ids": self.finding_ids,
             "rationale": self.rationale,
+            "instances": self.instances,
         }
 
 
@@ -273,13 +276,63 @@ DEFAULT_RULES: list[Rule] = [
 ]
 
 
+def aggregate_paths(paths: list[AttackPath]) -> list[AttackPath]:
+    """Verdichtet gleichartige Pfade (gleicher Titel) zu je einem Sammelpfad.
+
+    Reduziert Rauschen im Bericht: statt N nahezu identischer Pfade (z. B. je
+    ein offengelegtes Secret) entsteht ein Sammelpfad mit hoechstem Schweregrad,
+    vereinigten Findings und der Anzahl betroffener Kombinationen. Die Schritte
+    des schwersten Vertreters bleiben als Beispiel erhalten.
+    """
+    groups: dict[str, list[AttackPath]] = {}
+    order: list[str] = []
+    for p in paths:
+        if p.title not in groups:
+            groups[p.title] = []
+            order.append(p.title)
+        groups[p.title].append(p)
+
+    result: list[AttackPath] = []
+    for title in order:
+        members = groups[title]
+        if len(members) == 1:
+            result.append(members[0])
+            continue
+        strongest = max(members, key=lambda x: int(x.severity))
+        finding_ids: list[str] = []
+        for m in members:
+            for fid in m.finding_ids:
+                if fid not in finding_ids:
+                    finding_ids.append(fid)
+        rationale = strongest.rationale
+        if rationale:
+            rationale += (
+                f" Zusammengefasst aus {len(members)} gleichartigen Kombinationen."
+            )
+        result.append(AttackPath(
+            title=title,
+            severity=strongest.severity,
+            steps=strongest.steps,
+            finding_ids=finding_ids,
+            rationale=rationale,
+            instances=len(members),
+        ))
+    return sorted(result, key=lambda x: -int(x.severity))
+
+
 def correlate(
     findings_store: FindingsStore,
     graph: AssetGraph,
     rules: list[Rule] | None = None,
     min_severity: Severity = Severity.MITTEL,
+    aggregate: bool = True,
 ) -> list[AttackPath]:
-    """Wendet alle Regeln an und liefert die Angriffspfade, nach Schwere sortiert."""
+    """Wendet alle Regeln an und liefert die Angriffspfade, nach Schwere sortiert.
+
+    Mit ``aggregate=True`` (Standard) werden gleichartige Pfade zu Sammelpfaden
+    verdichtet - kompakter und kundentauglicher. ``aggregate=False`` liefert die
+    einzelnen Pfade (z. B. fuer eine detaillierte technische Analyse).
+    """
     active = rules if rules is not None else DEFAULT_RULES
     relevant = findings_store.by_severity(min_severity)
     paths: list[AttackPath] = []
@@ -294,4 +347,6 @@ def correlate(
             continue
         seen.add(sig)
         unique.append(p)
+    if aggregate:
+        return aggregate_paths(unique)
     return unique

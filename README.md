@@ -77,19 +77,22 @@ specter/
 ├── bsi.py             # BSI-IT-Grundschutz-Mapping
 ├── analyzers/         # Offline-Analyse bereitgestellter Exporte
 │   ├── active_directory.py   # AD-Risiken (Policy, Gruppen, Kerberos …)
-│   └── exchange.py           # Exchange-Risiken (Version, ECP, TLS, Header)
+│   ├── exchange.py           # Exchange-Risiken (Version, ECP, TLS, Header)
+│   └── entra_id.py           # Entra-ID/M365-Risiken (MFA, CA, Legacy-Auth …)
 ├── scanners/          # sichere Wrapper aktiver Scanner
 │   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
 │   ├── nmap.py               # nmap-Wrapper
 │   └── nikto.py              # nikto-Wrapper
+├── report.py          # produktionsreifer Bericht (Markdown + JSON)
+├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
 └── tools/
     ├── register_asset.py   ├── read_file.py       ├── code_scan.py
-    ├── analyze_ad.py       ├── analyze_exchange.py
+    ├── analyze_ad.py       ├── analyze_exchange.py ├── analyze_entra.py
     ├── run_command.py      ├── run_scanner.py
-    ├── record_finding.py   ├── correlate_paths.py └── generate_report.py
+    ├── record_finding.py   ├── correlate_paths.py  └── generate_report.py
 ```
 
-### Die zehn Werkzeuge
+### Die elf Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -98,17 +101,18 @@ specter/
 | `scan_code` | Prüfen | Muster-Scan, erfasst Findings automatisch |
 | `analyze_ad` | Prüfen | Active-Directory-Export offline analysieren |
 | `analyze_exchange` | Prüfen | Exchange-Daten offline/passiv analysieren |
+| `analyze_entra` | Prüfen | Entra-ID/M365-Export offline analysieren |
 | `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
 | `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
-| `correlate_paths` | Korrelation | Findings → Angriffspfade |
-| `generate_report` | Fix & Bericht | Report (MD/JSON) + Draft-PR-Texte |
+| `correlate_paths` | Korrelation | Findings → Angriffspfade (aggregiert) |
+| `generate_report` | Fix & Bericht | Report (Markdown/JSON/HTML) + Draft-PR-Texte |
 
 ---
 
-## Windows-Umgebungen: AD- & Exchange-Analyse (offline, defensiv)
+## Windows & Cloud: AD-, Exchange- & Entra-ID/M365-Analyse (offline, defensiv)
 
-Für den Mittelstand besonders relevant. Beide Analyzer werten **ausschließlich
+Für den Mittelstand besonders relevant. Alle drei Analyzer werten **ausschließlich
 bereitgestellte lokale Exportdateien** aus — **keine** Live-Verbindung, keine
 Credential-Nutzung, keine Ausnutzung.
 
@@ -120,6 +124,13 @@ Credential-Nutzung, keine Ausnutzung.
 - **`analyze_exchange`** (`analyzers/exchange.py`) — veraltete Version
   (ProxyLogon/ProxyShell-Ära anhand der Build-Nummer), extern erreichbares **ECP**,
   OWA/Autodiscover, schwache TLS-Protokolle, fehlende Sicherheits-Header.
+- **`analyze_entra`** (`analyzers/entra_id.py`) — fehlende MFA-Erzwingung/Conditional
+  Access, aktive **Legacy-Authentifizierung**, zu viele Global Admins, privilegierte
+  Konten **ohne MFA**, überprivilegierte App-Registrierungen (Admin-Consent),
+  inaktive Gastkonten, anonyme SharePoint-/OneDrive-Freigaben (DSGVO).
+
+Beispiel-Exporte: `examples/data/ad_export.example.json`,
+`exchange.example.json`, `entra_export.example.json`.
 
 Beispiel-Exporte: `examples/data/ad_export.example.json`,
 `examples/data/exchange.example.json`.
@@ -140,12 +151,19 @@ abgesichert:
 
 ## Bericht & BSI-IT-Grundschutz
 
-`generate_report` erzeugt einen **produktionsreifen** Bericht (Markdown + JSON) mit:
-Executive Summary, Risiko-Einstufung, Angriffspfaden, **Quick Wins**,
-langfristigen Maßnahmen, technischen Findings mit Evidenz,
-**BSI-IT-Grundschutz-Mapping** (Finding-ID, Risiko, Bereich, Maßnahme, BSI-Bezug,
-Priorität, Evidenz, Einschränkungen), Scanner-Ergebnissen, Scope-Hinweisen,
-Limitierungen und nächsten Schritten.
+`generate_report` erzeugt einen **produktionsreifen** Bericht in drei Formaten
+(**Markdown, JSON, HTML**) mit: Executive Summary, Risiko-Einstufung,
+Angriffspfaden, **Quick Wins**, langfristigen Maßnahmen, technischen Findings mit
+Evidenz, **BSI-IT-Grundschutz-Mapping** (Finding-ID, Risiko, Bereich, Maßnahme,
+BSI-Bezug, Priorität, Evidenz, Einschränkungen), Scanner-Ergebnissen,
+Scope-Hinweisen, Limitierungen und nächsten Schritten.
+
+- **HTML für die Kundenübergabe:** Der HTML-Bericht (`report_export.py`) ist im
+  Specter-Branding gestaltet und druckoptimiert (`@media print`) — im Browser
+  öffnen und **„Drucken → Als PDF speichern"** ergibt ein sauberes PDF, ganz ohne
+  zusätzliche Abhängigkeit.
+- **Kompakte Angriffspfade:** Gleichartige Pfade werden zu Sammelpfaden
+  verdichtet (mit Anzahl der Kombinationen) — kürzere, lesbarere Berichte.
 
 ---
 
@@ -205,16 +223,17 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**255 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**287 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
-- Findings-Modell, Asset-Graph, Angriffspfad-Korrelation, Report-Generierung
-- alle zehn Werkzeuge (Erfolgs- und Fehlerpfade)
-- AD-/Exchange-Analyzer (jede Regel + Fehlerfälle, BloodHound-Normalisierung)
+- Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
+- alle elf Werkzeuge (Erfolgs- und Fehlerpfade)
+- AD-/Exchange-/Entra-ID-Analyzer (jede Regel + Fehlerfälle, BloodHound)
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)
-- BSI-IT-Grundschutz-Mapping und alle Report-Abschnitte
+- BSI-IT-Grundschutz-Mapping sowie Markdown- und HTML-Report (alle Abschnitte,
+  HTML-Escaping)
 - die vollständige Agenten-Schleife mit simuliertem LLM (kein API-Key nötig)
 - ein **Integrationstest** mit echtem `curl` gegen einen lokalen Server
 

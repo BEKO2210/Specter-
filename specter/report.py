@@ -130,7 +130,10 @@ def _section_attack_paths(paths: list[AttackPath]) -> list[str]:
         lines += ["_Keine korrelierten Angriffspfade._", ""]
         return lines
     for i, p in enumerate(paths, start=1):
-        lines.append(f"### AP-{i}: {p.title}  ·  Schweregrad: {p.severity.label}")
+        suffix = f"  ·  {p.instances} Kombinationen" if p.instances > 1 else ""
+        lines.append(
+            f"### AP-{i}: {p.title}  ·  Schweregrad: {p.severity.label}{suffix}"
+        )
         lines.append("")
         for step_no, step in enumerate(p.steps, start=1):
             lines.append(f"{step_no}. {step}")

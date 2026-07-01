@@ -5,6 +5,7 @@ ausgewertet. Keine Live-Verbindungen, keine Ausnutzung, keine Credential-Nutzung
 """
 
 from .active_directory import analyze_ad
+from .entra_id import analyze_entra
 from .exchange import analyze_exchange
 
-__all__ = ["analyze_ad", "analyze_exchange"]
+__all__ = ["analyze_ad", "analyze_entra", "analyze_exchange"]

@@ -80,7 +80,7 @@ def test_regex_no_catastrophic_backtracking(tmp_path):
 
 
 def test_correlate_scales(tmp_path):
-    """Viele Findings korrelieren in vertretbarer Zeit."""
+    """Viele Findings korrelieren in vertretbarer Zeit; Aggregation verdichtet."""
     store = FindingsStore()
     for i in range(150):
         store.add(Finding(f"Secret {i}", "secret_exposure", Severity.HOCH,
@@ -89,10 +89,13 @@ def test_correlate_scales(tmp_path):
         store.add(Finding(f"Dienst {i}", "exposed_service", Severity.HOCH,
                           f"host{i}", location=f"10.0.0.{i}:22"))
     start = time.monotonic()
-    paths = correlate(store, AssetGraph())
+    raw = correlate(store, AssetGraph(), aggregate=False)
+    aggregated = correlate(store, AssetGraph())
     elapsed = time.monotonic() - start
-    # 150 Secrets x 150 Dienste -> viele Pfade, aber deterministisch und schnell.
-    assert len(paths) > 100
+    # 150 x 150 -> viele Einzelpfade, aber zu wenigen Sammelpfaden verdichtet.
+    assert len(raw) > 100
+    assert len(aggregated) < 5
+    assert aggregated[0].instances == len(raw)
     assert elapsed < 5.0, f"Korrelation zu langsam: {elapsed:.1f}s"
 
 

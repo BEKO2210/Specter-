@@ -41,6 +41,7 @@ CATEGORY_TO_BSI: dict[str, tuple[str, str]] = {
 SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "ad_analyzer": ("APP.2.2", "Active Directory Domain Services"),
     "exchange_analyzer": ("APP.5.2", "Microsoft Exchange und Outlook"),
+    "entra_analyzer": ("OPS.2.2", "Cloud-Nutzung"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -48,6 +49,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "static_scan": "Heuristischer Mustertreffer aus statischer Analyse - manuell zu verifizieren.",
     "ad_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten AD-Exports; kein Live-Abgleich.",
     "exchange_analyzer": "Bewertung anhand bereitgestellter Exchange-Daten; Build-Einschaetzung ist heuristisch.",
+    "entra_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Entra-ID-/M365-Exports; kein Live-Abgleich mit dem Tenant.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",

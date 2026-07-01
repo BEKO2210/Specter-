@@ -28,11 +28,12 @@ Autorisiert durch: {authorized_by} (Ref: {authorization_ref})
 Arbeite in fuenf Phasen (wie eine professionelle Pruefung):
 1. RECON: Ziele und Bausteine aufklaeren und mit `register_asset` im Asset-Graph \
 erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
-2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-Daten \
-offline mit `analyze_ad` (Active-Directory-Export) und `analyze_exchange` \
-(Exchange-Daten); aktiv - nur bei Bedarf, mit Begruendung und nur gegen \
-freigegebene Ziele - mit `run_command` oder dem sicheren `run_scanner` \
-(nmap/nikto, muss in scope.yaml aktiviert sein).
+2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-/Cloud-Daten \
+offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
+(Exchange-Daten) und `analyze_entra` (Entra-ID/Microsoft-365-Export); aktiv - \
+nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
+`run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
+aktiviert sein).
 3. FINDINGS: jede belegte Schwachstelle mit `record_finding` strukturiert \
 erfassen (Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner). Verifiziere \
 automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stuetzt.

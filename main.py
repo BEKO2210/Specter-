@@ -19,6 +19,7 @@ from specter.audit import AuditLog
 from specter.config import Config, ScopeError
 from specter.llm import AnthropicLLM, LLMError
 from specter.report import write_reports
+from specter.report_export import write_html
 from specter.state import EngagementState
 
 
@@ -110,8 +111,13 @@ def main(argv: list[str] | None = None) -> int:
         config, state.assets, state.findings, state.attack_paths,
         scanner_runs=state.scanner_runs,
     )
+    html_path = write_html(
+        config, state.assets, state.findings, state.attack_paths,
+        scanner_runs=state.scanner_runs,
+    )
     print(f"\nBericht (Markdown): {report_paths['markdown']}")
     print(f"Bericht (JSON):     {report_paths['json']}")
+    print(f"Bericht (HTML):     {html_path}  (im Browser -> Drucken -> Als PDF)")
     print(f"Audit-Log:          {audit.path}")
     return 0
 

@@ -13,6 +13,7 @@ from specter.config import Config, Engagement, ScannerPolicy
 from specter.safety import SafetyPolicy
 from specter.state import EngagementState
 from specter.tools.analyze_ad import AnalyzeAdTool
+from specter.tools.analyze_entra import AnalyzeEntraTool
 from specter.tools.analyze_exchange import AnalyzeExchangeTool
 from specter.tools.run_scanner import RunScannerTool
 
@@ -150,6 +151,68 @@ def test_analyze_exchange_no_findings(tmp_path):
     state = EngagementState()
     tool = AnalyzeExchangeTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "clean.json", {"host": "mail.de", "build": "15.2.1600.5"})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ------------------------------ analyze_entra -----------------------------
+
+def test_analyze_entra_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "entra.json", {
+        "tenant": "contoso.de", "security_defaults_enabled": False,
+        "legacy_auth_allowed": True, "conditional_access_policies": [],
+        "users": [{"upn": "admin@x", "enabled": True, "privileged": True,
+                   "mfa_registered": False}]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "M365-Analyse" in r.content
+    assert len(state.findings) >= 3
+
+
+def test_analyze_entra_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_entra_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_entra_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_entra_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", {"tenant": "x" * 50})
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_entra_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {
+        "tenant": "contoso.de", "security_defaults_enabled": True,
+        "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 
