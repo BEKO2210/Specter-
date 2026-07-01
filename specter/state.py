@@ -21,3 +21,5 @@ class EngagementState:
     attack_paths: list[AttackPath] = field(default_factory=list)
     # Strukturierte Ergebnisse aktiver Scanner (fuer den Bericht).
     scanner_runs: list[dict[str, Any]] = field(default_factory=list)
+    # Ergebnis eines Re-Tests (Vergleich mit fruehrerem Bericht), optional.
+    delta: Any = None

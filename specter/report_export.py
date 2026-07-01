@@ -16,6 +16,7 @@ from ._brand_asset import SPECTER_MARK_DATA_URI
 from .assets import AssetGraph
 from .attack_paths import AttackPath
 from .bsi import map_findings
+from .choke_points import compute_choke_points
 from .config import Config
 from .findings import FindingsStore, Severity
 from .remediation import remediation_for
@@ -99,6 +100,7 @@ def build_html(
     paths: list[AttackPath],
     generated_at: str | None = None,
     scanner_runs: list[dict[str, Any]] | None = None,
+    delta: Any = None,
 ) -> str:
     eng = config.engagement
     ts = generated_at or _now_iso()
@@ -132,6 +134,27 @@ def build_html(
             p.append(f"<li>{_badge(f.severity)} {_e(f.title)} <span class='muted'>({_e(f.asset)})</span></li>")
         p.append("</ul>")
 
+    # Re-Test / Delta
+    if delta is not None:
+        seit = f" seit {_e(delta.previous_date)}" if delta.previous_date else ""
+        alter = f" (vor {delta.aging_days} Tagen)" if delta.aging_days is not None else ""
+        p.append(f"<h2>Re-Test / Veränderung{seit}{alter}</h2>")
+        p.append(f"<p><strong>Behoben:</strong> {len(delta.resolved)} &middot; "
+                 f"<strong>Neu:</strong> {len(delta.new)} &middot; "
+                 f"<strong>Weiterhin offen:</strong> {len(delta.still_open)}</p>")
+        if delta.resolved:
+            p.append("<p><strong>Behoben seit dem letzten Bericht:</strong></p><ul>")
+            for r in delta.resolved:
+                p.append(f"<li>{_e(r.get('title', r.get('id')))} "
+                         f"<span class='muted'>({_e(r.get('severity', ''))})</span></li>")
+            p.append("</ul>")
+        if delta.new:
+            p.append("<p><strong>Neu hinzugekommen:</strong></p><ul>")
+            for f in delta.new:
+                p.append(f"<li>{_badge(f.severity)} {_e(f.title)} "
+                         f"<span class='muted'>({_e(f.asset)})</span></li>")
+            p.append("</ul>")
+
     # Risiko-Einstufung
     p.append("<h2>Risiko-Einstufung</h2><table><tr><th>Schweregrad</th><th>Anzahl</th></tr>")
     for sev in reversed(Severity):
@@ -150,6 +173,22 @@ def build_html(
         p.append("</ol>")
         if path.rationale:
             p.append(f"<p class='muted'>{_e(path.rationale)}</p>")
+
+    # Choke Points
+    p.append("<h2>Choke Points (engste Behebungsstellen)</h2>")
+    chokes = compute_choke_points(paths)
+    if not chokes:
+        p.append("<p class='muted'>Keine Choke Points (keine korrelierten Angriffspfade).</p>")
+    else:
+        p.append("<p>Diese Findings zuerst beheben &ndash; jedes bricht mehrere "
+                 "Angriffspfade auf einmal:</p><ul>")
+        for cp in chokes:
+            f = findings.get(cp.finding_id)
+            titel = _e(f.title) if f else _e(cp.finding_id)
+            asset = f" ({_e(f.asset)})" if f else ""
+            p.append(f"<li><strong>{titel}</strong>{asset} "
+                     f"&rarr; bricht {cp.paths_broken} Angriffspfad(e)</li>")
+        p.append("</ul>")
 
     # Quick Wins
     p.append("<h2>Quick Wins (kurzfristig, hohe Wirkung)</h2>")
@@ -250,13 +289,14 @@ def write_html(
     paths: list[AttackPath],
     directory: str | Path = "reports",
     scanner_runs: list[dict[str, Any]] | None = None,
+    delta: Any = None,
 ) -> Path:
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     stamp = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     html_path = out / f"specter-report-{stamp}.html"
     html_path.write_text(
-        build_html(config, assets, findings, paths, _now_iso(), scanner_runs),
+        build_html(config, assets, findings, paths, _now_iso(), scanner_runs, delta),
         encoding="utf-8",
     )
     return html_path

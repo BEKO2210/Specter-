@@ -53,6 +53,7 @@ def build_registry(
     from .read_file import ReadFileTool
     from .record_finding import RecordFindingTool
     from .register_asset import RegisterAssetTool
+    from .retest import RetestTool
     from .run_command import RunCommandTool
     from .run_scanner import RunScannerTool
 
@@ -71,6 +72,7 @@ def build_registry(
         # Findings-Analyse -> Korrelation -> Fix & Report
         RecordFindingTool(state, audit),
         CorrelatePathsTool(state, audit),
+        RetestTool(config, policy, audit, state),
         GenerateReportTool(config, state, audit),
     ]
     return {t.name: t for t in tools}
