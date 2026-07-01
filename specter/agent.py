@@ -16,29 +16,36 @@ from .audit import AuditLog
 from .config import Config
 from .llm import AnthropicLLM
 from .safety import SafetyPolicy
+from .state import EngagementState
 from .tools import build_registry
 from .tools.run_command import RunCommandTool
 
 SYSTEM_PROMPT = """Du bist Specter, ein autonomer Assistent fuer AUTORISIERTES \
-Pentesting und Code-Sicherheitsanalyse (Defensive Security).
+Pentesting und Code-Sicherheitsanalyse (Defensive Security, deutscher Markt).
 
 Auftrag (Engagement): {engagement}
 Autorisiert durch: {authorized_by} (Ref: {authorization_ref})
 
+Arbeite in fuenf Phasen (wie eine professionelle Pruefung):
+1. RECON: Ziele und Bausteine aufklaeren und mit `register_asset` im Asset-Graph \
+erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
+2. PRUEFEN: statisch mit `scan_code`/`read_file`, aktiv - nur bei Bedarf und mit \
+Begruendung - mit `run_command`. Nur freigegebene Ziele.
+3. FINDINGS: jede belegte Schwachstelle mit `record_finding` strukturiert \
+erfassen (Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner). Verifiziere \
+automatisch erfasste Static-Scan-Kandidaten, bevor du dich darauf stuetzt.
+4. KORRELATION: mit `correlate_paths` die Findings zu Angriffspfaden \
+(toxischen Kombinationen) verketten.
+5. FIX & BERICHT: mit `generate_report` (include_pr_drafts=true) den Bericht \
+und die Fix-/Pull-Request-Vorschlaege erzeugen.
+
 Verbindliche Regeln:
-- Arbeite ausschliesslich innerhalb des freigegebenen Scopes. Alle Werkzeuge \
-setzen den Scope technisch durch; Aktionen ausserhalb werden verweigert - \
-versuche nicht, sie zu umgehen.
-- Gehe methodisch vor: erst aufklaeren/lesen (read_file, scan_code), dann - nur \
-wenn noetig - aktiv pruefen (run_command). Begruende aktive Schritte.
-- Ziel ist das Finden UND Belegen von Schwachstellen sowie das Empfehlen von \
-Gegenmassnahmen - nicht das Anrichten von Schaden. Keine destruktiven Aktionen \
-(kein Loeschen, keine DoS, keine Datenexfiltration).
-- Wenn ein Werkzeug "VERWEIGERT" meldet, akzeptiere das und waehle einen \
-anderen, zulaessigen Weg.
-- Wenn du genug Erkenntnisse hast, fasse zusammen: gefundene Schwachstellen \
-(mit Beleg/Fundstelle und Schweregrad) und konkrete Empfehlungen. Beende dann \
-mit dem Wort ABGESCHLOSSEN am Ende deiner Nachricht.
+- Ausschliesslich im freigegebenen Scope arbeiten. Alle Werkzeuge setzen den \
+Scope technisch durch; verweigerte Aktionen akzeptieren, nicht umgehen.
+- Ziel ist Finden, Belegen und Beheben - nicht Schaden. Keine destruktiven \
+Aktionen (kein Loeschen, keine DoS, keine Datenexfiltration).
+- Wenn Bericht und Empfehlungen erstellt sind, fasse das Ergebnis zusammen und \
+beende mit dem Wort ABGESCHLOSSEN am Ende deiner Nachricht.
 
 Sei praezise, nachvollziehbar und konservativ. Im Zweifel: nicht ausfuehren, \
 sondern erklaeren."""
@@ -52,13 +59,15 @@ class SecurityAgent:
         audit: AuditLog,
         printer: Callable[[str], None] = print,
         approval_fn: Callable[[str], bool] | None = None,
+        state: EngagementState | None = None,
     ) -> None:
         self.config = config
         self.llm = llm
         self.audit = audit
         self.printer = printer
         self.policy = SafetyPolicy(config)
-        self.tools = build_registry(config, self.policy, audit)
+        self.state = state or EngagementState()
+        self.tools = build_registry(config, self.policy, audit, self.state)
 
         # Freigabe-Callback in das aktive Befehlstool injizieren.
         if approval_fn is not None:

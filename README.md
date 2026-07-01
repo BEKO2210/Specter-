@@ -35,15 +35,26 @@ Das ersetzt keine Rechtsberatung — es hilft dir, sauber zu arbeiten.
 
 ---
 
+## Der Esprit-/Trident-Workflow
+
+Specter bildet den Ablauf einer professionellen Pentest-Plattform in fünf
+Phasen ab — der Agent durchläuft sie autonom:
+
+1. **Connect & Recon** — Assets entdecken und im **einheitlichen Asset-Graph**
+   erfassen (`register_asset`): Hosts, Dienste, Endpunkte, Datenspeicher,
+   Secrets, Code.
+2. **Attack & Pentest** — statisch (`scan_code`, `read_file`) und aktiv
+   (`run_command`) prüfen, alles scope-gebunden.
+3. **Findings-Analyse** — jede Schwachstelle als **strukturiertes Finding**
+   (`record_finding`) mit Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner.
+   Der Static-Scan erfasst Kandidaten automatisch.
+4. **Attack-Path-Korrelation** — Findings werden zu **Angriffspfaden**
+   ("toxischen Kombinationen") verkettet (`correlate_paths`), z. B.
+   *offengelegtes Secret + exponierter Dienst → Kontoübernahme*.
+5. **Fix & Bericht** — deutscher **Bericht** (Markdown + JSON) plus fertige
+   **Draft-Pull-Request-Texte** je Finding (`generate_report`).
+
 ## Architektur
-
-Drei Kernbereiche, wie bei jedem autonomen Agenten:
-
-| Bereich | Rolle | Umsetzung in Specter |
-|---|---|---|
-| **Augen** (Scanner) | Daten sammeln | `read_file`, `scan_code` |
-| **Gehirn** (KI) | Bewerten & entscheiden | `specter/agent.py` (Anthropic Tool Calling) |
-| **Hände** (Aktor) | Aktiv prüfen | `run_command` (nmap etc., abgesichert) |
 
 ```
 specter/
@@ -51,23 +62,34 @@ specter/
 ├── safety.py          # Scope-Durchsetzung (Pfad / Host / Befehl)  ← Herzstück
 ├── audit.py           # JSONL-Audit-Log
 ├── llm.py             # Anthropic-Client-Wrapper
-├── agent.py           # die Entscheidungs-Schleife
+├── agent.py           # 5-Phasen-Entscheidungs-Schleife
+├── state.py           # geteilter Zustand (Assets + Findings + Pfade)
+├── assets.py          # einheitlicher Asset-Graph (Recon)
+├── findings.py        # Finding-Modell, Schweregrade, Store
+├── attack_paths.py    # regelbasierte Angriffspfad-Korrelation
+├── remediation.py     # Gegenmaßnahmen + Draft-PR-Generierung
+├── report.py          # Bericht (Markdown + JSON), DE / BSI / DSGVO
 └── tools/
-    ├── read_file.py   # White-Box: Datei lesen
-    ├── code_scan.py   # statische Sicherheitsmuster (Tool "scan_code")
-    └── run_command.py # Terminal-Befehle (Allowlist + Scope + Timeout)
+    ├── register_asset.py   # Recon: Asset erfassen
+    ├── read_file.py        # White-Box: Datei lesen
+    ├── code_scan.py        # statische Muster + Auto-Findings ("scan_code")
+    ├── run_command.py      # Terminal-Befehle (Allowlist + Scope + Timeout)
+    ├── record_finding.py   # Finding strukturiert erfassen
+    ├── correlate_paths.py  # Angriffspfade korrelieren
+    └── generate_report.py  # Bericht + Draft-PRs erzeugen
 ```
 
-### Die drei Werkzeuge
+### Die sieben Werkzeuge
 
-1. **`read_file`** — liest eine Datei, aber nur innerhalb von
-   `filesystem.allowed_paths` (Schutz vor Directory-Traversal).
-2. **`scan_code`** — durchsucht Code rekursiv nach typischen Mustern:
-   fest kodierte Secrets, `eval`/`exec`, `shell=True`, mögliche SQL-Injection,
-   schwache Hashes (MD5/SHA1), deaktivierte TLS-Prüfung u. a.
-3. **`run_command`** — führt **ein** erlaubtes Programm aus (kein `shell=True`,
-   keine Pipes/Verkettung, Ziel muss im Netzwerk-Scope liegen, hartes Timeout,
-   optional manuelle Freigabe).
+| Tool | Phase | Zweck |
+|---|---|---|
+| `register_asset` | Recon | Asset im Graph erfassen (+ Kanten) |
+| `read_file` | Prüfen | Datei lesen (nur im Datei-Scope) |
+| `scan_code` | Prüfen | Muster-Scan, erfasst Findings automatisch |
+| `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
+| `record_finding` | Findings | Schwachstelle strukturiert festhalten |
+| `correlate_paths` | Korrelation | Findings → Angriffspfade |
+| `generate_report` | Fix & Bericht | Report (MD/JSON) + Draft-PR-Texte |
 
 ---
 

@@ -8,6 +8,7 @@ from typing import Any, Protocol
 from ..audit import AuditLog
 from ..config import Config
 from ..safety import SafetyPolicy
+from ..state import EngagementState
 
 
 @dataclass
@@ -36,17 +37,31 @@ class Tool(Protocol):
 
 
 def build_registry(
-    config: Config, policy: SafetyPolicy, audit: AuditLog
+    config: Config,
+    policy: SafetyPolicy,
+    audit: AuditLog,
+    state: EngagementState,
 ) -> dict[str, Tool]:
     """Erzeugt alle verfuegbaren Tools und gibt sie als Name->Tool-Map zurueck."""
     # Import hier, um Zirkularimporte zu vermeiden.
     from .code_scan import CodeScanTool
+    from .correlate_paths import CorrelatePathsTool
+    from .generate_report import GenerateReportTool
     from .read_file import ReadFileTool
+    from .record_finding import RecordFindingTool
+    from .register_asset import RegisterAssetTool
     from .run_command import RunCommandTool
 
     tools: list[Tool] = [
+        # Recon / Augen
+        RegisterAssetTool(state, audit),
         ReadFileTool(config, policy, audit),
-        CodeScanTool(config, policy, audit),
+        CodeScanTool(config, policy, audit, state),
+        # Aktiv / Haende
         RunCommandTool(config, policy, audit),
+        # Findings-Analyse -> Korrelation -> Fix & Report
+        RecordFindingTool(state, audit),
+        CorrelatePathsTool(state, audit),
+        GenerateReportTool(config, state, audit),
     ]
     return {t.name: t for t in tools}
