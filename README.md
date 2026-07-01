@@ -127,15 +127,39 @@ Bei `runtime.require_approval: true` (Standard) fragt Specter vor **jedem**
 aktiven Befehl im Terminal nach Bestätigung (Human-in-the-loop). Mit `--yes`
 lässt sich das für **isolierte Testlabore** überspringen.
 
+## Sofort ausprobieren (Demo, ohne API-Key)
+
+Ein vollständiger End-to-End-Lauf gegen einen mitgelieferten lokalen
+Test-Webserver und eine absichtlich verwundbare Beispiel-App — beweist, dass
+die ganze Pipeline real funktioniert:
+
+```bash
+python examples/run_demo.py
+```
+
+Der Lauf durchläuft alle fünf Phasen (Recon → Scan → aktives `curl` → Findings →
+Angriffspfade → Bericht) und schreibt einen echten Report nach `reports/`.
+Ideal als Vorlage für ein echtes Engagement: `examples/demo_scope.yaml`
+kopieren, Autorisierung und Ziele eintragen, mit `main.py` autonom laufen lassen.
+
 ## Tests
 
 ```bash
-python -m pytest -q
+pip install -r requirements-dev.txt
+python -m pytest
 ```
 
-Die Tests decken den kritischsten Teil ab — die Scope-Durchsetzung
-(Pfad-Traversal, CIDR-Zugehörigkeit, Sperrliste, Befehls-Allowlist,
-Shell-Metazeichen).
+**102 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+`--cov-fail-under=100`). Abgedeckt sind u. a.:
+
+- Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
+- Findings-Modell, Asset-Graph, Angriffspfad-Korrelation, Report-Generierung
+- alle sieben Werkzeuge (Erfolgs- und Fehlerpfade)
+- die vollständige Agenten-Schleife mit simuliertem LLM (kein API-Key nötig)
+- ein **Integrationstest** mit echtem `curl` gegen einen lokalen Server
+
+CI (GitHub Actions, `.github/workflows/ci.yml`) führt die Suite auf Python 3.11
+und 3.12 aus.
 
 ---
 
@@ -144,7 +168,7 @@ Shell-Metazeichen).
 - Weitere Scanner als Tools ergänzen (z. B. `nikto`, `whatweb`, `dig`) — einfach
   in `commands.allowed_binaries` freigeben.
 - Eigene Code-Muster in `specter/tools/code_scan.py` hinzufügen.
-- Findings automatisch zu einem Markdown-Report (`reports/`) zusammenfassen.
+- Echte GitHub-Integration: Draft-PRs automatisch aus Findings öffnen.
 - Exploit-Verifikation nur gegen **eigene, lokale Test-Server** (z. B. DVWA,
   Juice Shop) in einer isolierten VM.
 
