@@ -51,6 +51,7 @@ def build_registry(
     from .code_scan import CodeScanTool
     from .correlate_paths import CorrelatePathsTool
     from .generate_report import GenerateReportTool
+    from .open_pull_requests import OpenPullRequestsTool
     from .read_file import ReadFileTool
     from .record_finding import RecordFindingTool
     from .register_asset import RegisterAssetTool
@@ -76,5 +77,6 @@ def build_registry(
         CorrelatePathsTool(state, audit),
         RetestTool(config, policy, audit, state),
         GenerateReportTool(config, state, audit),
+        OpenPullRequestsTool(config, audit, state),
     ]
     return {t.name: t for t in tools}

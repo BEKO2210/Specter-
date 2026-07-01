@@ -91,15 +91,17 @@ specter/
 ├── retest.py          # Re-Test/Delta gegen früheren Bericht
 ├── report.py          # produktionsreifer Bericht (Markdown + JSON)
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
+├── integrations/      # opt-in ausgehende Aktionen
+│   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
-    ├── register_asset.py   ├── read_file.py       ├── code_scan.py
-    ├── analyze_ad.py       ├── analyze_exchange.py ├── analyze_entra.py
-    ├── analyze_aws.py      ├── run_command.py      ├── run_scanner.py
-    ├── record_finding.py   ├── correlate_paths.py  ├── retest.py
-    └── generate_report.py
+    ├── register_asset.py   ├── read_file.py        ├── code_scan.py
+    ├── analyze_ad.py       ├── analyze_exchange.py  ├── analyze_entra.py
+    ├── analyze_aws.py      ├── run_command.py       ├── run_scanner.py
+    ├── record_finding.py   ├── correlate_paths.py   ├── retest.py
+    ├── generate_report.py  └── open_pull_requests.py
 ```
 
-### Die dreizehn Werkzeuge
+### Die vierzehn Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -116,6 +118,7 @@ specter/
 | `correlate_paths` | Korrelation | Findings → Angriffspfade (aggregiert) |
 | `retest` | Korrelation | Gegen früheren Bericht vergleichen (behoben/neu/offen) |
 | `generate_report` | Fix & Bericht | Report (Markdown/JSON/HTML) + Draft-PR-Texte |
+| `open_pull_requests` | Fix & Bericht | PR-Texte offline schreiben; opt-in echte GitHub-Draft-PRs |
 
 ---
 
@@ -191,6 +194,27 @@ python main.py --scope scope.yaml \
   --objective "Prüfe ./targets erneut und vergleiche mit reports/specter-report-ALT.json (retest)."
 ```
 
+## GitHub-Draft-PRs (opt-in, kein Auto-Apply)
+
+`open_pull_requests` erzeugt aus den Findings fertige Pull-Request-Texte.
+
+- **Standard (offline, sicher):** schreibt je Finding eine Markdown-Datei nach
+  `reports/pull-requests/` — **nichts verlässt das Haus**.
+- **Opt-in (online):** ist `integrations.github` in `scope.yaml` aktiviert und
+  liegt ein Token in der konfigurierten Umgebungsvariable, öffnet Specter je
+  Finding einen echten **Draft-PR** (neuer Branch + Remediation-Trackingdokument).
+  **Kein Auto-Merge, kein Auto-Apply** — ein Mensch prüft; vor dem Online-Schritt
+  wird eine Freigabe eingeholt.
+
+```yaml
+integrations:
+  github:
+    enabled: true
+    repo: "owner/repo"        # nur eigenes/autorisiertes Repository
+    base_branch: "main"
+    token_env: "GITHUB_TOKEN"
+```
+
 ---
 
 ## Installation
@@ -249,13 +273,13 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**339 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**359 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
 - **Choke-Point-Analyse** (Greedy-Hitting-Set) und **Re-Test/Delta** (behoben/neu/offen)
-- alle dreizehn Werkzeuge (Erfolgs- und Fehlerpfade)
+- alle vierzehn Werkzeuge (Erfolgs- und Fehlerpfade)
 - AD-/Exchange-/Entra-ID-/AWS-Analyzer (jede Regel + Fehlerfälle, BloodHound), CVSS-Lite
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)

@@ -92,3 +92,19 @@ scanners:
     allow_aggressive: false
     timeout_seconds: 600
     max_output_bytes: 200000
+
+# ---------------------------------------------------------------------------
+# INTEGRATIONEN (ausgehende Aktionen) - per Default DEAKTIVIERT
+# open_pull_requests schreibt die Fix-/PR-Texte immer OFFLINE als Dateien.
+# Nur wenn github.enabled true ist UND ein Token in der genannten Umgebungs-
+# variable liegt, werden zusaetzlich echte GitHub-DRAFT-PRs eroeffnet
+# (kein Auto-Merge, kein Auto-Apply; ein Mensch prueft). Vor dem Online-Schritt
+# wird eine Freigabe eingeholt.
+# ---------------------------------------------------------------------------
+integrations:
+  github:
+    enabled: false
+    repo: "owner/repo"          # Ziel-Repository (nur eigenes/autorisiertes!)
+    base_branch: "main"
+    branch_prefix: "specter/fix-"
+    token_env: "GITHUB_TOKEN"   # Name der Umgebungsvariable mit dem PAT
