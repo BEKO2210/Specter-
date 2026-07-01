@@ -1,0 +1,31 @@
+# Demo-Scope fuer den lokalen Beispiel-Lauf (examples/run_demo.py).
+# Alles zeigt auf localhost bzw. das mitgelieferte Beispielverzeichnis -
+# es werden keine fremden Systeme beruehrt.
+
+engagement:
+  name: "Specter Demo-Engagement (localhost)"
+  authorized_by: "Selbsttest (lokale Umgebung)"
+  authorization_ref: "DEMO-LOCALHOST"
+  valid_until: "2999-12-31"
+
+network:
+  allowed_targets:
+    - "127.0.0.1"
+  forbidden_targets:
+    - "169.254.169.254"
+
+filesystem:
+  allowed_paths:
+    - "examples/vulnerable_app"
+  max_file_bytes: 1000000
+
+commands:
+  allowed_binaries:
+    - "curl"
+    - "nmap"
+  timeout_seconds: 60
+
+runtime:
+  require_approval: false
+  max_iterations: 25
+  model: "claude-sonnet-5"
