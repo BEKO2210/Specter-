@@ -1,7 +1,0 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">Specter mark monochrome</title>
-  <desc id="desc">Monochrome geometric S-shaped security mark.</desc>
-  <path d="M64 8L112 36V62.5H92V48.3L64 32.1L36 48.3V62.5H16V36L64 8Z" fill="currentColor"/>
-  <path d="M112 65.5V92L64 120L16 92V65.5H36V79.7L64 95.9L92 79.7V65.5H112Z" fill="currentColor" fill-opacity="0.72"/>
-  <path d="M36 48.3L64 32.1L92 48.3V65.5H72.2V59.8L64 55.1L55.8 59.8L92 80.7L64 96.9L36 80.7V62.5H55.8V68.9L64 73.6L72.2 68.9L36 48.3Z" fill="white"/>
-</svg>
