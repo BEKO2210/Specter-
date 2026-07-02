@@ -206,7 +206,7 @@ Siehe auch [`SECURITY.md`](SECURITY.md).
 | **Vertrauens-One-Pager** | Kunden überzeugen | `python examples/build_trust_onepager.py` |
 
 **Website veröffentlichen:** GitHub → *Settings → Pages → Deploy from a branch →
-`main` / `/docs`*. Danach live unter `https://beko2210.github.io/specter-/`.
+`main` / `/docs`*. Danach live unter `https://beko2210.github.io/Specter-/`.
 
 ---
 
