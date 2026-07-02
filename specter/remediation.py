@@ -92,6 +92,13 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "Angreifer-Verweildauer anpassen (>= 30 Tage) und Backups verschluesseln. "
         "Wiederanlauf-/Notfallkonzept dokumentieren und ueben."
     ),
+    "web_security": (
+        "Sicherheits-Header setzen: HSTS (max-age >= 1 Jahr, includeSubDomains), "
+        "Content-Security-Policy, X-Frame-Options bzw. CSP frame-ancestors, "
+        "X-Content-Type-Options: nosniff, Referrer-Policy und Permissions-Policy. "
+        "Cookies mit Secure, HttpOnly und SameSite ausliefern; Server-/X-Powered-By-"
+        "Banner reduzieren, damit keine Softwareversionen preisgegeben werden."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 

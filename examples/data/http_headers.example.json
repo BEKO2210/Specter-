@@ -1,0 +1,29 @@
+{
+  "endpoints": [
+    {
+      "url": "https://portal.musterversicherung.de",
+      "headers": {
+        "Server": "Apache/2.4.29 (Ubuntu)",
+        "X-Powered-By": "PHP/7.2.24",
+        "Content-Type": "text/html; charset=UTF-8"
+      },
+      "cookies": [
+        {"name": "SESSIONID", "secure": false, "httponly": false, "samesite": "None"}
+      ]
+    },
+    {
+      "url": "https://www.musterversicherung.de",
+      "headers": {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Content-Security-Policy": "default-src 'self'",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "geolocation=()"
+      },
+      "cookies": [
+        {"name": "consent", "secure": true, "httponly": true, "samesite": "Lax"}
+      ]
+    }
+  ]
+}

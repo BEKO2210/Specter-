@@ -145,6 +145,8 @@ def main() -> int:
         {"path": str(data_dir / "tls.example.json")}).content)
     print(tools["analyze_backup"].run(
         {"path": str(data_dir / "backup.example.json")}).content)
+    print(tools["analyze_http_headers"].run(
+        {"path": str(data_dir / "http_headers.example.json")}).content)
 
     print("\n--- Phase 4: ANGRIFFSPFAD-KORRELATION ---")
     print(tools["correlate_paths"].run({}).content)

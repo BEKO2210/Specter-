@@ -17,6 +17,7 @@ from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.analyzers.firewall import analyze_firewall
+from specter.analyzers.http_headers import analyze_http_headers
 from specter.analyzers.tls_certificates import analyze_tls
 from specter.findings import Severity
 
@@ -1033,3 +1034,103 @@ def test_entra_clean_tenant():
             "app_registrations": [],
             "sharing": {"anonymous_links_enabled": False}}
     assert analyze_entra(data) == []
+
+
+# ==================== HTTP-Security-Header / Cookies ========================
+
+def test_http_missing_hsts():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {}})
+    assert any("Kein HSTS" in f.title and f.category == "transport_security"
+               and f.severity is Severity.HOCH for f in findings)
+
+
+def test_http_hsts_too_short():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {
+        "Strict-Transport-Security": "max-age=3600"}})
+    assert any("zu kurzer Gültigkeit" in f.title and f.severity is Severity.NIEDRIG
+               for f in findings)
+
+
+def test_http_hsts_strong_no_finding_for_hsts():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains"}})
+    assert not any("HSTS" in f.title for f in findings)
+
+
+def test_http_hsts_without_maxage_flags_short():
+    # HSTS-Header vorhanden aber ohne max-age -> age=0 -> zu kurz.
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {
+        "strict-transport-security": "includeSubDomains"}})
+    assert any("zu kurzer Gültigkeit (0s)" in f.title for f in findings)
+
+
+def test_http_missing_csp_and_xfo():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {}})
+    titles = " ".join(f.title for f in findings)
+    assert "Keine Content-Security-Policy" in titles
+    assert "Clickjacking-Schutz fehlt" in titles
+
+
+def test_http_content_type_options():
+    bad = analyze_http_headers({"url": "https://a.de", "headers": {"X-Content-Type-Options": "off"}})
+    assert any("nicht 'nosniff'" in f.title for f in bad)
+    good = analyze_http_headers({"url": "https://a.de", "headers": {
+        "Strict-Transport-Security": "max-age=31536000",
+        "Content-Security-Policy": "default-src 'self'", "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "geolocation=()"}})
+    assert not any("X-Content-Type-Options" in f.title for f in good)
+
+
+def test_http_missing_referrer_and_permissions_policy():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {}})
+    titles = " ".join(f.title for f in findings)
+    assert "Keine Referrer-Policy" in titles
+    assert "Keine Permissions-Policy" in titles
+
+
+def test_http_banner_leaks():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {
+        "Server": "Apache/2.4.29", "X-Powered-By": "PHP/7.2"}})
+    titles = " ".join(f.title for f in findings)
+    assert "Server-Banner verrät Software: Apache/2.4.29" in titles
+    assert "X-Powered-By verrät Software: PHP/7.2" in titles
+
+
+def test_http_cookie_flags():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {}, "cookies": [
+        {"name": "SID", "secure": False, "httponly": False, "samesite": "None"}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Cookie ohne Secure-Flag: SID" in titles
+    assert "Cookie ohne HttpOnly-Flag: SID" in titles
+    assert "Cookie ohne SameSite-Schutz: SID" in titles
+
+
+def test_http_cookie_secure_ok_and_non_dict_skipped():
+    findings = analyze_http_headers({"url": "https://a.de", "headers": {
+        "Strict-Transport-Security": "max-age=31536000",
+        "Content-Security-Policy": "default-src 'self'", "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "geolocation=()"},
+        "cookies": ["kaputt", {"name": "ok", "secure": True, "httponly": True,
+                               "samesite": "Strict"}]})
+    assert findings == []
+
+
+def test_http_endpoints_list_and_non_dict_headers():
+    findings = analyze_http_headers({"endpoints": [
+        {"url": "https://a.de", "headers": "kaputt"},
+        "kaputt",
+        {"url": "https://b.de", "headers": {
+            "Strict-Transport-Security": "max-age=31536000",
+            "Content-Security-Policy": "x", "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer",
+            "Permissions-Policy": "x"}}]})
+    # a.de: headers kein Dict -> als leer behandelt -> mehrere Befunde; b.de sauber.
+    assert findings
+    assert all(f.asset == "https://a.de" for f in findings)
+
+
+def test_http_invalid_input():
+    assert analyze_http_headers("nope") == []
+    assert len(analyze_http_headers({})) >= 1  # leerer Endpunkt -> fehlende Header

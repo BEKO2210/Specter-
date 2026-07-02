@@ -52,6 +52,7 @@ def build_registry(
     from .analyze_email_security import AnalyzeEmailSecurityTool
     from .analyze_entra import AnalyzeEntraTool
     from .analyze_firewall import AnalyzeFirewallTool
+    from .analyze_http_headers import AnalyzeHttpHeadersTool
     from .analyze_tls import AnalyzeTlsTool
     from .analyze_exchange import AnalyzeExchangeTool
     from .code_scan import CodeScanTool
@@ -81,6 +82,7 @@ def build_registry(
         AnalyzeFirewallTool(config, policy, audit, state),
         AnalyzeTlsTool(config, policy, audit, state),
         AnalyzeBackupTool(config, policy, audit, state),
+        AnalyzeHttpHeadersTool(config, policy, audit, state),
         # Aktiv / Haende
         RunCommandTool(config, policy, audit),
         RunScannerTool(config, policy, audit, state),

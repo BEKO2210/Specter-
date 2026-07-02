@@ -20,6 +20,7 @@ from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
 from specter.tools.analyze_firewall import AnalyzeFirewallTool
+from specter.tools.analyze_http_headers import AnalyzeHttpHeadersTool
 from specter.tools.analyze_tls import AnalyzeTlsTool
 from specter.tools.analyze_exchange import AnalyzeExchangeTool
 from specter.tools.run_scanner import RunScannerTool
@@ -659,6 +660,70 @@ def test_analyze_backup_no_findings(tmp_path):
         {"name": "erp", "copies": 3, "offsite": True, "offline_or_immutable": True,
          "encrypted": True, "restore_tested": True, "last_restore_test_days": 30,
          "mfa_on_console": True, "retention_days": 90}], "policy": {"documented": True}})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# -------------------------- analyze_http_headers --------------------------
+
+def _hdr_export():
+    return {"url": "https://a.de", "headers": {"Server": "Apache/2.4.29"},
+            "cookies": [{"name": "SID", "secure": False}]}
+
+
+def test_analyze_http_headers_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "hdr.json", _hdr_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "HTTP-Header-Analyse" in r.content
+    assert len(state.findings) >= 3
+
+
+def test_analyze_http_headers_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_http_headers_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_http_headers_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_http_headers_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _hdr_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_http_headers_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {"url": "https://a.de", "headers": {
+        "Strict-Transport-Security": "max-age=31536000", "Content-Security-Policy": "x",
+        "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer", "Permissions-Policy": "x"}})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 
