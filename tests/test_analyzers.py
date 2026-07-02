@@ -16,6 +16,7 @@ from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.analyzers.firewall import analyze_firewall
+from specter.analyzers.tls_certificates import analyze_tls
 from specter.findings import Severity
 
 
@@ -805,6 +806,109 @@ def test_fw_invalid_input_and_robustness():
         "management": "kaputt"})
     assert any(f.category == "misconfiguration" for f in findings)
     assert any(f.category == "remote_access" for f in findings)
+
+
+# ========================= TLS / Zertifikate ===============================
+
+def test_tls_expired_certificate():
+    findings = analyze_tls({"host": "a.de", "certificate": {"days_until_expiry": -3}})
+    assert any("abgelaufen" in f.title and f.category == "transport_security"
+               and f.severity is Severity.HOCH for f in findings)
+
+
+def test_tls_expired_via_flag():
+    findings = analyze_tls({"host": "a.de", "certificate": {"expired": True}})
+    assert any("abgelaufen" in f.title for f in findings)
+
+
+def test_tls_expiring_soon():
+    findings = analyze_tls({"host": "a.de", "certificate": {"days_until_expiry": 10}})
+    assert any("laeuft in 10 Tagen ab" in f.title and f.severity is Severity.MITTEL
+               for f in findings)
+
+
+def test_tls_valid_expiry_no_finding():
+    findings = analyze_tls({"host": "a.de", "certificate": {
+        "days_until_expiry": 200, "signature_algorithm": "sha256WithRSAEncryption",
+        "key_type": "RSA", "key_bits": 2048}})
+    assert findings == []
+
+
+def test_tls_invalid_days_ignored():
+    # Nicht-numerisches days_until_expiry ohne expired-Flag -> kein Ablauf-Befund.
+    findings = analyze_tls({"host": "a.de", "certificate": {"days_until_expiry": "n/a"}})
+    assert findings == []
+
+
+def test_tls_weak_signature():
+    for sig in ("sha1WithRSAEncryption", "md5WithRSAEncryption"):
+        findings = analyze_tls({"host": "a.de", "certificate": {
+            "days_until_expiry": 100, "signature_algorithm": sig}})
+        assert any("schwacher Signatur" in f.title and f.category == "crypto_weakness"
+                   for f in findings)
+
+
+def test_tls_short_rsa_key():
+    findings = analyze_tls({"host": "a.de", "certificate": {
+        "days_until_expiry": 100, "key_type": "RSA", "key_bits": 1024}})
+    assert any("zu kurzem Schluessel" in f.title and f.severity is Severity.HOCH
+               for f in findings)
+
+
+def test_tls_ec_key_not_flagged():
+    # EC-Schluessel mit wenig Bits sind gleichwertig -> kein Krypto-Befund.
+    findings = analyze_tls({"host": "a.de", "certificate": {
+        "days_until_expiry": 100, "key_type": "EC", "key_bits": 256}})
+    assert findings == []
+
+
+def test_tls_invalid_key_bits_ignored():
+    findings = analyze_tls({"host": "a.de", "certificate": {
+        "days_until_expiry": 100, "key_type": "RSA", "key_bits": "kaputt"}})
+    assert findings == []
+
+
+def test_tls_self_signed():
+    findings = analyze_tls({"host": "a.de", "certificate": {
+        "days_until_expiry": 100, "self_signed": True}})
+    assert any("Selbstsigniertes" in f.title and f.category == "misconfiguration"
+               for f in findings)
+
+
+def test_tls_weak_protocols():
+    findings = analyze_tls({"host": "a.de", "protocols": ["SSLv3", "TLSv1.0", "TLSv1.3"]})
+    titles = " ".join(f.title for f in findings)
+    assert "SSLv3" in titles and "TLSv1.0" in titles
+    # SSLv3 -> HOCH, TLSv1.0 -> MITTEL, TLSv1.3 -> kein Befund.
+    assert len(findings) == 2
+    sslv3 = next(f for f in findings if "SSLv3" in f.title)
+    assert sslv3.severity is Severity.HOCH
+
+
+def test_tls_weak_ciphers():
+    findings = analyze_tls({"host": "a.de", "ciphers": [
+        "ECDHE-RSA-AES256-GCM-SHA384", "RC4-SHA", "DES-CBC3-SHA", "NULL-MD5"]})
+    # RC4, 3DES(DES-), NULL/MD5 -> schwach; AES-GCM -> ok.
+    assert len(findings) == 3
+    assert all(f.category == "crypto_weakness" for f in findings)
+
+
+def test_tls_endpoints_list_and_multiple():
+    findings = analyze_tls({"endpoints": [
+        {"host": "a.de", "certificate": {"expired": True}},
+        {"host": "b.de", "protocols": ["SSLv3"]}]})
+    hosts = {f.asset.split("/")[0] for f in findings}
+    assert hosts == {"a.de", "b.de"}
+
+
+def test_tls_invalid_input_and_robustness():
+    assert analyze_tls("nope") == []
+    assert analyze_tls({}) == []
+    # certificate kein Dict -> uebersprungen; Nicht-Dict-Endpunkte robust.
+    findings = analyze_tls({"endpoints": ["kaputt", None,
+                                          {"host": "a.de", "certificate": "x",
+                                           "protocols": ["SSLv3"]}]})
+    assert len(findings) == 1 and "SSLv3" in findings[0].title
 
 
 def test_entra_clean_tenant():

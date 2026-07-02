@@ -86,7 +86,8 @@ specter/
 │   ├── azure.py              # Azure-Risiken (Storage, NSG, VM, Key-Vault, SQL, RBAC)
 │   ├── email_security.py     # E-Mail-Spoofing/Phishing (SPF, DKIM, DMARC)
 │   ├── dependency.py         # SCA: verwundbare/veraltete Abhängigkeiten (CVE)
-│   └── firewall.py           # Firewall-/VPN-Config (Any-Any, RDP/SSH, MFA)
+│   ├── firewall.py           # Firewall-/VPN-Config (Any-Any, RDP/SSH, MFA)
+│   └── tls_certificates.py   # TLS/Zertifikate (Ablauf, schwache Cipher/Protokolle)
 ├── scanners/          # sichere Wrapper aktiver Scanner
 │   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
 │   ├── nmap.py               # nmap-Wrapper
@@ -101,12 +102,13 @@ specter/
     ├── register_asset.py   ├── read_file.py        ├── code_scan.py
     ├── analyze_ad.py       ├── analyze_exchange.py  ├── analyze_entra.py
     ├── analyze_aws.py      ├── analyze_azure.py     ├── analyze_email_security.py
-    ├── analyze_dependencies.py  ├── analyze_firewall.py  ├── run_command.py
-    ├── run_scanner.py      ├── record_finding.py    ├── correlate_paths.py
-    ├── retest.py           ├── generate_report.py   └── open_pull_requests.py
+    ├── analyze_dependencies.py  ├── analyze_firewall.py  ├── analyze_tls.py
+    ├── run_command.py      ├── run_scanner.py       ├── record_finding.py
+    ├── correlate_paths.py  ├── retest.py            ├── generate_report.py
+    └── open_pull_requests.py
 ```
 
-### Die achtzehn Werkzeuge
+### Die neunzehn Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -121,6 +123,7 @@ specter/
 | `analyze_email_security` | Prüfen | DNS-Export (SPF/DKIM/DMARC) gegen Spoofing/Phishing offline analysieren |
 | `analyze_dependencies` | Prüfen | Abhängigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste offline analysieren (SCA) |
 | `analyze_firewall` | Prüfen | Firewall-/VPN-Konfig-Export offline analysieren (Any-Any, offenes RDP/SSH, VPN ohne MFA) |
+| `analyze_tls` | Prüfen | TLS-/Zertifikats-Export offline analysieren (Ablauf, schwache Cipher/Signatur, alte Protokolle) |
 | `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
 | `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
@@ -131,9 +134,9 @@ specter/
 
 ---
 
-## Windows, Cloud, E-Mail, Abhängigkeiten & Perimeter: AD-, Exchange-, Entra-ID/M365-, AWS-, Azure-, E-Mail-Security-, SCA- & Firewall-Analyse (offline, defensiv)
+## Windows, Cloud, E-Mail, Abhängigkeiten, Perimeter & TLS: AD-, Exchange-, Entra-ID/M365-, AWS-, Azure-, E-Mail-Security-, SCA-, Firewall- & TLS-Analyse (offline, defensiv)
 
-Für den Mittelstand besonders relevant. Alle acht Analyzer werten **ausschließlich
+Für den Mittelstand besonders relevant. Alle neun Analyzer werten **ausschließlich
 bereitgestellte lokale Exportdateien** aus — **keine** Live-Verbindung, keine
 Credential-Nutzung, keine Ausnutzung.
 
@@ -179,6 +182,13 @@ Credential-Nutzung, keine Ausnutzung.
   veraltete/abgekündigte **VPN-Gateways** sowie öffentlich erreichbare
   **Management-Interfaces**. Offenes RDP ist im Mittelstand der häufigste
   Ransomware-Einstieg.
+- **`analyze_tls`** (`analyzers/tls_certificates.py`) — prüft aus einem TLS-/
+  Zertifikats-Export je Endpunkt: **abgelaufene** oder **bald ablaufende**
+  Zertifikate, **schwache Signatur** (SHA-1/MD5), **zu kurze Schlüssel**
+  (RSA < 2048), **selbstsignierte** Zertifikate, **veraltete Protokolle**
+  (SSLv3/TLS 1.0/1.1) und **schwache Cipher-Suites** (RC4/3DES/NULL/EXPORT/MD5).
+  Der Ablauf wird deterministisch aus dem gelieferten `days_until_expiry`
+  bewertet — **kein Live-Handshake**.
 
 Jedes Finding erhält zusätzlich einen numerischen **CVSS-Lite-Score** (0–10,
 `cvss.py`) mit CVSS-v3.1-Qualitätsstufe — transparent im Bericht ausgewiesen.
@@ -186,7 +196,7 @@ Jedes Finding erhält zusätzlich einen numerischen **CVSS-Lite-Score** (0–10,
 Beispiel-Exporte: `examples/data/ad_export.example.json`,
 `exchange.example.json`, `entra_export.example.json`, `aws_export.example.json`,
 `azure_export.example.json`, `email_security.example.json`,
-`dependencies.example.json`, `firewall.example.json`.
+`dependencies.example.json`, `firewall.example.json`, `tls.example.json`.
 
 ## Aktive Scanner (nmap/nikto) — sicher gekapselt
 
@@ -348,14 +358,14 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**433 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**453 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
 - **Choke-Point-Analyse** (Greedy-Hitting-Set) und **Re-Test/Delta** (behoben/neu/offen)
-- alle achtzehn Werkzeuge (Erfolgs- und Fehlerpfade)
-- AD-/Exchange-/Entra-ID-/AWS-/Azure-/E-Mail-Security-/SCA-/Firewall-Analyzer (jede Regel + Fehlerfälle, BloodHound, Versionsvergleich), CVSS-Lite
+- alle neunzehn Werkzeuge (Erfolgs- und Fehlerpfade)
+- AD-/Exchange-/Entra-ID-/AWS-/Azure-/E-Mail-Security-/SCA-/Firewall-/TLS-Analyzer (jede Regel + Fehlerfälle, BloodHound, Versionsvergleich), CVSS-Lite
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)
 - BSI-IT-Grundschutz-Mapping sowie Markdown- und HTML-Report (alle Abschnitte,

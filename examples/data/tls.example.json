@@ -1,0 +1,30 @@
+{
+  "endpoints": [
+    {
+      "host": "portal.musterversicherung.de:443",
+      "certificate": {
+        "subject": "portal.musterversicherung.de",
+        "days_until_expiry": -4,
+        "signature_algorithm": "sha1WithRSAEncryption",
+        "key_type": "RSA",
+        "key_bits": 1024,
+        "self_signed": false
+      },
+      "protocols": ["SSLv3", "TLSv1.0", "TLSv1.2"],
+      "ciphers": ["ECDHE-RSA-AES256-GCM-SHA384", "RC4-SHA", "DES-CBC3-SHA"]
+    },
+    {
+      "host": "mail.musterversicherung.de:443",
+      "certificate": {
+        "subject": "mail.musterversicherung.de",
+        "days_until_expiry": 12,
+        "signature_algorithm": "sha256WithRSAEncryption",
+        "key_type": "RSA",
+        "key_bits": 2048,
+        "self_signed": true
+      },
+      "protocols": ["TLSv1.2", "TLSv1.3"],
+      "ciphers": ["ECDHE-RSA-AES256-GCM-SHA384"]
+    }
+  ]
+}
