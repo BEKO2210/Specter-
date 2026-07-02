@@ -8,7 +8,7 @@
 <p align="center"><strong>Defensive Security Intelligence — automatische IT-Sicherheitsprüfung für den Mittelstand.</strong></p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-527%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-541%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
   <img alt="Defensiv" src="https://img.shields.io/badge/Ausrichtung-rein%20defensiv-0D1B2A">
@@ -46,6 +46,29 @@ und rechtlich sauber.
 
 ---
 
+## Gegen echte Server geprüft
+
+Specter wird nicht nur an Fixtures getestet, sondern gegen **echte, selbst
+gestartete Server**: Das Labor-Harness mintet ein echtes (abgelaufenes,
+selbstsigniertes) TLS-Zertifikat, startet damit einen echten HTTPS-Server mit
+absichtlich fehlenden Sicherheits-Headern und einem unsicheren Cookie, greift ihn
+real ab (`curl` + `openssl`) und prüft, dass Specter die Schwachstellen findet.
+
+```bash
+python examples/live_lab/run_lab.py
+```
+
+<p align="center"><img src="docs/assets/img/screens/lab.jpg" alt="Specter Labor-Beweis gegen echten Server" width="760"></p>
+
+Denselben Live-Check kannst du gegen eine **eigene, freigegebene Domain oder einen
+eigenen Server** laufen lassen (nur eigene/freigegebene Systeme — §202 StGB):
+
+```bash
+python examples/live_web_check.py meine-domain.de
+```
+
+---
+
 ## Schnellstart
 
 Einmalig einrichten:
@@ -68,7 +91,7 @@ python examples/run_demo.py
 python examples/live_email_check.py kunde-domain.de
 ```
 
-**3) Tests laufen lassen** — 527 Tests, 100 % Coverage:
+**3) Tests laufen lassen** — 541 Tests, 100 % Coverage:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -168,7 +191,7 @@ Siehe auch [`SECURITY.md`](SECURITY.md).
 
 ## Qualität
 
-**527 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**541 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
 Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle elf Analyzer (jede Regel +
 Fehlerfälle), die einundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
@@ -184,7 +207,7 @@ specter/            # Kern: Analyzer, Tools, Scope-Policy, Report, CVSS, BSI
   tools/            # einundzwanzig Agenten-Werkzeuge
 examples/           # Demo, Live-Check, Marketing-Generatoren, Beispieldaten
 docs/               # Website (GitHub Pages), Marke, Handbuch-PDF
-tests/              # 527 Tests (100 % Coverage)
+tests/              # 541 Tests (100 % Coverage)
 ```
 
 ---
