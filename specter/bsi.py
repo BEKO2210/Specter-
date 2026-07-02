@@ -48,6 +48,7 @@ SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "email_security_analyzer": ("APP.5.3", "Allgemeiner E-Mail-Client und -Server"),
     "dependency_analyzer": ("OPS.1.1.3", "Patch- und Aenderungsmanagement"),
     "firewall_analyzer": ("NET.3.2", "Firewall"),
+    "tls_analyzer": ("CON.1", "Kryptokonzept"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -61,6 +62,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "email_security_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten DNS-Exports (SPF/DKIM/DMARC); keine Live-DNS-Abfrage.",
     "dependency_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Abhaengigkeits-/Advisory-Exports; kein Live-Abgleich mit Paket-Registries oder CVE-Feeds.",
     "firewall_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Firewall-/VPN-Konfigurationsexports; keine Live-Verbindung zum Geraet.",
+    "tls_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten TLS-/Zertifikatsexports; kein Live-Handshake. Ablauf gemessen zum Erhebungszeitpunkt.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",

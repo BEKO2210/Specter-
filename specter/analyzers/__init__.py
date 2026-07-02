@@ -12,9 +12,10 @@ from .email_security import analyze_email_security
 from .entra_id import analyze_entra
 from .exchange import analyze_exchange
 from .firewall import analyze_firewall
+from .tls_certificates import analyze_tls
 
 __all__ = [
     "analyze_ad", "analyze_aws", "analyze_azure", "analyze_dependencies",
     "analyze_email_security", "analyze_entra", "analyze_exchange",
-    "analyze_firewall",
+    "analyze_firewall", "analyze_tls",
 ]

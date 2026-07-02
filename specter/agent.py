@@ -35,7 +35,8 @@ offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 (Azure-Export: Storage/NSG/VM/Key-Vault/SQL/RBAC) und \
 `analyze_email_security` (DNS-Export: SPF/DKIM/DMARC gegen Spoofing/Phishing) und \
 `analyze_dependencies` (Abhaengigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
-`analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA); aktiv - \
+`analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA) und \
+`analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle); aktiv - \
 nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).
