@@ -8,6 +8,7 @@ from .active_directory import analyze_ad
 from .aws import analyze_aws
 from .azure import analyze_azure
 from .backup import analyze_backup
+from .database import analyze_database
 from .dependency import analyze_dependencies
 from .dns_security import analyze_dns
 from .email_security import analyze_email_security
@@ -19,7 +20,7 @@ from .tls_certificates import analyze_tls
 
 __all__ = [
     "analyze_ad", "analyze_aws", "analyze_azure", "analyze_backup",
-    "analyze_dependencies", "analyze_dns", "analyze_email_security",
-    "analyze_entra", "analyze_exchange", "analyze_firewall",
-    "analyze_http_headers", "analyze_tls",
+    "analyze_database", "analyze_dependencies", "analyze_dns",
+    "analyze_email_security", "analyze_entra", "analyze_exchange",
+    "analyze_firewall", "analyze_http_headers", "analyze_tls",
 ]

@@ -1,0 +1,7 @@
+{
+  "databases": [
+    {"engine": "redis", "port": 6379, "public": true, "auth_required": false, "tls": false, "default_creds": false},
+    {"engine": "mysql", "port": 3306, "public": true, "auth_required": true, "tls": false, "default_creds": true},
+    {"engine": "postgresql", "port": 5432, "public": false, "auth_required": true, "tls": true, "default_creds": false}
+  ]
+}

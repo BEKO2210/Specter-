@@ -35,6 +35,7 @@ offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 (Azure-Export: Storage/NSG/VM/Key-Vault/SQL/RBAC) und \
 `analyze_email_security` (DNS-Export: SPF/DKIM/DMARC gegen Spoofing/Phishing) und \
 `analyze_dns` (DNS-Sicherheit: DNSSEC, CAA, offener Zonentransfer/AXFR, Wildcard, dangling CNAME) und \
+`analyze_database` (Datenbank-Exposition: oeffentlicher Port, fehlende Authentifizierung, Default-Creds, Transport ohne TLS) und \
 `analyze_dependencies` (Abhaengigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
 `analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA) und \
 `analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle) und \
