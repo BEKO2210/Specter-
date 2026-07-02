@@ -26,18 +26,20 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from specter.analyzers.dns_security import analyze_dns  # noqa: E402
 from specter.analyzers.email_security import analyze_email_security  # noqa: E402
+from specter.dns_live import build_dns_export  # noqa: E402
 from specter.email_live import (  # noqa: E402
     COMMON_DKIM_SELECTORS, build_email_export, extract_txt,
 )
 
 
-def doh(name: str) -> dict:
-    """Fragt TXT-Eintraege eines Namens per DNS-over-HTTPS ab (nur lesend)."""
+def doh(name: str, rtype: str = "TXT") -> dict:
+    """Fragt DNS-Eintraege eines Namens per DNS-over-HTTPS ab (nur lesend)."""
     try:
         raw = subprocess.run(
             ["curl", "-s", "--max-time", "15",
-             f"https://dns.google/resolve?name={name}&type=TXT"],
+             f"https://dns.google/resolve?name={name}&type={rtype}&do=1"],
             capture_output=True, text=True, timeout=20).stdout
         return json.loads(raw)
     except (subprocess.SubprocessError, json.JSONDecodeError, OSError):
@@ -77,6 +79,10 @@ def main() -> int:
     export = build_email_export(domain, apex, dmarc, dkim_by_selector)
     findings = analyze_email_security(export)
 
+    # DNS-Sicherheit derselben Domain real mitziehen (DNSSEC-AD-Flag + CAA).
+    dns_export = build_dns_export(domain, doh(domain, "SOA"), doh(domain, "CAA"))
+    dns_findings = analyze_dns(dns_export)
+
     print("=" * 74)
     print(f" LIVE-E-Mail-Sicherheits-Check: {domain}")
     print("=" * 74)
@@ -88,15 +94,18 @@ def main() -> int:
     else:
         sel = "(ueber gaengige Selektoren keiner gefunden - beim Kunden erfragen)"
     print(f"  DKIM  : {sel}")
+    print(f"  DNSSEC: {'aktiv (AD-Flag)' if dns_export['dnssec'] else 'NICHT aktiv'}")
+    print(f"  CAA   : {', '.join(dns_export['caa']) or '(keine CAA-Records gefunden)'}")
 
     print("-" * 74)
-    if findings:
-        print(f" {len(findings)} Befund(e):")
-        for f in findings:
+    alle = findings + dns_findings
+    if alle:
+        print(f" {len(alle)} Befund(e):")
+        for f in alle:
             print(f"   [{f.severity.label}] {f.title}")
             print(f"        Empfehlung: {f.evidence}")
     else:
-        print(" Keine Befunde - der E-Mail-Schutz dieser Domain ist vorbildlich.")
+        print(" Keine Befunde - E-Mail- und DNS-Schutz dieser Domain sind vorbildlich.")
     print("=" * 74)
     print(" Hinweis: nur oeffentliche DNS-Eintraege gelesen; kein Eingriff. "
           "DKIM-Selektoren\n variieren je Anbieter - fehlender DKIM-Treffer ist "

@@ -49,6 +49,7 @@ def build_registry(
     from .analyze_azure import AnalyzeAzureTool
     from .analyze_backup import AnalyzeBackupTool
     from .analyze_dependencies import AnalyzeDependenciesTool
+    from .analyze_dns import AnalyzeDnsTool
     from .analyze_email_security import AnalyzeEmailSecurityTool
     from .analyze_entra import AnalyzeEntraTool
     from .analyze_firewall import AnalyzeFirewallTool
@@ -78,6 +79,7 @@ def build_registry(
         AnalyzeAwsTool(config, policy, audit, state),
         AnalyzeAzureTool(config, policy, audit, state),
         AnalyzeEmailSecurityTool(config, policy, audit, state),
+        AnalyzeDnsTool(config, policy, audit, state),
         AnalyzeDependenciesTool(config, policy, audit, state),
         AnalyzeFirewallTool(config, policy, audit, state),
         AnalyzeTlsTool(config, policy, audit, state),

@@ -13,6 +13,7 @@ from specter.analyzers.backup import analyze_backup
 from specter.analyzers.dependency import (
     _satisfies, _split_op, analyze_dependencies,
 )
+from specter.analyzers.dns_security import analyze_dns
 from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
@@ -1134,3 +1135,67 @@ def test_http_endpoints_list_and_non_dict_headers():
 def test_http_invalid_input():
     assert analyze_http_headers("nope") == []
     assert len(analyze_http_headers({})) >= 1  # leerer Endpunkt -> fehlende Header
+
+
+# ============================= DNS-Sicherheit =============================
+
+def test_dns_missing_dnssec():
+    findings = analyze_dns({"domain": "a.de", "caa": ["0 issue \"x\""]})
+    titles = " ".join(f.title for f in findings)
+    assert "DNSSEC nicht aktiv" in titles
+    assert {f.category for f in findings} == {"dns_security"}
+    assert findings[0].source == "dns_analyzer"
+
+
+def test_dns_dnssec_active_no_finding():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True,
+                            "caa": ["0 issue \"letsencrypt.org\""]})
+    assert findings == []
+
+
+def test_dns_missing_caa():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True, "caa": []})
+    titles = " ".join(f.title for f in findings)
+    assert "Keine CAA-Records" in titles
+    # Leere Strings zaehlen nicht als CAA.
+    only_blank = analyze_dns({"domain": "a.de", "dnssec": True, "caa": ["", "  "]})
+    assert any("Keine CAA-Records" in f.title for f in only_blank)
+
+
+def test_dns_caa_not_a_list():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True, "caa": "nope"})
+    assert any("Keine CAA-Records" in f.title for f in findings)
+
+
+def test_dns_open_zone_transfer():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True,
+                            "caa": ["0 issue \"x\""], "zone_transfer": True})
+    hoch = [f for f in findings if "Zonentransfer" in f.title]
+    assert hoch and hoch[0].severity is Severity.HOCH and hoch[0].cwe == "CWE-200"
+
+
+def test_dns_wildcard():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True,
+                            "caa": ["0 issue \"x\""], "wildcard": True})
+    assert any("Wildcard" in f.title for f in findings)
+
+
+def test_dns_dangling_cnames():
+    findings = analyze_dns({
+        "domain": "a.de", "dnssec": True, "caa": ["0 issue \"x\""],
+        "dangling_cnames": ["old.a.de -> bucket.s3.amazonaws.com", "", "  "]})
+    dangling = [f for f in findings if "Dangling CNAME" in f.title]
+    assert len(dangling) == 1  # leere Eintraege uebersprungen
+    assert dangling[0].severity is Severity.HOCH
+
+
+def test_dns_dangling_not_a_list_ignored():
+    findings = analyze_dns({"domain": "a.de", "dnssec": True,
+                            "caa": ["0 issue \"x\""], "dangling_cnames": "nope"})
+    assert findings == []
+
+
+def test_dns_invalid_input():
+    assert analyze_dns("nope") == []
+    # Leeres Dict -> DNSSEC nicht aktiv + keine CAA.
+    assert len(analyze_dns({})) >= 1

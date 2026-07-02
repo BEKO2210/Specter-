@@ -34,9 +34,10 @@ def test_registry_has_all_tools(kit):
         "register_asset", "read_file", "scan_code", "run_command",
         "record_finding", "correlate_paths", "generate_report",
         "analyze_ad", "analyze_exchange", "analyze_entra", "analyze_aws",
-        "analyze_azure", "analyze_email_security", "analyze_dependencies",
-        "analyze_firewall", "analyze_tls", "analyze_backup",
-        "analyze_http_headers", "run_scanner", "retest", "open_pull_requests",
+        "analyze_azure", "analyze_email_security", "analyze_dns",
+        "analyze_dependencies", "analyze_firewall", "analyze_tls",
+        "analyze_backup", "analyze_http_headers", "run_scanner", "retest",
+        "open_pull_requests",
     }
     for t in tools.values():
         assert "name" in t.spec and "input_schema" in t.spec
