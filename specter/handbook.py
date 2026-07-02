@@ -24,7 +24,7 @@ _MARK_IMG = (
     'width="38" height="46" style="display:block">'
 )
 
-# Die zehn Offline-Analyzer in einfacher Sprache (Name, was er findet, warum wichtig).
+# Die vierzehn Offline-Analyzer in einfacher Sprache (Name, was er findet, warum wichtig).
 ANALYZERS: list[tuple[str, str, str]] = [
     ("analyze_ad", "Active Directory: schwache Passwort-Regeln, zu viele Admins, "
      "veraltete Konten, Kerberoasting/Golden-Ticket-Risiken.",
@@ -44,6 +44,10 @@ ANALYZERS: list[tuple[str, str, str]] = [
     ("analyze_email_security", "E-Mail-Schutz (SPF/DKIM/DMARC): kann jemand in "
      "eurem Namen Mails faelschen?",
      "Schuetzt vor CEO-Fraud - der teuerste Betrug im Mittelstand."),
+    ("analyze_dns", "DNS-Sicherheit: fehlendes DNSSEC, fehlende CAA-Records, "
+     "offener Zonentransfer (AXFR), Wildcard, dangling CNAME.",
+     "DNS ist das Adressbuch der Firma - manipuliert es jemand, landet Verkehr "
+     "beim Angreifer."),
     ("analyze_dependencies", "Software-Bibliotheken: bekannte Luecken (Log4Shell-"
      "Klasse), veraltete oder ungepinnte Pakete.",
      "Fremd-Code steckt ueberall - und altert schnell."),
@@ -53,9 +57,19 @@ ANALYZERS: list[tuple[str, str, str]] = [
     ("analyze_tls", "TLS/Zertifikate: abgelaufen, schwache Verschluesselung, "
      "alte Protokolle.",
      "Fuer jeden von aussen sichtbar - ein schneller Vertrauensverlust."),
+    ("analyze_http_headers", "Web-Sicherheit: fehlende Schutz-Header (HSTS/CSP/"
+     "X-Frame-Options), unsichere Cookies, verraterische Server-Banner.",
+     "Websites sind das Schaufenster - hier faellt Nachlaessigkeit sofort auf."),
     ("analyze_backup", "Backup/Ransomware-Resilienz: 3-2-1-Regel, offline/"
      "unveraenderbare Kopien, getestete Wiederherstellung.",
      "Entscheidet, ob ihr eine Ransomware ueberlebt - Versicherer-Pruefpunkt Nr. 1."),
+    ("analyze_database", "Datenbanken: oeffentlich erreichbare Ports, fehlende "
+     "Authentifizierung (Redis/Mongo), Default-Zugangsdaten, Transport ohne TLS.",
+     "In Datenbanken liegen die Kronjuwelen - offen erreichbar sind sie ein "
+     "Selbstbedienungsladen."),
+    ("analyze_container", "Container/Docker: privilegierte Container, gemountetes "
+     "docker.sock, Host-Networking, gefaehrliche Capabilities, root, :latest.",
+     "Ein schlecht konfigurierter Container ist der direkte Weg vom Dienst zum Host."),
 ]
 
 _CSS = """
@@ -212,10 +226,12 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
              "BloodHound-Daten</td></tr>"
              "<tr><td>Microsoft 365 / Entra</td><td>MFA-/Conditional-Access-Report</td></tr>"
              "<tr><td>AWS / Azure</td><td>IAM-/Storage-/Netzwerk-Export</td></tr>"
-             "<tr><td>E-Mail</td><td>DNS-Eintraege (SPF/DKIM/DMARC)</td></tr>"
+             "<tr><td>E-Mail / DNS</td><td>DNS-Eintraege (SPF/DKIM/DMARC, DNSSEC/CAA)</td></tr>"
              "<tr><td>Software</td><td>requirements.txt / package.json / SBOM</td></tr>"
              "<tr><td>Firewall / VPN</td><td>Regelwerk-Export</td></tr>"
-             "<tr><td>TLS</td><td>Zertifikats-/Protokoll-Uebersicht</td></tr>"
+             "<tr><td>TLS / Web</td><td>Zertifikats-/Protokoll-Uebersicht, HTTP-Header</td></tr>"
+             "<tr><td>Datenbanken</td><td>Port-/Auth-/TLS-Uebersicht der DB-Dienste</td></tr>"
+             "<tr><td>Container</td><td><code>docker inspect</code>-Ausgabe</td></tr>"
              "<tr><td>Backup</td><td>Kurzer Fragebogen zur Backup-Strategie</td></tr>"
              "</table>")
     p.append("<div class='ok'>Tipp: In <code>examples/data/</code> liegt fuer jeden "

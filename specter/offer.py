@@ -36,7 +36,7 @@ PACKAGES: list[tuple[str, str, str, list[str], bool]] = [
       "CVSS-Bewertung je Finding"], True),
     ("Voll-Audit", "ab 2.500 €",
      "Das vollständige Lagebild über alle Prüfbereiche.",
-     ["Alle zehn Prüfbereiche (AD, M365, Cloud, …)",
+     ["Alle vierzehn Prüfbereiche (AD, M365, Cloud, Web, DNS, DB, Container, …)",
       "BSI-IT-Grundschutz-Bericht",
       "Angriffspfad- und Choke-Point-Analyse",
       "Ein Nachtest nach der Behebung inklusive"], False),
