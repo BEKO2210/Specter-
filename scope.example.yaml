@@ -63,11 +63,20 @@ commands:
 #   require_approval: true  -> jede aktive Aktion (Scan/Befehl) muss im
 #                              Terminal manuell bestätigt werden (Human-in-the-loop).
 #   max_iterations         -> Obergrenze für die Agenten-Schleife (Kostenschutz).
+#   model                  -> das KI-Modell, das den Agenten steuert (entscheidet,
+#                             welches Werkzeug als Nächstes läuft, korreliert die
+#                             Findings zu Angriffspfaden und schreibt den Bericht).
+#                             Frei wählbar; ein stärkeres Modell liefert bessere
+#                             Korrelation und Berichte. Beispiele:
+#                               "claude-fable-5"   (stärkste Analyse-/Korrelationstiefe)
+#                               "claude-sonnet-5"  (schneller/günstiger, Standard)
+#                             Voraussetzung für den echten Lauf: die Umgebungs-
+#                             variable ANTHROPIC_API_KEY muss gesetzt sein.
 # ---------------------------------------------------------------------------
 runtime:
   require_approval: true
   max_iterations: 25
-  model: "claude-sonnet-5"
+  model: "claude-fable-5"
 
 # ---------------------------------------------------------------------------
 # AKTIVE SCANNER (nmap/nikto)
