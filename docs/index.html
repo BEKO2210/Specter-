@@ -2,12 +2,13 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Specter — Defensive IT-Sicherheit für den Mittelstand</title>
 <meta name="description" content="Specter deckt die Schwachstellen auf, über die im Mittelstand wirklich Schäden entstehen — defensiv, offline und nachvollziehbar. Kostenloser E-Mail-Sicherheits-Check.">
+<meta name="theme-color" content="#0A1420">
 <meta property="og:title" content="Specter — Defensive Security Intelligence">
 <meta property="og:description" content="IT-Sicherheit, die Ihr Unternehmen versteht und schützt. Kostenloser E-Mail-Sicherheits-Check.">
-<meta property="og:image" content="assets/img/hero-a.png">
+<meta property="og:image" content="assets/img/hero.jpg">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/img/mark.png">
 <script>document.documentElement.className+=' js';</script>
@@ -16,23 +17,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0A1420; --surface:#0E1C2B; --elev:#12283B; --line:rgba(255,255,255,.08);
-  --text:#E6EDF3; --muted:#94A6B6; --teal:#14B8A6; --teal-2:#2DD4BF;
-  --navy:#0D1B2A; --maxw:1140px;
+  --bg:#0A1420; --surface:#0E1C2B; --elev:#12283B; --line:rgba(255,255,255,.09);
+  --text:#E7EEF4; --muted:#93A5B5; --teal:#14B8A6; --teal-2:#2DD4BF;
+  --gutter:clamp(18px,5vw,24px); --maxw:1140px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--bg); color:var(--text);
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden;
   font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
-  line-height:1.65; -webkit-font-smoothing:antialiased;
-}
+  line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 h1,h2,h3,.brandmark{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em}
-.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--teal-2)}
-.btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;
-  padding:13px 22px;border-radius:11px;border:1px solid transparent;transition:.18s;cursor:pointer}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.eyebrow{font-size:clamp(11px,2.6vw,12.5px);font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--teal-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:600;
+  font-size:15px;min-height:46px;padding:12px 22px;border-radius:11px;border:1px solid transparent;
+  transition:.18s;cursor:pointer;text-align:center}
 .btn.primary{background:linear-gradient(180deg,var(--teal-2),var(--teal));color:#04211d;
   box-shadow:0 8px 26px rgba(20,184,166,.28)}
 .btn.primary:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(20,184,166,.4)}
@@ -41,56 +43,81 @@ h1,h2,h3,.brandmark{font-family:'Space Grotesk','Inter',sans-serif;letter-spacin
 .ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
 
 /* NAV */
-header.nav{position:sticky;top:0;z-index:40;transition:.25s;border-bottom:1px solid transparent}
-header.nav.scrolled{background:rgba(10,20,32,.82);backdrop-filter:blur(14px);border-bottom-color:var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:14px;height:70px}
-.logo{display:flex;align-items:center;gap:11px}
-.logo img{height:30px;width:auto;display:block}
-.logo .brandmark{font-weight:700;font-size:20px}
-.navlinks{margin-left:auto;display:flex;align-items:center;gap:30px;font-size:14.5px;color:var(--muted)}
+header.nav{position:sticky;top:0;z-index:50;transition:.25s;border-bottom:1px solid transparent}
+header.nav.scrolled{background:rgba(10,20,32,.85);backdrop-filter:blur(14px);border-bottom-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{height:28px;width:auto}
+.logo .brandmark{font-weight:700;font-size:19px}
+.navlinks{margin-left:auto;display:flex;align-items:center;gap:28px;font-size:14.5px;color:var(--muted)}
 .navlinks a:hover{color:var(--text)}
-.navlinks .btn{margin-left:6px}
+.navlinks .btn{margin-left:4px;min-height:40px;padding:9px 16px}
 
 /* HERO */
 .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
-.hero .bg{position:absolute;inset:0;background:url('assets/img/hero-a.png') center/cover no-repeat;opacity:.9}
+.hero .bg{position:absolute;inset:0;background:url('assets/img/hero.jpg') right center/cover no-repeat}
 .hero .veil{position:absolute;inset:0;background:
-  linear-gradient(90deg,var(--bg) 8%,rgba(10,20,32,.72) 46%,rgba(10,20,32,.30) 100%),
-  linear-gradient(0deg,var(--bg) 2%,transparent 40%)}
-.hero .wrap{position:relative;padding:120px 24px 128px;max-width:var(--maxw)}
-.hero h1{font-size:clamp(38px,5.6vw,64px);line-height:1.04;font-weight:700;margin:18px 0 20px;max-width:15ch}
+  linear-gradient(90deg,var(--bg) 4%,rgba(10,20,32,.78) 45%,rgba(10,20,32,.35) 100%),
+  linear-gradient(0deg,var(--bg) 1%,transparent 42%)}
+.hero .wrap{position:relative;padding:clamp(72px,12vw,128px) var(--gutter) clamp(72px,12vw,124px)}
+.hero h1{font-size:clamp(33px,7vw,62px);line-height:1.06;font-weight:700;margin:16px 0 18px;max-width:15ch}
 .hero h1 em{font-style:normal;color:var(--teal-2)}
-.hero p.lead{font-size:clamp(17px,2.1vw,21px);color:#C6D2DD;max-width:40ch;margin:0 0 34px}
-.hero .cta{display:flex;gap:14px;flex-wrap:wrap}
-.chips{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:40px;color:var(--muted);font-size:14px}
+.hero p.lead{font-size:clamp(16px,3.6vw,21px);color:#C9D5DF;max-width:42ch;margin:0 0 30px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero .cta .btn{flex:1 1 auto;min-width:200px}
+.chips{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:34px;color:var(--muted);font-size:13.5px}
 .chips span{display:inline-flex;align-items:center;gap:8px}
 .chips .ic{color:var(--teal-2);width:16px;height:16px}
 
-/* SECTION */
-section{padding:96px 0;position:relative}
-.sec-head{max-width:60ch;margin-bottom:44px}
-.sec-head h2{font-size:clamp(26px,3.4vw,38px);font-weight:700;margin:12px 0 12px;line-height:1.12}
-.sec-head p{color:var(--muted);font-size:17px;margin:0}
-.divider{border:0;border-top:1px solid var(--line);margin:0}
+/* STATS */
+.stats{background:var(--surface);border-bottom:1px solid var(--line)}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:26px;padding-bottom:26px}
+.stat{text-align:center}
+.stat b{display:block;font-family:'Space Grotesk',sans-serif;font-size:clamp(22px,5vw,30px);
+  color:var(--teal-2);font-weight:700;line-height:1}
+.stat span{color:var(--muted);font-size:clamp(11.5px,2.6vw,13px)}
 
-/* CARDS */
-.grid{display:grid;gap:18px}
+/* SECTION */
+section{padding:clamp(56px,9vw,96px) 0;position:relative}
+section.alt{background:linear-gradient(180deg,transparent,rgba(14,28,43,.45),transparent)}
+.sec-head{max-width:62ch;margin-bottom:clamp(28px,5vw,44px)}
+.sec-head h2{font-size:clamp(24px,5.2vw,38px);font-weight:700;margin:10px 0 12px;line-height:1.14}
+.sec-head p{color:var(--muted);font-size:clamp(15px,3.2vw,17px);margin:0}
+
+/* GRID / CARDS */
+.grid{display:grid;gap:16px}
 .cols-3{grid-template-columns:repeat(3,1fr)}
 .card{background:linear-gradient(180deg,var(--surface),rgba(14,28,43,.5));
-  border:1px solid var(--line);border-radius:16px;padding:26px 24px;transition:.2s}
+  border:1px solid var(--line);border-radius:16px;padding:clamp(20px,4vw,26px);transition:.2s}
 .card:hover{border-color:rgba(45,212,191,.4);transform:translateY(-3px)}
 .card .badge{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.28);margin-bottom:16px}
+  background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.28);margin-bottom:15px}
 .card .badge .ic{width:22px;height:22px;color:var(--teal-2)}
-.card h3{font-size:18px;margin:0 0 7px}
+.card h3{font-size:17.5px;margin:0 0 7px}
 .card p{margin:0;color:var(--muted);font-size:14.5px}
 
+/* FEATURE (image + text) */
+.feature{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,5vw,52px);align-items:center}
+.feature .shot{border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 26px 60px rgba(0,0,0,.4);background:var(--surface)}
+.feature ul{list-style:none;padding:0;margin:18px 0 0}
+.feature li{display:flex;gap:11px;align-items:flex-start;padding:7px 0;color:#C9D5DF;font-size:15px}
+.feature li .ic{color:var(--teal-2);width:19px;height:19px;margin-top:3px;flex:none}
+
 /* COVERAGE */
-.cover{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 40px}
-.cov{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
-.cov .ic{color:var(--teal-2);width:20px;height:20px;margin-top:3px}
-.cov strong{display:block;font-size:15.5px;font-weight:600;font-family:'Space Grotesk',sans-serif}
-.cov span{color:var(--muted);font-size:14px}
+.cover{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 40px}
+.cov{display:flex;gap:13px;padding:15px 0;border-bottom:1px solid var(--line)}
+.cov .ic{color:var(--teal-2);width:20px;height:20px;margin-top:3px;flex:none}
+.cov strong{display:block;font-size:15px;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.cov span{color:var(--muted);font-size:13.5px}
+
+/* BAND (full-width image) */
+.imgband{position:relative;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.imgband .bg{position:absolute;inset:0;background:url('assets/img/band.jpg') center/cover no-repeat}
+.imgband .veil{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,20,32,.94),rgba(10,20,32,.6))}
+.imgband .wrap{position:relative;padding:clamp(52px,8vw,84px) var(--gutter);text-align:center}
+.imgband h2{font-size:clamp(22px,4.6vw,34px);margin:0 auto 10px;max-width:24ch}
+.imgband p{color:#C9D5DF;margin:0 auto 22px;max-width:52ch}
 
 /* PRICING */
 .price{display:flex;flex-direction:column;text-align:left}
@@ -101,53 +128,73 @@ section{padding:96px 0;position:relative}
 .price .amt{font-size:30px;font-weight:800;color:var(--teal-2);margin:10px 0 4px;font-family:'Space Grotesk',sans-serif}
 .price .amt small{font-size:14px;color:var(--muted);font-weight:500}
 .price ul{list-style:none;padding:0;margin:16px 0 0}
-.price li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;color:#C6D2DD;font-size:14.5px}
+.price li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;color:#C9D5DF;font-size:14.5px}
 .price li .ic{color:var(--teal-2);width:17px;height:17px;margin-top:4px;flex:none}
 
-/* INSURANCE CALLOUT */
+/* CALLOUT */
 .callout{background:linear-gradient(120deg,var(--elev),var(--surface));border:1px solid var(--line);
-  border-radius:20px;padding:40px 36px;display:flex;gap:26px;align-items:center}
-.callout .ic{width:44px;height:44px;color:var(--teal-2);flex:none}
-.callout h3{margin:0 0 6px;font-size:21px}
-.callout p{margin:0;color:var(--muted);font-size:15.5px}
+  border-radius:20px;padding:clamp(26px,5vw,40px);display:flex;gap:24px;align-items:center;margin-top:22px}
+.callout .ic{width:42px;height:42px;color:var(--teal-2);flex:none}
+.callout h3{margin:0 0 6px;font-size:20px}
+.callout p{margin:0;color:var(--muted);font-size:15px}
 
 /* STEPS */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:s}
-.step{padding-top:10px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;counter-reset:s}
 .step .n{counter-increment:s;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;
   width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-  background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:var(--teal-2);margin-bottom:14px}
+  background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:var(--teal-2);margin-bottom:13px}
 .step .n::before{content:counter(s,decimal-leading-zero)}
 .step h3{margin:0 0 6px;font-size:17px}
 .step p{margin:0;color:var(--muted);font-size:14.5px}
+
+/* FAQ */
+.faq details{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  margin:10px 0;padding:0 18px;overflow:hidden}
+.faq summary{list-style:none;cursor:pointer;padding:16px 0;font-weight:600;font-size:15.5px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .plus{color:var(--teal-2);font-size:22px;transition:.2s;flex:none;line-height:1}
+.faq details[open] summary .plus{transform:rotate(45deg)}
+.faq p{margin:0 0 16px;color:var(--muted);font-size:14.5px}
 
 /* CTA BAND */
 .band{background:
   radial-gradient(1200px 300px at 50% -40%,rgba(20,184,166,.20),transparent),
   linear-gradient(180deg,var(--surface),var(--bg));
-  border:1px solid var(--line);border-radius:24px;text-align:center;padding:64px 28px}
-.band h2{font-size:clamp(26px,3.4vw,36px);margin:0 0 12px}
-.band p{color:var(--muted);margin:0 auto 26px;max-width:46ch}
+  border:1px solid var(--line);border-radius:24px;text-align:center;padding:clamp(44px,7vw,64px) var(--gutter)}
+.band h2{font-size:clamp(24px,4.6vw,36px);margin:0 auto 12px;max-width:22ch}
+.band p{color:var(--muted);margin:0 auto 24px;max-width:46ch}
 
 /* FOOTER */
-footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);font-size:13.5px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center}
+footer{border-top:1px solid var(--line);padding:40px 0 calc(48px + env(safe-area-inset-bottom));color:var(--muted);font-size:13.5px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center}
 footer .logo .brandmark{font-size:17px;color:var(--text)}
-footer .fr{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
+footer .fr{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}
 footer a:hover{color:var(--teal-2)}
 
 /* REVEAL */
-.js .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
 .js .reveal.in{opacity:1;transform:none}
 
+/* RESPONSIVE */
 @media(max-width:900px){
   .cols-3{grid-template-columns:1fr}
   .cover{grid-template-columns:1fr;gap:0}
   .steps{grid-template-columns:1fr}
-  .callout{flex-direction:column;text-align:center}
+  .feature{grid-template-columns:1fr}
+  .feature .shot{order:-1}
   .navlinks a:not(.btn){display:none}
-  .hero .wrap{padding:92px 24px 96px}
+  .hero .veil{background:linear-gradient(180deg,rgba(10,20,32,.55),rgba(10,20,32,.82) 60%,var(--bg)),
+    linear-gradient(90deg,var(--bg),rgba(10,20,32,.3))}
+  .hero .bg{background-position:72% center}
 }
+@media(max-width:560px){
+  .stats .wrap{grid-template-columns:repeat(2,1fr);gap:22px 12px}
+  .callout{flex-direction:column;text-align:center}
+  .hero .cta .btn{flex:1 1 100%}
+  footer .fr{margin-left:0;width:100%}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -187,7 +234,14 @@ footer a:hover{color:var(--teal-2)}
     </div>
   </section>
 
-  <hr class="divider">
+  <section class="stats" style="padding:0">
+    <div class="wrap">
+      <div class="stat"><b>10</b><span>Prüfbereiche</span></div>
+      <div class="stat"><b>100%</b><span>offline &amp; lesend</span></div>
+      <div class="stat"><b>0</b><span>Eingriffe ins System</span></div>
+      <div class="stat"><b>5&nbsp;Min</b><span>bis zum Erst-Check</span></div>
+    </div>
+  </section>
 
   <section id="problem">
     <div class="wrap">
@@ -216,7 +270,26 @@ footer a:hover{color:var(--teal-2)}
     </div>
   </section>
 
-  <section id="leistungen" style="background:linear-gradient(180deg,transparent,rgba(14,28,43,.4),transparent)">
+  <section class="alt">
+    <div class="wrap">
+      <div class="feature">
+        <div class="shot reveal"><img src="assets/img/report.jpg" alt="Beispielhafte, verständliche Auswertung" loading="lazy"></div>
+        <div class="reveal">
+          <div class="eyebrow">Das Ergebnis</div>
+          <h2 style="font-size:clamp(24px,5vw,34px);margin:10px 0 10px;line-height:1.15">Ein Bericht, den auch die Geschäftsführung versteht</h2>
+          <p style="color:var(--muted);font-size:16px;margin:0">Keine kryptische Tool-Ausgabe, sondern ein klares Lagebild mit Prioritäten — für IT und Chefetage gleichermaßen.</p>
+          <ul>
+            <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Findings nach Schweregrad mit CVSS-Bewertung</li>
+            <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Konkrete Handlungsempfehlungen je Punkt</li>
+            <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>BSI-IT-Grundschutz-Bezug für Ihre Nachweise</li>
+            <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Nachtest belegt die Behebung</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="leistungen">
     <div class="wrap">
       <div class="sec-head reveal">
         <div class="eyebrow">Der Prüfumfang</div>
@@ -238,49 +311,35 @@ footer a:hover{color:var(--teal-2)}
     </div>
   </section>
 
+  <section class="imgband" style="padding:0">
+    <div class="bg"></div><div class="veil"></div>
+    <div class="wrap reveal">
+      <div class="eyebrow" style="justify-content:center">Warum defensiv</div>
+      <h2>Eine Prüfung darf nie selbst zum Risiko werden</h2>
+      <p>Specter greift nichts an und verändert nichts. Wir werten nur bereitgestellte oder öffentliche Daten aus — nachvollziehbar, im festen Rahmen, DSGVO-konform.</p>
+      <a class="btn primary" href="mailto:belkis.aslani@gmail.com?subject=Kostenloser%20E-Mail-Sicherheits-Check">Unverbindlich starten</a>
+    </div>
+  </section>
+
   <section id="vertrauen">
     <div class="wrap">
       <div class="sec-head reveal">
         <div class="eyebrow">Vertrauen</div>
         <h2>Warum Firmen uns an ihre Systeme lassen</h2>
-        <p>Eine Prüfung darf nie selbst zum Risiko werden. Deshalb ist Specter von Grund auf defensiv gebaut.</p>
+        <p>Sechs Prinzipien, die Specter von einem gewöhnlichen Scan unterscheiden.</p>
       </div>
       <div class="grid cols-3">
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/></svg></div>
-          <h3>Offline &amp; ohne Eingriff</h3>
-          <p>Wir werten nur bereitgestellte Export-Dateien aus. Keine Live-Verbindung, keine Angriffe, keine Veränderung Ihrer Systeme.</p>
-        </div>
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div>
-          <h3>Im festen Rahmen</h3>
-          <p>Geprüft wird nur, was schriftlich freigegeben ist (§202 StGB). Alles andere wird technisch verweigert.</p>
-        </div>
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <h3>DSGVO-konform</h3>
-          <p>Datenminimierung, lokale Verarbeitung, Löschkonzept und auf Wunsch ein Auftragsverarbeitungsvertrag.</p>
-        </div>
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg></div>
-          <h3>Nachvollziehbar</h3>
-          <p>Lückenloses Audit-Log, CVSS-Bewertung und BSI-IT-Grundschutz-Bezug — die Sprache, die Ihre IT und Ihre Versicherung verstehen.</p>
-        </div>
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-          <h3>Schnell startklar</h3>
-          <p>Ein erster Check läuft in Minuten. Für das volle Audit genügen wenige Export-Dateien Ihrer IT.</p>
-        </div>
-        <div class="card reveal">
-          <div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
-          <h3>Nachtest inklusive</h3>
-          <p>Nach der Behebung prüfen wir erneut und belegen, was jetzt geschlossen ist.</p>
-        </div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/></svg></div><h3>Offline &amp; ohne Eingriff</h3><p>Wir werten nur bereitgestellte Export-Dateien aus. Keine Live-Verbindung, keine Angriffe, keine Veränderung Ihrer Systeme.</p></div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div><h3>Im festen Rahmen</h3><p>Geprüft wird nur, was schriftlich freigegeben ist (§202 StGB). Alles andere wird technisch verweigert.</p></div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>DSGVO-konform</h3><p>Datenminimierung, lokale Verarbeitung, Löschkonzept und auf Wunsch ein Auftragsverarbeitungsvertrag.</p></div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg></div><h3>Nachvollziehbar</h3><p>Lückenloses Audit-Log, CVSS-Bewertung und BSI-IT-Grundschutz-Bezug — die Sprache, die Ihre IT und Ihre Versicherung verstehen.</p></div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><h3>Schnell startklar</h3><p>Ein erster Check läuft in Minuten. Für das volle Audit genügen wenige Export-Dateien Ihrer IT.</p></div>
+        <div class="card reveal"><div class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div><h3>Nachtest inklusive</h3><p>Nach der Behebung prüfen wir erneut und belegen, was jetzt geschlossen ist.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="preise" style="background:linear-gradient(180deg,transparent,rgba(14,28,43,.4),transparent)">
+  <section id="preise" class="alt">
     <div class="wrap">
       <div class="sec-head reveal">
         <div class="eyebrow">Angebote</div>
@@ -289,8 +348,7 @@ footer a:hover{color:var(--teal-2)}
       </div>
       <div class="grid cols-3">
         <div class="card price reveal">
-          <div class="pname">Quick-Check</div>
-          <div class="amt">kostenlos</div>
+          <div class="pname">Quick-Check</div><div class="amt">kostenlos</div>
           <ul>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>E-Mail-Sicherheit (SPF/DKIM/DMARC)</li>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>TLS-Kurzprüfung einer Domain</li>
@@ -298,9 +356,7 @@ footer a:hover{color:var(--teal-2)}
           </ul>
         </div>
         <div class="card price feat reveal">
-          <div class="tag">Beliebt</div>
-          <div class="pname">Basis-Audit</div>
-          <div class="amt">ab 900&nbsp;€ <small>einmalig</small></div>
+          <div class="tag">Beliebt</div><div class="pname">Basis-Audit</div><div class="amt">ab 900&nbsp;€ <small>einmalig</small></div>
           <ul>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>E-Mail, TLS, Firewall &amp; Backup-Check</li>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Verständlicher Bericht mit Prioritäten</li>
@@ -308,8 +364,7 @@ footer a:hover{color:var(--teal-2)}
           </ul>
         </div>
         <div class="card price reveal">
-          <div class="pname">Voll-Audit</div>
-          <div class="amt">ab 2.500&nbsp;€ <small>einmalig</small></div>
+          <div class="pname">Voll-Audit</div><div class="amt">ab 2.500&nbsp;€ <small>einmalig</small></div>
           <ul>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Alle zehn Prüfbereiche</li>
             <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>BSI-Bericht &amp; Angriffspfade</li>
@@ -317,13 +372,10 @@ footer a:hover{color:var(--teal-2)}
           </ul>
         </div>
       </div>
-      <div style="margin-top:26px" class="reveal">
+      <div class="reveal">
         <div class="callout">
           <svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
-          <div>
-            <h3>Nachweis für Ihre Cyber-Versicherung</h3>
-            <p>Viele Policen verlangen MFA, getestete Backups und Patch-Management. Genau diese Punkte prüft Specter — der Bericht hilft Ihnen, versicherbar zu bleiben.</p>
-          </div>
+          <div><h3>Nachweis für Ihre Cyber-Versicherung</h3><p>Viele Policen verlangen MFA, getestete Backups und Patch-Management. Genau diese Punkte prüft Specter — der Bericht hilft Ihnen, versicherbar zu bleiben.</p></div>
         </div>
       </div>
     </div>
@@ -331,14 +383,23 @@ footer a:hover{color:var(--teal-2)}
 
   <section id="ablauf">
     <div class="wrap">
-      <div class="sec-head reveal">
-        <div class="eyebrow">Ablauf</div>
-        <h2>So einfach läuft es ab</h2>
-      </div>
+      <div class="sec-head reveal"><div class="eyebrow">Ablauf</div><h2>So einfach läuft es ab</h2></div>
       <div class="steps">
         <div class="step reveal"><div class="n"></div><h3>Kostenloser Erst-Check</h3><p>Wir prüfen öffentlich sichtbare Punkte Ihrer Domain — unverbindlich.</p></div>
         <div class="step reveal"><div class="n"></div><h3>Audit im vereinbarten Rahmen</h3><p>Sie stellen Export-Dateien bereit, wir werten sie offline aus. Kein Eingriff in Ihre Systeme.</p></div>
         <div class="step reveal"><div class="n"></div><h3>Bericht &amp; Nachweis</h3><p>Sie erhalten einen klaren Bericht mit Prioritäten — auch als Nachweis für Ihre Versicherung.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="alt">
+    <div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">Häufige Fragen</div><h2>Was Kunden oft fragen</h2></div>
+      <div class="faq reveal">
+        <details><summary>Ist das nicht gefährlich oder illegal? <span class="plus">+</span></summary><p>Nein. Specter arbeitet rein defensiv, nur mit Ihrer schriftlichen Freigabe und ausschließlich im vereinbarten Rahmen (§202 StGB). Es werden keine Angriffe ausgeführt und nichts an Ihren Systemen verändert.</p></details>
+        <details><summary>Braucht Specter Zugriff auf unsere Systeme? <span class="plus">+</span></summary><p>Nein. Wir werten bereitgestellte Export-Dateien und öffentliche Daten (z. B. DNS-Einträge) offline aus. Kein Fernzugriff, kein Agent, keine Installation.</p></details>
+        <details><summary>Was kostet der erste Check? <span class="plus">+</span></summary><p>Der Quick-Check der E-Mail-Sicherheit ist kostenlos und in wenigen Minuten erledigt. Ein Basis-Audit beginnt bei 900&nbsp;€, ein Voll-Audit bei 2.500&nbsp;€.</p></details>
+        <details><summary>Hilft mir das bei der Cyber-Versicherung? <span class="plus">+</span></summary><p>Ja. Der Bericht dokumentiert genau die Punkte, die viele Policen verlangen (MFA, getestete Backups, Patch-Management) — ein handfester Nachweis.</p></details>
       </div>
     </div>
   </section>
