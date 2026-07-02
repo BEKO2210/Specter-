@@ -16,6 +16,7 @@ from specter.tools.analyze_ad import AnalyzeAdTool
 from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
 from specter.tools.analyze_backup import AnalyzeBackupTool
+from specter.tools.analyze_database import AnalyzeDatabaseTool
 from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_dns import AnalyzeDnsTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
@@ -786,6 +787,70 @@ def test_analyze_dns_no_findings(tmp_path):
     tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "clean.json", {
         "domain": "a.de", "dnssec": True, "caa": ["0 issue \"letsencrypt.org\""]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ---------------------------- analyze_database ----------------------------
+
+def _db_export():
+    return {"databases": [
+        {"engine": "redis", "port": 6379, "public": True,
+         "auth_required": False, "tls": False}]}
+
+
+def test_analyze_database_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "db.json", _db_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "Datenbank-Analyse" in r.content
+    assert len(state.findings) >= 3
+
+
+def test_analyze_database_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_database_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_database_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_database_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _db_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_database_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {"databases": [
+        {"engine": "postgresql", "port": 5432, "public": False,
+         "auth_required": True, "tls": True}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

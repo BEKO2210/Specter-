@@ -10,6 +10,7 @@ from specter.analyzers.active_directory import (
 from specter.analyzers.aws import analyze_aws
 from specter.analyzers.azure import analyze_azure
 from specter.analyzers.backup import analyze_backup
+from specter.analyzers.database import analyze_database
 from specter.analyzers.dependency import (
     _satisfies, _split_op, analyze_dependencies,
 )
@@ -1199,3 +1200,73 @@ def test_dns_invalid_input():
     assert analyze_dns("nope") == []
     # Leeres Dict -> DNSSEC nicht aktiv + keine CAA.
     assert len(analyze_dns({})) >= 1
+
+
+# =========================== Datenbank-Exposition =========================
+
+def test_db_public_exposure():
+    findings = analyze_database({"databases": [
+        {"engine": "mysql", "port": 3306, "public": True,
+         "auth_required": True, "tls": True}]})
+    exposed = [f for f in findings if f.category == "exposed_service"]
+    assert exposed and exposed[0].severity is Severity.HOCH
+    assert "3306" in exposed[0].location
+    assert findings[0].source == "database_analyzer"
+
+
+def test_db_no_auth():
+    findings = analyze_database({"databases": [
+        {"engine": "redis", "port": 6379, "public": False,
+         "auth_required": False, "tls": True}]})
+    weak = [f for f in findings if f.category == "auth_weakness"]
+    assert weak and weak[0].cwe == "CWE-306"
+
+
+def test_db_default_creds_critical():
+    findings = analyze_database({"databases": [
+        {"engine": "mssql", "public": False, "auth_required": True,
+         "tls": True, "default_creds": True}]})
+    dc = [f for f in findings if f.category == "default_credentials"]
+    assert dc and dc[0].severity is Severity.KRITISCH
+
+
+def test_db_no_tls():
+    findings = analyze_database({"databases": [
+        {"engine": "postgresql", "public": False, "auth_required": True,
+         "tls": False}]})
+    tr = [f for f in findings if f.category == "transport_security"]
+    assert tr and tr[0].severity is Severity.MITTEL
+
+
+def test_db_engine_derived_from_port():
+    # Ohne engine-Feld wird der Standardport zur Beschriftung genutzt.
+    findings = analyze_database({"databases": [
+        {"port": 27017, "public": True, "auth_required": True, "tls": True}]})
+    assert any("MongoDB" in f.title for f in findings)
+
+
+def test_db_invalid_port_and_no_engine():
+    # Kaputter Port -> keine Beschriftung ueber Port, Fallback-Name.
+    findings = analyze_database({"databases": [
+        {"port": "abc", "public": True, "auth_required": True, "tls": True}]})
+    assert any(f.location == "Datenbank" for f in findings)
+
+
+def test_db_clean_no_findings():
+    findings = analyze_database({"databases": [
+        {"engine": "postgresql", "port": 5432, "public": False,
+         "auth_required": True, "tls": True, "default_creds": False}]})
+    assert findings == []
+
+
+def test_db_auth_key_missing_not_flagged():
+    # Fehlt auth_required ganz, wird "keine Auth" NICHT gemeldet (nur explizit False).
+    findings = analyze_database({"databases": [
+        {"engine": "redis", "public": False, "tls": True}]})
+    assert all(f.category != "auth_weakness" for f in findings)
+
+
+def test_db_invalid_input():
+    assert analyze_database("nope") == []
+    assert analyze_database({"databases": "x"}) == []
+    assert analyze_database({"databases": [None, 5]}) == []

@@ -55,6 +55,7 @@ SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "backup_analyzer": ("CON.3", "Datensicherungskonzept"),
     "http_headers_analyzer": ("APP.3.1", "Webanwendungen und Webservices"),
     "dns_analyzer": ("APP.3.6", "DNS-Server"),
+    "database_analyzer": ("APP.4.3", "Relationale Datenbanksysteme"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -72,6 +73,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "backup_analyzer": "Bewertung ausschliesslich anhand der bereitgestellten Backup-/Resilienz-Angaben; kein Live-Abgleich mit dem Backup-System.",
     "http_headers_analyzer": "Bewertung ausschliesslich anhand der bereitgestellten HTTP-Antwort-Header/Cookies; keine Live-Abfrage.",
     "dns_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten DNS-Exports (DNSSEC/CAA/AXFR); keine Live-DNS-Abfrage.",
+    "database_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Datenbank-Exports (Port/Auth/TLS/Default-Creds); keine Live-Verbindung zur Datenbank.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",
