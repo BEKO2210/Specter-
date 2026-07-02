@@ -13,10 +13,10 @@ def test_handbook_html_structure_and_content():
     assert "Dein Specter-Handbuch" in html
     assert "Muster GmbH" in html
     assert "2026-01-01" in html
-    # Alle zehn Analyzer sind dokumentiert.
+    # Alle vierzehn Analyzer sind dokumentiert.
     for name, _what, _why in ANALYZERS:
         assert name in html
-    assert len(ANALYZERS) == 10
+    assert len(ANALYZERS) == 14
     # Kernbotschaften: defensiv, Rahmen, Recht, Versicherung.
     assert "defensiv" in html
     assert "202" in html  # Hackerparagraf-Hinweis
