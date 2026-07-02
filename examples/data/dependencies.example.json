@@ -1,0 +1,18 @@
+{
+  "project": "portal-backend",
+  "dependencies": [
+    {"name": "log4j-core", "version": "2.14.1", "ecosystem": "maven"},
+    {"name": "django", "version": "2.2.0", "ecosystem": "pypi"},
+    {"name": "lodash", "version": "4.17.11", "ecosystem": "npm", "deprecated": true},
+    {"name": "requests", "version": "*", "ecosystem": "pypi"},
+    {"name": "fastapi", "version": "0.110.0", "ecosystem": "pypi"}
+  ],
+  "advisories": [
+    {"name": "log4j-core", "ecosystem": "maven", "vulnerable": "<2.15.0",
+     "fixed": "2.17.1", "cve": "CVE-2021-44228", "severity": "kritisch",
+     "title": "Log4Shell Remote Code Execution"},
+    {"name": "django", "ecosystem": "pypi", "vulnerable": ">=2.0,<2.2.28",
+     "fixed": "2.2.28", "cve": "CVE-2022-28346", "severity": "hoch",
+     "title": "SQL Injection ueber QuerySet.annotate()"}
+  ]
+}

@@ -84,7 +84,8 @@ specter/
 │   ├── entra_id.py           # Entra-ID/M365-Risiken (MFA, CA, Legacy-Auth …)
 │   ├── aws.py                # AWS-Risiken (IAM, S3, Security-Groups, Root)
 │   ├── azure.py              # Azure-Risiken (Storage, NSG, VM, Key-Vault, SQL, RBAC)
-│   └── email_security.py     # E-Mail-Spoofing/Phishing (SPF, DKIM, DMARC)
+│   ├── email_security.py     # E-Mail-Spoofing/Phishing (SPF, DKIM, DMARC)
+│   └── dependency.py         # SCA: verwundbare/veraltete Abhängigkeiten (CVE)
 ├── scanners/          # sichere Wrapper aktiver Scanner
 │   ├── base.py               # Allowlist, Forbidden-Flags, Timeout, Parser
 │   ├── nmap.py               # nmap-Wrapper
@@ -99,12 +100,12 @@ specter/
     ├── register_asset.py   ├── read_file.py        ├── code_scan.py
     ├── analyze_ad.py       ├── analyze_exchange.py  ├── analyze_entra.py
     ├── analyze_aws.py      ├── analyze_azure.py     ├── analyze_email_security.py
-    ├── run_command.py      ├── run_scanner.py       ├── record_finding.py
-    ├── correlate_paths.py  ├── retest.py            ├── generate_report.py
-    └── open_pull_requests.py
+    ├── analyze_dependencies.py  ├── run_command.py  ├── run_scanner.py
+    ├── record_finding.py   ├── correlate_paths.py   ├── retest.py
+    ├── generate_report.py  └── open_pull_requests.py
 ```
 
-### Die sechzehn Werkzeuge
+### Die siebzehn Werkzeuge
 
 | Tool | Phase | Zweck |
 |---|---|---|
@@ -117,6 +118,7 @@ specter/
 | `analyze_aws` | Prüfen | AWS-Export (IAM/S3/Security-Groups) offline analysieren |
 | `analyze_azure` | Prüfen | Azure-Export (Storage/NSG/VM/Key-Vault/SQL/RBAC) offline analysieren |
 | `analyze_email_security` | Prüfen | DNS-Export (SPF/DKIM/DMARC) gegen Spoofing/Phishing offline analysieren |
+| `analyze_dependencies` | Prüfen | Abhängigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste offline analysieren (SCA) |
 | `run_command` | Prüfen | Ein erlaubtes Programm gegen ein Scope-Ziel |
 | `run_scanner` | Prüfen | Freigegebenen Scanner (nmap/nikto) sicher ausführen |
 | `record_finding` | Findings | Schwachstelle strukturiert festhalten |
@@ -127,9 +129,9 @@ specter/
 
 ---
 
-## Windows, Cloud & E-Mail: AD-, Exchange-, Entra-ID/M365-, AWS-, Azure- & E-Mail-Security-Analyse (offline, defensiv)
+## Windows, Cloud, E-Mail & Abhängigkeiten: AD-, Exchange-, Entra-ID/M365-, AWS-, Azure-, E-Mail-Security- & SCA-Analyse (offline, defensiv)
 
-Für den Mittelstand besonders relevant. Alle sechs Analyzer werten **ausschließlich
+Für den Mittelstand besonders relevant. Alle sieben Analyzer werten **ausschließlich
 bereitgestellte lokale Exportdateien** aus — **keine** Live-Verbindung, keine
 Credential-Nutzung, keine Ausnutzung.
 
@@ -160,13 +162,22 @@ Credential-Nutzung, keine Ausnutzung.
   **fehlendes DMARC** oder nur `p=none` sowie fehlende `rua`-Reportadresse.
   Schützt vor **CEO-Fraud/BEC** — im Mittelstand und bei Versicherern ein
   Haupteinfallstor.
+- **`analyze_dependencies`** (`analyzers/dependency.py`) — **Software Composition
+  Analysis**: gleicht einen Abhängigkeits-/SBOM-Export (requirements.txt,
+  `pip freeze`, package.json, npm ls) gegen eine **lokal bereitgestellte
+  Advisory-/CVE-Liste** ab und erkennt **bekannte verwundbare Paketversionen**
+  (Log4Shell-Klasse, OWASP A06:2021), **nicht mehr gepflegte** (`deprecated`)
+  Pakete sowie **ungepinnte** Versionen. Ein transparenter Versionsvergleich
+  (`<`, `<=`, `>`, `>=`, `==`, `!=`, Bereiche) entscheidet den Treffer — ohne
+  Abfrage von Paket-Registries oder CVE-Feeds.
 
 Jedes Finding erhält zusätzlich einen numerischen **CVSS-Lite-Score** (0–10,
 `cvss.py`) mit CVSS-v3.1-Qualitätsstufe — transparent im Bericht ausgewiesen.
 
 Beispiel-Exporte: `examples/data/ad_export.example.json`,
 `exchange.example.json`, `entra_export.example.json`, `aws_export.example.json`,
-`azure_export.example.json`, `email_security.example.json`.
+`azure_export.example.json`, `email_security.example.json`,
+`dependencies.example.json`.
 
 ## Aktive Scanner (nmap/nikto) — sicher gekapselt
 
@@ -328,14 +339,14 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**392 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**411 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
 - Findings-Modell, Asset-Graph, Angriffspfad-Korrelation + Aggregation
 - **Choke-Point-Analyse** (Greedy-Hitting-Set) und **Re-Test/Delta** (behoben/neu/offen)
-- alle sechzehn Werkzeuge (Erfolgs- und Fehlerpfade)
-- AD-/Exchange-/Entra-ID-/AWS-/Azure-/E-Mail-Security-Analyzer (jede Regel + Fehlerfälle, BloodHound), CVSS-Lite
+- alle siebzehn Werkzeuge (Erfolgs- und Fehlerpfade)
+- AD-/Exchange-/Entra-ID-/AWS-/Azure-/E-Mail-Security-/SCA-Analyzer (jede Regel + Fehlerfälle, BloodHound, Versionsvergleich), CVSS-Lite
 - Scanner-Wrapper: Argument-Allowlist, blockierte Gefahren-Flags, Timeout,
   Truncation, Parser (mit gemocktem Subprozess)
 - BSI-IT-Grundschutz-Mapping sowie Markdown- und HTML-Report (alle Abschnitte,
