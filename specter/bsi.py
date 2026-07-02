@@ -34,6 +34,7 @@ CATEGORY_TO_BSI: dict[str, tuple[str, str]] = {
     "default_credentials": ("ORP.4", "Identitaets- und Berechtigungsmanagement"),
     "outdated_component": ("OPS.1.1.3", "Patch- und Aenderungsmanagement"),
     "personal_data": ("CON.2", "Datenschutz"),
+    "email_security": ("APP.5.3", "Allgemeiner E-Mail-Client und -Server"),
     "other": ("ISMS.1", "Sicherheitsmanagement"),
 }
 
@@ -44,6 +45,7 @@ SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "entra_analyzer": ("OPS.2.2", "Cloud-Nutzung"),
     "aws_analyzer": ("OPS.2.2", "Cloud-Nutzung"),
     "azure_analyzer": ("OPS.2.2", "Cloud-Nutzung"),
+    "email_security_analyzer": ("APP.5.3", "Allgemeiner E-Mail-Client und -Server"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -54,6 +56,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "entra_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Entra-ID-/M365-Exports; kein Live-Abgleich mit dem Tenant.",
     "aws_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten AWS-Exports; kein Live-Abgleich mit dem Konto.",
     "azure_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Azure-Exports; kein Live-Abgleich mit der Subscription.",
+    "email_security_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten DNS-Exports (SPF/DKIM/DMARC); keine Live-DNS-Abfrage.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",

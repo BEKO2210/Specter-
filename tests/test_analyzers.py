@@ -9,6 +9,7 @@ from specter.analyzers.active_directory import (
 )
 from specter.analyzers.aws import analyze_aws
 from specter.analyzers.azure import analyze_azure
+from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.findings import Severity
@@ -451,6 +452,84 @@ def test_azure_invalid_input_and_robust_skips():
         "storage_accounts": ["kaputt"], "network_security_groups": [None],
         "virtual_machines": [1], "key_vaults": ["x"], "sql_servers": [2],
         "role_assignments": ["nope", None]}) == []
+
+
+# ============================ E-Mail-Security ==============================
+
+def test_email_all_missing():
+    findings = analyze_email_security({"domain": "x.de"})
+    titles = " ".join(f.title for f in findings)
+    assert "Kein SPF-Eintrag" in titles
+    assert "Kein DMARC-Eintrag" in titles
+    assert "Kein DKIM-Schluessel" in titles
+
+
+def test_email_spf_weak_allall():
+    findings = analyze_email_security({"domain": "x.de", "spf": "v=spf1 +all"})
+    assert any("beliebige Absender" in f.title and f.severity is Severity.HOCH
+               for f in findings)
+
+
+def test_email_spf_no_all_mechanism():
+    findings = analyze_email_security(
+        {"domain": "x.de", "spf": "v=spf1 include:_spf.google.com"})
+    assert any("ohne abschliessenden all-Mechanismus" in f.title
+               and f.severity is Severity.MITTEL for f in findings)
+
+
+def test_email_spf_strict_ok():
+    # -all + gueltiges DMARC + starkes DKIM -> keine SPF/DMARC/DKIM-Befunde
+    findings = analyze_email_security({
+        "domain": "x.de",
+        "spf": "v=spf1 include:_spf.google.com -all",
+        "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
+        "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
+    assert findings == []
+
+
+def test_email_dmarc_pnone_and_no_rua():
+    findings = analyze_email_security(
+        {"domain": "x.de", "spf": "v=spf1 -all", "dmarc": "v=DMARC1; p=none",
+         "dkim": [{"selector": "g", "key_bits": 2048}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Monitoring-Modus (p=none)" in titles
+    assert "ohne Auswertungs-Reports" in titles
+
+
+def test_email_dkim_weak_and_dated_keys():
+    weak = analyze_email_security(
+        {"domain": "x.de", "dkim": [{"selector": "s", "key_bits": 512}]})
+    assert any("zu schwach" in f.title and f.severity is Severity.HOCH for f in weak)
+    dated = analyze_email_security(
+        {"domain": "x.de", "dkim": [{"selector": "s", "key_bits": 1024}]})
+    assert any("nicht mehr zeitgemaess" in f.title and f.severity is Severity.NIEDRIG
+               for f in dated)
+
+
+def test_email_dkim_present_false_counts_as_missing():
+    findings = analyze_email_security(
+        {"domain": "x.de", "dkim": [{"selector": "old", "present": False}]})
+    assert any("Kein DKIM-Schluessel" in f.title for f in findings)
+
+
+def test_email_dkim_invalid_bits_ignored():
+    # Nicht-numerische Bitangabe -> kein Krypto-Befund (robust).
+    findings = analyze_email_security(
+        {"domain": "x.de", "spf": "v=spf1 -all",
+         "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
+         "dkim": [{"selector": "s", "key_bits": "kaputt"}]})
+    assert findings == []
+
+
+def test_email_invalid_input():
+    assert analyze_email_security("x") == []
+    # Leeres Dict = alles fehlt -> SPF/DMARC/DKIM je ein Befund.
+    assert len(analyze_email_security({})) == 3
+    # Nicht-Dict-DKIM-Elemente werden robust uebersprungen (gilt als kein DKIM).
+    assert any("Kein DKIM-Schluessel" in f.title
+               for f in analyze_email_security({"domain": "x.de", "spf": "v=spf1 -all",
+                                                "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
+                                                "dkim": ["kaputt", None]}))
 
 
 def test_entra_clean_tenant():

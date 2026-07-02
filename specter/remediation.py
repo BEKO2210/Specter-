@@ -78,6 +78,12 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "Loeschkonzept und Verarbeitungsverzeichnis. Besondere Kategorien "
         "(Art. 9 DSGVO) gesondert schuetzen."
     ),
+    "email_security": (
+        "E-Mail-Spoofing verhindern: SPF mit -all (bzw. mindestens ~all) setzen, "
+        "DKIM mit >= 2048-Bit-Schluessel signieren und DMARC schrittweise auf "
+        "p=quarantine, dann p=reject anheben. rua-Reportadresse konfigurieren und "
+        "die Berichte regelmaessig auswerten (Schutz vor CEO-Fraud/BEC)."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 
