@@ -123,7 +123,7 @@ def main() -> int:
         "evidence": "GET / -> 200, Server: DemoServer/0.1", "owner": "Infrastruktur",
     }).content)
 
-    print("\n--- Phase 3c: WINDOWS-/CLOUD-OFFLINE-ANALYSE (AD, Exchange, Entra-ID/M365) ---")
+    print("\n--- Phase 3c: WINDOWS-/CLOUD-OFFLINE-ANALYSE (AD, Exchange, Entra-ID/M365, AWS, Azure) ---")
     data_dir = REPO_ROOT / "examples" / "data"
     print(tools["analyze_ad"].run(
         {"path": str(data_dir / "ad_export.example.json")}).content)
@@ -133,6 +133,8 @@ def main() -> int:
         {"path": str(data_dir / "entra_export.example.json")}).content)
     print(tools["analyze_aws"].run(
         {"path": str(data_dir / "aws_export.example.json")}).content)
+    print(tools["analyze_azure"].run(
+        {"path": str(data_dir / "azure_export.example.json")}).content)
 
     print("\n--- Phase 4: ANGRIFFSPFAD-KORRELATION ---")
     print(tools["correlate_paths"].run({}).content)

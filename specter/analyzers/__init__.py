@@ -6,7 +6,8 @@ ausgewertet. Keine Live-Verbindungen, keine Ausnutzung, keine Credential-Nutzung
 
 from .active_directory import analyze_ad
 from .aws import analyze_aws
+from .azure import analyze_azure
 from .entra_id import analyze_entra
 from .exchange import analyze_exchange
 
-__all__ = ["analyze_ad", "analyze_aws", "analyze_entra", "analyze_exchange"]
+__all__ = ["analyze_ad", "analyze_aws", "analyze_azure", "analyze_entra", "analyze_exchange"]
