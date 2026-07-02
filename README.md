@@ -99,7 +99,8 @@ specter/
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
 ├── handbook.py        # internes Lern-/Bedien-Handbuch (HTML -> PDF)
 ├── trust.py           # Kunden-Vertrauens-/Sicherheits-One-Pager (HTML -> PDF)
-├── landing.py         # markengerechte Marketing-Landingpage (eigenständiges HTML)
+├── landing.py         # kompakte Ein-Datei-Landingpage (eigenständiges HTML)
+├── outreach.py        # personalisierte Erstkontakt-E-Mail-Vorlage
 ├── integrations/      # opt-in ausgehende Aktionen
 │   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
@@ -382,6 +383,21 @@ Netzwerkabruf im Beispiel-Runner. DKIM-Selektoren variieren je Anbieter — find
 der Check über gängige Namen keinen, ist das **kein** sicherer Beleg für
 fehlendes DKIM (dann den Selector beim Kunden erfragen).
 
+## Erstkontakt-E-Mail (Akquise)
+
+Aus dem Live-Check lässt sich eine **personalisierte, sachliche Erstkontakt-Mail**
+erzeugen — sie benennt den öffentlich sichtbaren Befund nüchtern und bietet einen
+kostenlosen Kurz-Check an:
+
+```bash
+python examples/build_outreach_email.py kunde-domain.de "Dein Name" deine@mail.de
+```
+
+Die reine Textlogik liegt getestet in `specter/outreach.py`. **Rechtlicher
+Hinweis:** Unaufgeforderte Werbe-E-Mails an Unternehmen sind in Deutschland nach
+UWG heikel — für individuellen Erstkontakt nutzen (idealerweise nach
+Telefonat/Empfehlung/LinkedIn), nicht für Massenversand.
+
 ## Handbuch für das eigene Team
 
 Ein einfaches, markengerechtes **Lern-/Bedien-Handbuch** (kein Vorwissen nötig)
@@ -408,12 +424,26 @@ in [`SECURITY.md`](SECURITY.md).
 python examples/build_trust_onepager.py   # reports/specter-vertrauen-onepager.html
 ```
 
-## Marketing-Landingpage
+## Website (GitHub Pages)
 
-Eine fertige, responsive **Landingpage** (eigenständiges HTML, im Specter-Branding)
-mit Gratis-Check als Türöffner, den zehn Prüfbereichen, Vertrauens-Argumenten,
-Preis-Paketen und Ablauf — direkt auf einen Webspace hochladbar. Die
-Kontaktadresse lässt sich beim Bauen setzen:
+Die **öffentliche Landingpage** liegt als fertige, hochwertige Website unter
+[`docs/index.html`](docs/index.html) — dunkles Premium-Design mit Higgsfield-
+generiertem Hero-Bild, SVG-Icons (keine Emojis), den zehn Prüfbereichen,
+Vertrauens-/DSGVO-Argumenten, Preis-Paketen und Ablauf.
+
+**Veröffentlichen (einmalig, durch die Repo-Eigentümerin):**
+GitHub → **Settings → Pages** → *Source: Deploy from a branch* →
+Branch **`main`**, Ordner **`/docs`** → *Save*. Nach ein bis zwei Minuten ist die
+Seite live unter `https://beko2210.github.io/specter-/`.
+
+**Kontaktadresse ändern:** In `docs/index.html` die Platzhalter-Adresse
+`kontakt@specter-security.de` durch die echte E-Mail ersetzen (kommt an vier
+Stellen vor: Navigation, zwei CTA-Buttons, Footer).
+
+### Landingpage als eigenständige Datei (Alternative)
+
+Zusätzlich lässt sich eine kompakte, responsive Ein-Datei-Landingpage erzeugen
+(z. B. für einen klassischen Webspace); die Kontaktadresse wird beim Bauen gesetzt:
 
 ```bash
 python examples/build_landing.py deine@mailadresse.de   # reports/specter-landingpage.html
