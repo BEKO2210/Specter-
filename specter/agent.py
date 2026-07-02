@@ -36,7 +36,8 @@ offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 `analyze_email_security` (DNS-Export: SPF/DKIM/DMARC gegen Spoofing/Phishing) und \
 `analyze_dependencies` (Abhaengigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
 `analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA) und \
-`analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle); aktiv - \
+`analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle) und \
+`analyze_backup` (Backup-/Resilienz-Export: 3-2-1, Immutable/Offline, Restore-Test - Ransomware-Ueberleben); aktiv - \
 nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).

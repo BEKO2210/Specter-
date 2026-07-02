@@ -84,6 +84,14 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "p=quarantine, dann p=reject anheben. rua-Reportadresse konfigurieren und "
         "die Berichte regelmaessig auswerten (Schutz vor CEO-Fraud/BEC)."
     ),
+    "backup_resilience": (
+        "3-2-1-Regel umsetzen: mindestens 3 Kopien, 2 verschiedene Medien, 1 Kopie "
+        "offsite - und mindestens eine offline bzw. unveraenderbar (WORM/Immutable) "
+        "gegen Ransomware. Restores regelmaessig testen (mind. jaehrlich, besser "
+        "quartalsweise), die Backup-Konsole mit MFA schuetzen, Aufbewahrung an die "
+        "Angreifer-Verweildauer anpassen (>= 30 Tage) und Backups verschluesseln. "
+        "Wiederanlauf-/Notfallkonzept dokumentieren und ueben."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 

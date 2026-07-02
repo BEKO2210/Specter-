@@ -7,6 +7,7 @@ ausgewertet. Keine Live-Verbindungen, keine Ausnutzung, keine Credential-Nutzung
 from .active_directory import analyze_ad
 from .aws import analyze_aws
 from .azure import analyze_azure
+from .backup import analyze_backup
 from .dependency import analyze_dependencies
 from .email_security import analyze_email_security
 from .entra_id import analyze_entra
@@ -15,7 +16,7 @@ from .firewall import analyze_firewall
 from .tls_certificates import analyze_tls
 
 __all__ = [
-    "analyze_ad", "analyze_aws", "analyze_azure", "analyze_dependencies",
-    "analyze_email_security", "analyze_entra", "analyze_exchange",
-    "analyze_firewall", "analyze_tls",
+    "analyze_ad", "analyze_aws", "analyze_azure", "analyze_backup",
+    "analyze_dependencies", "analyze_email_security", "analyze_entra",
+    "analyze_exchange", "analyze_firewall", "analyze_tls",
 ]

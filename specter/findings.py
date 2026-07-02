@@ -71,6 +71,7 @@ CATEGORIES: dict[str, str] = {
     "outdated_component": "Veraltete Komponente/Abhaengigkeit (bekannte CVE)",
     "personal_data": "Personenbezogene Daten (DSGVO-relevant)",
     "email_security": "E-Mail-Spoofing/Phishing (SPF/DKIM/DMARC)",
+    "backup_resilience": "Backup-/Ransomware-Resilienz (3-2-1, Immutable, Restore-Test)",
     "other": "Sonstiges",
 }
 
