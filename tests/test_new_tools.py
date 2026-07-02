@@ -15,6 +15,7 @@ from specter.state import EngagementState
 from specter.tools.analyze_ad import AnalyzeAdTool
 from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
+from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
 from specter.tools.analyze_exchange import AnalyzeExchangeTool
@@ -398,6 +399,72 @@ def test_analyze_email_security_no_findings(tmp_path):
         "domain": "x.de", "spf": "v=spf1 -all",
         "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
         "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ------------------------- analyze_dependencies ---------------------------
+
+def _dep_export():
+    return {
+        "project": "p",
+        "dependencies": [{"name": "log4j-core", "version": "2.14.1", "ecosystem": "maven"}],
+        "advisories": [{"name": "log4j-core", "ecosystem": "maven",
+                        "vulnerable": "<2.15.0", "fixed": "2.17.1",
+                        "cve": "CVE-2021-44228", "severity": "kritisch"}]}
+
+
+def test_analyze_dependencies_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "deps.json", _dep_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "SCA-/Abhaengigkeits-Analyse" in r.content
+    assert len(state.findings) == 1
+
+
+def test_analyze_dependencies_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_dependencies_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_dependencies_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_dependencies_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _dep_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_dependencies_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {
+        "dependencies": [{"name": "fastapi", "version": "0.110.0", "ecosystem": "pypi"}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

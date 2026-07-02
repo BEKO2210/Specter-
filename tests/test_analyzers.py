@@ -9,6 +9,9 @@ from specter.analyzers.active_directory import (
 )
 from specter.analyzers.aws import analyze_aws
 from specter.analyzers.azure import analyze_azure
+from specter.analyzers.dependency import (
+    _satisfies, _split_op, analyze_dependencies,
+)
 from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
@@ -530,6 +533,144 @@ def test_email_invalid_input():
                for f in analyze_email_security({"domain": "x.de", "spf": "v=spf1 -all",
                                                 "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
                                                 "dkim": ["kaputt", None]}))
+
+
+# ====================== SCA / Abhaengigkeiten (CVE) ========================
+
+_LOG4J_ADV = {"name": "log4j-core", "ecosystem": "maven", "vulnerable": "<2.15.0",
+              "fixed": "2.17.1", "cve": "CVE-2021-44228", "severity": "kritisch",
+              "title": "Log4Shell RCE"}
+
+
+def test_sca_known_cve_match():
+    findings = analyze_dependencies({
+        "project": "p",
+        "dependencies": [{"name": "log4j-core", "version": "2.14.1", "ecosystem": "maven"}],
+        "advisories": [_LOG4J_ADV]})
+    assert len(findings) == 1
+    f = findings[0]
+    assert "Verwundbare Abhaengigkeit: log4j-core 2.14.1 (CVE-2021-44228)" in f.title
+    assert f.severity is Severity.KRITISCH
+    assert f.category == "outdated_component" and f.cwe == "CWE-1395"
+    assert "behoben in 2.17.1" in f.evidence and "Log4Shell RCE" in f.evidence
+
+
+def test_sca_no_match_when_version_is_fixed():
+    # 2.17.1 erfuellt '<2.15.0' NICHT -> kein CVE-Finding (nur gepinnt, kein Befund).
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "log4j-core", "version": "2.17.1", "ecosystem": "maven"}],
+        "advisories": [_LOG4J_ADV]})
+    assert findings == []
+
+
+def test_sca_ecosystem_mismatch_no_match():
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "log4j-core", "version": "2.14.1", "ecosystem": "pypi"}],
+        "advisories": [_LOG4J_ADV]})
+    assert findings == []
+
+
+def test_sca_name_mismatch_no_match():
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "something-else", "version": "1.0.0"}],
+        "advisories": [_LOG4J_ADV]})
+    assert findings == []
+
+
+def test_sca_deprecated_component():
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "lodash", "version": "4.17.11", "ecosystem": "npm",
+                          "deprecated": True}]})
+    assert len(findings) == 1
+    assert "Nicht mehr gepflegte Abhaengigkeit: lodash" in findings[0].title
+    assert findings[0].severity is Severity.MITTEL and findings[0].cwe == "CWE-1104"
+
+
+def test_sca_unpinned_versions():
+    for pin in ("*", "", "latest", "any", "x"):
+        findings = analyze_dependencies({
+            "dependencies": [{"name": "requests", "version": pin, "ecosystem": "pypi"}]})
+        assert any("Ungepinnte Abhaengigkeit" in f.title
+                   and f.severity is Severity.NIEDRIG for f in findings)
+
+
+def test_sca_deprecated_and_unpinned_combined():
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "old", "version": "*", "deprecated": True}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Nicht mehr gepflegte" in titles and "Ungepinnte" in titles
+
+
+def test_sca_match_suppresses_deprecated_and_unpinned():
+    # Trifft ein Advisory zu, zaehlt nur der konkrete CVE-Befund.
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "log4j-core", "version": "2.14.1", "ecosystem": "maven",
+                          "deprecated": True}],
+        "advisories": [_LOG4J_ADV]})
+    assert len(findings) == 1 and "CVE-2021-44228" in findings[0].title
+
+
+def test_sca_default_and_invalid_severity_fall_back_to_hoch():
+    no_sev = analyze_dependencies({
+        "dependencies": [{"name": "a", "version": "1.0.0"}],
+        "advisories": [{"name": "a", "vulnerable": "<2.0.0"}]})
+    assert no_sev[0].severity is Severity.HOCH
+    bad_sev = analyze_dependencies({
+        "dependencies": [{"name": "a", "version": "1.0.0"}],
+        "advisories": [{"name": "a", "vulnerable": "<2.0.0", "severity": "banane"}]})
+    assert bad_sev[0].severity is Severity.HOCH
+
+
+def test_sca_advisory_without_fixed_or_title_or_cve():
+    findings = analyze_dependencies({
+        "dependencies": [{"name": "a", "version": "1.0.0"}],
+        "advisories": [{"name": "a", "vulnerable": "==1.0.0"}]})
+    assert len(findings) == 1
+    assert "ohne CVE-ID" in findings[0].title
+    assert "behoben in" not in findings[0].evidence
+
+
+def test_sca_invalid_input_and_robustness():
+    assert analyze_dependencies("nope") == []
+    assert analyze_dependencies({}) == []
+    # Nicht-Dict-Eintraege in dependencies/advisories werden robust uebersprungen.
+    findings = analyze_dependencies({
+        "dependencies": ["kaputt", None, {"name": "a", "version": "1.0.0"}],
+        "advisories": ["kaputt", {"name": "a", "vulnerable": "<2.0.0", "cve": "CVE-X"}]})
+    assert len(findings) == 1 and "CVE-X" in findings[0].title
+
+
+def test_sca_version_constraint_operators():
+    # Deckt alle Vergleichsoperatoren + Default (==) ab.
+    assert _satisfies("1.0.0", "<2.0.0") is True
+    assert _satisfies("2.0.0", "<2.0.0") is False
+    assert _satisfies("2.0.0", "<=2.0.0") is True
+    assert _satisfies("2.0.1", "<=2.0.0") is False
+    assert _satisfies("3.0.0", ">2.0.0") is True
+    assert _satisfies("2.0.0", ">2.0.0") is False
+    assert _satisfies("2.0.0", ">=2.0.0") is True
+    assert _satisfies("1.9.0", ">=2.0.0") is False
+    assert _satisfies("1.0.0", "==1.0.0") is True
+    assert _satisfies("1.0.1", "==1.0.0") is False
+    assert _satisfies("1.0.0", "!=2.0.0") is True
+    assert _satisfies("2.0.0", "!=2.0.0") is False
+    # Bereich (kommagetrennt), Default-Operator (bare = ==) und Rand.
+    assert _satisfies("2.1.0", ">=2.0.0,<3.0.0") is True
+    assert _satisfies("1.0.0", "1.0.0") is True
+    # Leere / unvollstaendige Constraints matchen nicht.
+    assert _satisfies("1.0.0", "") is False
+    assert _satisfies("1.0.0", ",") is False
+    assert _satisfies("1.0.0", ">=") is False
+    # Trailing-Komma wird ignoriert, restlicher Constraint zaehlt.
+    assert _satisfies("1.5.0", ">=1.0.0,") is True
+    # Nicht-numerische Versionsbestandteile werden robust auf 0 gesetzt.
+    assert _satisfies("1.0.0-beta", "<2.0.0") is True
+
+
+def test_sca_split_op_helper():
+    assert _split_op(">=2.0.0") == (">=", "2.0.0")
+    assert _split_op("<1.0") == ("<", "1.0")
+    assert _split_op("3.1.4") == ("==", "3.1.4")
 
 
 def test_entra_clean_tenant():
