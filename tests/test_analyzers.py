@@ -8,6 +8,7 @@ from specter.analyzers.active_directory import (
     analyze_ad, normalize_bloodhound_users,
 )
 from specter.analyzers.aws import analyze_aws
+from specter.analyzers.azure import analyze_azure
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
 from specter.findings import Severity
@@ -352,6 +353,104 @@ def test_aws_invalid_input_and_empty():
     # Nicht-Dict-Elemente werden robust uebersprungen.
     assert analyze_aws({"users": ["kaputt"], "roles": [None],
                         "s3_buckets": [1], "security_groups": ["x"]}) == []
+
+
+# ================================= Azure ==================================
+
+def test_azure_storage_all_issues():
+    findings = analyze_azure({"subscription_id": "sub-1", "storage_accounts": [
+        {"name": "sa1", "public_blob_access": True, "https_only": False,
+         "encryption": False, "min_tls": "TLS1.0"}]})
+    cats = {f.category for f in findings}
+    assert cats == {"cloud_storage", "transport_security", "misconfiguration"}
+    assert any("Oeffentlicher Blob-Zugriff" in f.title for f in findings)
+    assert any(f.severity is Severity.HOCH for f in findings)
+
+
+def test_azure_storage_clean_no_findings():
+    findings = analyze_azure({"storage_accounts": [
+        {"name": "ok", "public_blob_access": False, "https_only": True,
+         "encryption": True, "min_tls": "TLS1.2"}]})
+    assert findings == []
+
+
+def test_azure_nsg_sensitive_and_normal_ports():
+    findings = analyze_azure({"network_security_groups": [
+        {"name": "nsg-db", "open_to_internet_ports": [3389, 8080, "kaputt", None]}]})
+    hoch = [f for f in findings if f.severity is Severity.HOCH]
+    mittel = [f for f in findings if f.severity is Severity.MITTEL]
+    assert len(hoch) == 1 and len(mittel) == 1     # 3389 hoch, 8080 mittel, Rest ignoriert
+    assert all(f.category == "exposed_service" for f in findings)
+
+
+def test_azure_vm_public_outdated_and_unencrypted():
+    findings = analyze_azure({"virtual_machines": [
+        {"name": "vm1", "public_ip": True, "disk_encryption": False,
+         "os": "Windows Server 2012"}]})
+    cats = {f.category for f in findings}
+    assert cats == {"exposed_service", "outdated_component", "misconfiguration"}
+    assert any(f.severity is Severity.HOCH for f in findings)
+
+
+def test_azure_vm_modern_clean():
+    findings = analyze_azure({"virtual_machines": [
+        {"name": "vm2", "public_ip": False, "disk_encryption": True,
+         "os": "Windows Server 2022"}]})
+    assert findings == []
+
+
+def test_azure_key_vault_issues():
+    findings = analyze_azure({"key_vaults": [
+        {"name": "kv1", "public_network_access": True, "purge_protection": False}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Key Vault oeffentlich erreichbar" in titles
+    assert "Purge-Protection" in titles
+    assert any(f.severity is Severity.HOCH for f in findings)
+
+
+def test_azure_key_vault_clean():
+    findings = analyze_azure({"key_vaults": [
+        {"name": "kv2", "public_network_access": False, "purge_protection": True}]})
+    assert findings == []
+
+
+def test_azure_sql_public_and_no_tde():
+    findings = analyze_azure({"sql_servers": [
+        {"name": "sql1", "public_access": True, "tde_enabled": False}]})
+    cats = {f.category for f in findings}
+    assert cats == {"exposed_service", "crypto_weakness"}
+
+
+def test_azure_sql_clean():
+    findings = analyze_azure({"sql_servers": [
+        {"name": "sql2", "public_access": False, "tde_enabled": True}]})
+    assert findings == []
+
+
+def test_azure_rbac_too_many_owners():
+    owners = [{"principal": f"u{i}@x", "role": "Owner", "scope": "subscription"}
+              for i in range(4)]
+    findings = analyze_azure({"subscription_id": "sub-x", "role_assignments": owners})
+    assert len(findings) == 1
+    assert findings[0].category == "access_control"
+    assert findings[0].severity is Severity.HOCH
+
+
+def test_azure_rbac_within_limit_no_finding():
+    owners = [{"principal": f"u{i}@x", "role": "Owner", "scope": "subscription"}
+              for i in range(3)]
+    findings = analyze_azure({"role_assignments": owners})
+    assert findings == []
+
+
+def test_azure_invalid_input_and_robust_skips():
+    assert analyze_azure("x") == []
+    assert analyze_azure({}) == []
+    # Nicht-Dict-Elemente in allen Listen werden robust uebersprungen.
+    assert analyze_azure({
+        "storage_accounts": ["kaputt"], "network_security_groups": [None],
+        "virtual_machines": [1], "key_vaults": ["x"], "sql_servers": [2],
+        "role_assignments": ["nope", None]}) == []
 
 
 def test_entra_clean_tenant():

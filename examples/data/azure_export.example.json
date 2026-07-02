@@ -1,0 +1,27 @@
+{
+  "subscription_id": "00000000-1111-2222-3333-444444444444",
+  "storage_accounts": [
+    { "name": "mustermannsa", "public_blob_access": true, "https_only": false, "encryption": false, "min_tls": "TLS1.0" },
+    { "name": "logssa", "public_blob_access": false, "https_only": true, "encryption": true, "min_tls": "TLS1.2" }
+  ],
+  "network_security_groups": [
+    { "name": "nsg-db", "open_to_internet_ports": [3389, 1433] },
+    { "name": "nsg-web", "open_to_internet_ports": [80, 443] }
+  ],
+  "virtual_machines": [
+    { "name": "vm-legacy-app", "public_ip": true, "disk_encryption": false, "os": "Windows Server 2012 R2" },
+    { "name": "vm-app01", "public_ip": false, "disk_encryption": true, "os": "Windows Server 2022" }
+  ],
+  "key_vaults": [
+    { "name": "kv-prod", "public_network_access": true, "purge_protection": false }
+  ],
+  "sql_servers": [
+    { "name": "sql-kunden", "public_access": true, "tde_enabled": false }
+  ],
+  "role_assignments": [
+    { "principal": "admin1@musterversicherung.de", "role": "Owner", "scope": "subscription" },
+    { "principal": "admin2@musterversicherung.de", "role": "Owner", "scope": "subscription" },
+    { "principal": "admin3@musterversicherung.de", "role": "Owner", "scope": "subscription" },
+    { "principal": "admin4@musterversicherung.de", "role": "Owner", "scope": "subscription" }
+  ]
+}
