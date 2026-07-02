@@ -16,6 +16,7 @@ from specter.tools.analyze_ad import AnalyzeAdTool
 from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
 from specter.tools.analyze_backup import AnalyzeBackupTool
+from specter.tools.analyze_container import AnalyzeContainerTool
 from specter.tools.analyze_database import AnalyzeDatabaseTool
 from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_dns import AnalyzeDnsTool
@@ -851,6 +852,71 @@ def test_analyze_database_no_findings(tmp_path):
     path = _write_json(tmp_path, "clean.json", {"databases": [
         {"engine": "postgresql", "port": 5432, "public": False,
          "auth_required": True, "tls": True}]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# --------------------------- analyze_container ----------------------------
+
+def _container_export():
+    return {"containers": [
+        {"name": "web", "image": "nginx:latest", "privileged": True,
+         "user": "root", "docker_socket_mounted": True}]}
+
+
+def test_analyze_container_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "c.json", _container_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "Container-Analyse" in r.content
+    assert len(state.findings) >= 3
+
+
+def test_analyze_container_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_container_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_container_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_container_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _container_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_container_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {"containers": [
+        {"name": "app", "image": "registry.io/app:1.2.3", "privileged": False,
+         "host_network": False, "cap_add": [], "user": "1000",
+         "docker_socket_mounted": False, "ports": ["127.0.0.1:3000->3000/tcp"]}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

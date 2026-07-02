@@ -141,6 +141,8 @@ def main() -> int:
         {"path": str(data_dir / "dns.example.json")}).content)
     print(tools["analyze_database"].run(
         {"path": str(data_dir / "database.example.json")}).content)
+    print(tools["analyze_container"].run(
+        {"path": str(data_dir / "container.example.json")}).content)
     print(tools["analyze_dependencies"].run(
         {"path": str(data_dir / "dependencies.example.json")}).content)
     print(tools["analyze_firewall"].run(
