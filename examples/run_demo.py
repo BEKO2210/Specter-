@@ -139,6 +139,8 @@ def main() -> int:
         {"path": str(data_dir / "email_security.example.json")}).content)
     print(tools["analyze_dependencies"].run(
         {"path": str(data_dir / "dependencies.example.json")}).content)
+    print(tools["analyze_firewall"].run(
+        {"path": str(data_dir / "firewall.example.json")}).content)
 
     print("\n--- Phase 4: ANGRIFFSPFAD-KORRELATION ---")
     print(tools["correlate_paths"].run({}).content)
