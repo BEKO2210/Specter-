@@ -107,6 +107,15 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "eng fassen und ungenutzte CNAME-Verweise (dangling) entfernen, um "
         "Subdomain-Takeover zu verhindern."
     ),
+    "container_security": (
+        "Container haerten: nicht privilegiert und als unprivilegierter Benutzer "
+        "laufen (USER != root), das Docker-Socket niemals in Container mounten, "
+        "Host-Networking vermeiden, nur die minimal noetigen Capabilities vergeben "
+        "(--cap-drop=ALL, gezielt einzelne --cap-add), Images mit festem Tag/Digest "
+        "pinnen (kein :latest) und regelmaessig aktualisieren, Ports nur auf "
+        "benoetigte Quell-IPs/127.0.0.1 veroeffentlichen und den Docker-Daemon nicht "
+        "ungeschuetzt exponieren."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 

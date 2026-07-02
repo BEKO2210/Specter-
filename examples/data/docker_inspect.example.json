@@ -1,0 +1,24 @@
+[
+  {
+    "Id": "9f3a1c7e2b4d",
+    "Name": "/legacy-web",
+    "Config": {
+      "Image": "nginx:latest",
+      "User": ""
+    },
+    "HostConfig": {
+      "Privileged": true,
+      "NetworkMode": "host",
+      "CapAdd": ["SYS_ADMIN"],
+      "Binds": ["/var/run/docker.sock:/var/run/docker.sock"]
+    },
+    "Mounts": [
+      {"Source": "/var/run/docker.sock", "Destination": "/var/run/docker.sock"}
+    ],
+    "NetworkSettings": {
+      "Ports": {
+        "80/tcp": [{"HostIp": "0.0.0.0", "HostPort": "8080"}]
+      }
+    }
+  }
+]

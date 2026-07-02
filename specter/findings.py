@@ -74,6 +74,7 @@ CATEGORIES: dict[str, str] = {
     "backup_resilience": "Backup-/Ransomware-Resilienz (3-2-1, Immutable, Restore-Test)",
     "web_security": "Web-Sicherheit (HTTP-Header/Cookies)",
     "dns_security": "DNS-Sicherheit (DNSSEC/CAA/Zonentransfer)",
+    "container_security": "Container-/Docker-Sicherheit",
     "other": "Sonstiges",
 }
 

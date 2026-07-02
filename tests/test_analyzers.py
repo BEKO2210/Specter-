@@ -10,6 +10,7 @@ from specter.analyzers.active_directory import (
 from specter.analyzers.aws import analyze_aws
 from specter.analyzers.azure import analyze_azure
 from specter.analyzers.backup import analyze_backup
+from specter.analyzers.container import analyze_container
 from specter.analyzers.database import analyze_database
 from specter.analyzers.dependency import (
     _satisfies, _split_op, analyze_dependencies,
@@ -1270,3 +1271,86 @@ def test_db_invalid_input():
     assert analyze_database("nope") == []
     assert analyze_database({"databases": "x"}) == []
     assert analyze_database({"databases": [None, 5]}) == []
+
+
+# ======================== Container-/Docker-Sicherheit ====================
+
+def _clean_container(**ov):
+    base = {"name": "app", "image": "registry.io/app:1.2.3", "privileged": False,
+            "host_network": False, "cap_add": [], "user": "1000",
+            "docker_socket_mounted": False, "ports": ["127.0.0.1:3000->3000/tcp"]}
+    base.update(ov)
+    return {"containers": [base]}
+
+
+def test_container_privileged():
+    findings = analyze_container(_clean_container(privileged=True))
+    assert any(f.severity is Severity.KRITISCH and "Privilegiert" in f.title
+               for f in findings)
+    assert {f.category for f in findings} == {"container_security"}
+    assert findings[0].source == "container_analyzer"
+
+
+def test_container_docker_socket():
+    findings = analyze_container(_clean_container(docker_socket_mounted=True))
+    assert any("Docker-Socket" in f.title and f.severity is Severity.KRITISCH
+               for f in findings)
+
+
+def test_container_dangerous_caps_dedup_and_prefix():
+    # CAP_-Praefix wird entfernt, harmlose Caps ignoriert, gefaehrliche gemeldet.
+    findings = analyze_container(_clean_container(
+        cap_add=["CAP_SYS_ADMIN", "SYS_ADMIN", "CHOWN", ""]))
+    caps = [f for f in findings if "Gefaehrliche Capabilities" in f.title]
+    assert len(caps) == 1 and "SYS_ADMIN" in caps[0].title
+    assert caps[0].severity is Severity.HOCH
+
+
+def test_container_only_harmless_caps_no_finding():
+    findings = analyze_container(_clean_container(cap_add=["CHOWN", "SETUID"]))
+    assert not any("Capabilities" in f.title for f in findings)
+
+
+def test_container_host_network():
+    findings = analyze_container(_clean_container(host_network=True))
+    assert any("Host-Networking" in f.title and f.severity is Severity.MITTEL
+               for f in findings)
+
+
+def test_container_runs_as_root_variants():
+    for user in ["root", "", "0", "0:0"]:
+        findings = analyze_container(_clean_container(user=user))
+        assert any("laeuft als root" in f.title for f in findings), user
+    # Nicht-root wird nicht gemeldet.
+    assert not any("laeuft als root" in f.title
+                   for f in analyze_container(_clean_container(user="1000")))
+
+
+def test_container_unpinned_image_variants():
+    for img in ["nginx:latest", "nginx", "registry.io:5000/app"]:
+        findings = analyze_container(_clean_container(image=img))
+        assert any("Ungepinntes Image" in f.title for f in findings), img
+    # Fester Tag -> kein Befund; leeres Image -> kein Image-Befund.
+    assert not any("Ungepinntes Image" in f.title
+                   for f in analyze_container(_clean_container(image="app:1.0.0")))
+    assert not any("Ungepinntes Image" in f.title
+                   for f in analyze_container(_clean_container(image="")))
+
+
+def test_container_public_port_maps_to_exposed_service():
+    findings = analyze_container(_clean_container(ports=["0.0.0.0:8080->80/tcp"]))
+    exp = [f for f in findings if f.category == "exposed_service"]
+    assert exp and exp[0].severity is Severity.MITTEL
+    # IPv6-Alle-Interfaces ebenfalls.
+    findings6 = analyze_container(_clean_container(ports=["[::]:8080->80/tcp"]))
+    assert any(f.category == "exposed_service" for f in findings6)
+
+
+def test_container_clean_no_findings():
+    assert analyze_container(_clean_container()) == []
+
+
+def test_container_invalid_input():
+    assert analyze_container("nope") == []
+    assert analyze_container({"containers": "x"}) == []
+    assert analyze_container({"containers": [None, 7]}) == []

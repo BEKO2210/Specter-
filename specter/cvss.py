@@ -38,6 +38,7 @@ _CATEGORY_ADJUST: dict[str, float] = {
     "backup_resilience": 0.2,
     "web_security": 0.0,
     "dns_security": 0.0,
+    "container_security": 0.2,
     "auth_weakness": 0.1,
     "crypto_weakness": 0.0,
     "personal_data": 0.0,

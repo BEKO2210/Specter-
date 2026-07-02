@@ -1,0 +1,24 @@
+{
+  "containers": [
+    {
+      "name": "legacy-web",
+      "image": "nginx:latest",
+      "privileged": true,
+      "host_network": true,
+      "cap_add": ["SYS_ADMIN", "NET_ADMIN"],
+      "user": "root",
+      "docker_socket_mounted": true,
+      "ports": ["0.0.0.0:8080->80/tcp"]
+    },
+    {
+      "name": "app",
+      "image": "registry.example.com/app:1.4.2",
+      "privileged": false,
+      "host_network": false,
+      "cap_add": [],
+      "user": "10001",
+      "docker_socket_mounted": false,
+      "ports": ["127.0.0.1:3000->3000/tcp"]
+    }
+  ]
+}

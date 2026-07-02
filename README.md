@@ -8,7 +8,7 @@
 <p align="center"><strong>Defensive Security Intelligence — automatische IT-Sicherheitsprüfung für den Mittelstand.</strong></p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-580%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-603%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
   <img alt="Defensiv" src="https://img.shields.io/badge/Ausrichtung-rein%20defensiv-0D1B2A">
@@ -76,6 +76,15 @@ Socket und prüft, dass Specter den offenen, ungeschützten Datenbank-Port erken
 python examples/live_lab/run_db_lab.py
 ```
 
+Und gegen eine **echte Container-Konfiguration**: das Container-Labor erfasst per
+`docker inspect` die echte Konfiguration eines absichtlich unsicheren Containers
+(privilegiert, `docker.sock` gemountet, Host-Networking) und prüft, dass Specter
+die gefährlichen Fehlkonfigurationen erkennt:
+
+```bash
+python examples/live_lab/run_container_lab.py
+```
+
 ---
 
 ## Schnellstart
@@ -100,7 +109,7 @@ python examples/run_demo.py
 python examples/live_email_check.py kunde-domain.de
 ```
 
-**3) Tests laufen lassen** — 580 Tests, 100 % Coverage:
+**3) Tests laufen lassen** — 603 Tests, 100 % Coverage:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -144,7 +153,7 @@ python -m pytest
 
 ## Was Specter prüft
 
-Dreizehn Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich zählen:
+Vierzehn Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich zählen:
 
 | Bereich | Findet u. a. |
 |---|---|
@@ -152,6 +161,7 @@ Dreizehn Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich z�
 | **DNS-Sicherheit** | fehlendes DNSSEC, fehlende CAA, offener Zonentransfer (AXFR), dangling CNAME |
 | **Web-Sicherheit** | fehlende HTTP-Header (HSTS/CSP/X-Frame), unsichere Cookies, Banner-Leaks |
 | **Datenbanken** | öffentlich erreichbare DB-Ports, fehlende Authentifizierung (Redis/Mongo), Default-Creds, Transport ohne TLS |
+| **Container/Docker** | privilegierte Container, gemountetes docker.sock, Host-Networking, gefährliche Capabilities, Lauf als root, `:latest` |
 | **Active Directory** | schwache Policies, Kerberoasting, Golden-Ticket-Risiken |
 | **Microsoft 365 / Entra** | fehlende MFA, Legacy-Auth, zu viele Admins, offene Freigaben |
 | **AWS** | Root ohne MFA, offene S3-Buckets, zu weite Rechte |
@@ -202,10 +212,10 @@ Siehe auch [`SECURITY.md`](SECURITY.md).
 
 ## Qualität
 
-**580 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**603 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle dreizehn Analyzer (jede Regel +
-Fehlerfälle), die dreiundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
+Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle vierzehn Analyzer (jede Regel +
+Fehlerfälle), die vierundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
 BSI-Mapping sowie Markdown- und HTML-Report.
 
 ---
@@ -214,11 +224,11 @@ BSI-Mapping sowie Markdown- und HTML-Report.
 
 ```
 specter/            # Kern: Analyzer, Tools, Scope-Policy, Report, CVSS, BSI
-  analyzers/        # die dreizehn Offline-Analyzer
-  tools/            # dreiundzwanzig Agenten-Werkzeuge
+  analyzers/        # die vierzehn Offline-Analyzer
+  tools/            # vierundzwanzig Agenten-Werkzeuge
 examples/           # Demo, Live-Check, Marketing-Generatoren, Beispieldaten
 docs/               # Website (GitHub Pages), Marke, Handbuch-PDF
-tests/              # 580 Tests (100 % Coverage)
+tests/              # 603 Tests (100 % Coverage)
 ```
 
 ---
