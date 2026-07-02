@@ -364,6 +364,24 @@ Muster-Definitionen des Scanners selbst) — die KI-Schicht mit Fable 5
 verifiziert sie und trennt echte Befunde vom Rauschen. Genau diese
 Verifikationsstufe unterscheidet Specter von einem reinen Signatur-Scanner.
 
+## Live-E-Mail-Sicherheits-Check (Kunden-Türöffner)
+
+Für die Akquise gibt es einen **kostenlosen Live-Check**: Er holt die echten
+SPF-/DKIM-/DMARC-Einträge einer Domain über **DNS-over-HTTPS** und wertet sie mit
+demselben Offline-Analyzer aus, der auch im Kundenauftrag läuft. Es werden
+ausschließlich **öffentliche DNS-Einträge gelesen** — kein Zugriff auf Systeme,
+kein Mailversand, kein Eingriff.
+
+```bash
+python examples/live_email_check.py kunde-domain.de
+python examples/live_email_check.py kunde-domain.de --selectors s1,s2,intern
+```
+
+Die reine Auswertelogik liegt getestet in `specter/email_live.py`; der
+Netzwerkabruf im Beispiel-Runner. DKIM-Selektoren variieren je Anbieter — findet
+der Check über gängige Namen keinen, ist das **kein** sicherer Beleg für
+fehlendes DKIM (dann den Selector beim Kunden erfragen).
+
 ## Handbuch für das eigene Team
 
 Ein einfaches, markengerechtes **Lern-/Bedien-Handbuch** (kein Vorwissen nötig)
@@ -408,7 +426,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**485 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**497 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
