@@ -36,6 +36,7 @@ CATEGORY_TO_BSI: dict[str, tuple[str, str]] = {
     "personal_data": ("CON.2", "Datenschutz"),
     "email_security": ("APP.5.3", "Allgemeiner E-Mail-Client und -Server"),
     "backup_resilience": ("CON.3", "Datensicherungskonzept"),
+    "web_security": ("APP.3.1", "Webanwendungen und Webservices"),
     "other": ("ISMS.1", "Sicherheitsmanagement"),
 }
 
@@ -51,6 +52,7 @@ SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "firewall_analyzer": ("NET.3.2", "Firewall"),
     "tls_analyzer": ("CON.1", "Kryptokonzept"),
     "backup_analyzer": ("CON.3", "Datensicherungskonzept"),
+    "http_headers_analyzer": ("APP.3.1", "Webanwendungen und Webservices"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -66,6 +68,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "firewall_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Firewall-/VPN-Konfigurationsexports; keine Live-Verbindung zum Geraet.",
     "tls_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten TLS-/Zertifikatsexports; kein Live-Handshake. Ablauf gemessen zum Erhebungszeitpunkt.",
     "backup_analyzer": "Bewertung ausschliesslich anhand der bereitgestellten Backup-/Resilienz-Angaben; kein Live-Abgleich mit dem Backup-System.",
+    "http_headers_analyzer": "Bewertung ausschliesslich anhand der bereitgestellten HTTP-Antwort-Header/Cookies; keine Live-Abfrage.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",

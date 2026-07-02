@@ -37,7 +37,8 @@ offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 `analyze_dependencies` (Abhaengigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
 `analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA) und \
 `analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle) und \
-`analyze_backup` (Backup-/Resilienz-Export: 3-2-1, Immutable/Offline, Restore-Test - Ransomware-Ueberleben); aktiv - \
+`analyze_backup` (Backup-/Resilienz-Export: 3-2-1, Immutable/Offline, Restore-Test - Ransomware-Ueberleben) und \
+`analyze_http_headers` (HTTP-Security-Header/Cookies: HSTS, CSP, X-Frame-Options, Secure/HttpOnly/SameSite); aktiv - \
 nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).
