@@ -99,6 +99,7 @@ specter/
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
 ├── handbook.py        # internes Lern-/Bedien-Handbuch (HTML -> PDF)
 ├── trust.py           # Kunden-Vertrauens-/Sicherheits-One-Pager (HTML -> PDF)
+├── landing.py         # markengerechte Marketing-Landingpage (eigenständiges HTML)
 ├── integrations/      # opt-in ausgehende Aktionen
 │   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
@@ -389,6 +390,17 @@ in [`SECURITY.md`](SECURITY.md).
 python examples/build_trust_onepager.py   # reports/specter-vertrauen-onepager.html
 ```
 
+## Marketing-Landingpage
+
+Eine fertige, responsive **Landingpage** (eigenständiges HTML, im Specter-Branding)
+mit Gratis-Check als Türöffner, den zehn Prüfbereichen, Vertrauens-Argumenten,
+Preis-Paketen und Ablauf — direkt auf einen Webspace hochladbar. Die
+Kontaktadresse lässt sich beim Bauen setzen:
+
+```bash
+python examples/build_landing.py deine@mailadresse.de   # reports/specter-landingpage.html
+```
+
 ## Tests
 
 ```bash
@@ -396,7 +408,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**482 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**485 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
