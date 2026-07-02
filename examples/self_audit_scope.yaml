@@ -1,0 +1,46 @@
+# =============================================================================
+# Self-Audit-Scope: Specter prueft den EIGENEN Quellcode.
+# =============================================================================
+# Ein guter Reifenachweis: Wir setzen unser eigenes Werkzeug auf uns selbst an.
+# Der Datei-Scope zeigt ausschliesslich auf den Specter-Quellcode; es werden
+# keine fremden Systeme und keine Netzwerkziele beruehrt.
+#
+# Aufruf (deterministisch, ohne API-Key):
+#     python examples/self_audit.py
+#
+# Voll autonomer KI-Lauf mit Fable 5:
+#     export ANTHROPIC_API_KEY=sk-ant-...
+#     python examples/self_audit.py            # nutzt automatisch das Modell unten
+#   oder direkt ueber die CLI:
+#     python main.py --scope examples/self_audit_scope.yaml --yes \
+#       --objective "Auditiere den Specter-Quellcode in ./specter auf Schwachstellen."
+# =============================================================================
+
+engagement:
+  name: "Specter Self-Audit (eigener Quellcode)"
+  authorized_by: "Selbsttest (Maintainer)"
+  authorization_ref: "SELF-AUDIT"
+  valid_until: "2999-12-31"
+
+# Keine Netzwerkziele - der Self-Audit ist rein statisch (White-Box).
+network:
+  allowed_targets: []
+  forbidden_targets:
+    - "169.254.169.254"
+
+# Nur der eigene Quellcode ist im Datei-Scope.
+filesystem:
+  allowed_paths:
+    - "specter"
+  max_file_bytes: 1000000
+
+# Keine aktiven Befehle noetig - reine Codeanalyse.
+commands:
+  allowed_binaries: []
+  timeout_seconds: 60
+
+runtime:
+  require_approval: false
+  max_iterations: 25
+  # Fable 5 steuert den Audit: staerkste Analyse- und Korrelationstiefe.
+  model: "claude-fable-5"

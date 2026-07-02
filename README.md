@@ -259,6 +259,25 @@ Bei `runtime.require_approval: true` (Standard) fragt Specter vor **jedem**
 aktiven Befehl im Terminal nach Bestätigung (Human-in-the-loop). Mit `--yes`
 lässt sich das für **isolierte Testlabore** überspringen.
 
+### KI-Modell wählen (z. B. Fable 5)
+
+Welches Modell den Agenten steuert, legt **ein Schalter** in der Scope-Datei fest:
+
+```yaml
+runtime:
+  model: "claude-fable-5"      # stärkste Analyse-/Korrelationstiefe
+  # model: "claude-sonnet-5"   # schneller/günstiger
+```
+
+Voraussetzung ist die Umgebungsvariable `ANTHROPIC_API_KEY`. Wichtig zur
+**Arbeitsteilung**: Die Analyzer und Scanner finden die Schwachstellen
+**deterministisch** (reproduzierbar, ohne Halluzination); das Modell
+**orchestriert** — es entscheidet, welches Werkzeug als Nächstes läuft,
+**verifiziert** die Kandidaten (und verwirft False Positives des statischen
+Scans), **korreliert** die Einzelbefunde zu Angriffspfaden und schreibt den
+Bericht. Ein stärkeres Modell wie Fable 5 hebt vor allem die Qualität von
+Verifikation, Korrelation und Berichtstext.
+
 ## Sofort ausprobieren (Demo, ohne API-Key)
 
 Ein vollständiger End-to-End-Lauf gegen einen mitgelieferten lokalen
@@ -273,6 +292,25 @@ Der Lauf durchläuft alle fünf Phasen (Recon → Scan → aktives `curl` → Fi
 Angriffspfade → Bericht) und schreibt einen echten Report nach `reports/`.
 Ideal als Vorlage für ein echtes Engagement: `examples/demo_scope.yaml`
 kopieren, Autorisierung und Ziele eintragen, mit `main.py` autonom laufen lassen.
+
+### Self-Audit: Specter prüft sich selbst
+
+Specter lässt sich auf den **eigenen Quellcode** ansetzen — ein Reifenachweis
+fürs Kundengespräch:
+
+```bash
+python examples/self_audit.py                    # statischer Selbst-Scan (ohne API-Key)
+
+export ANTHROPIC_API_KEY=sk-ant-...              # zusätzlich der autonome
+python examples/self_audit.py                    # KI-Lauf mit Fable 5
+```
+
+Der Datei-Scope (`examples/self_audit_scope.yaml`) zeigt ausschließlich auf
+`specter/`; es werden keine fremden Systeme berührt. Der statische Scan liefert
+bewusst nur **Kandidaten** (heuristische Treffer, darunter erwartbar die
+Muster-Definitionen des Scanners selbst) — die KI-Schicht mit Fable 5
+verifiziert sie und trennt echte Befunde vom Rauschen. Genau diese
+Verifikationsstufe unterscheidet Specter von einem reinen Signatur-Scanner.
 
 ## Tests
 
