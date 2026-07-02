@@ -15,6 +15,7 @@ from specter.state import EngagementState
 from specter.tools.analyze_ad import AnalyzeAdTool
 from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
+from specter.tools.analyze_backup import AnalyzeBackupTool
 from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
@@ -594,6 +595,70 @@ def test_analyze_tls_no_findings(tmp_path):
     path = _write_json(tmp_path, "clean.json", {
         "host": "a.de", "certificate": {"days_until_expiry": 300},
         "protocols": ["TLSv1.2", "TLSv1.3"], "ciphers": ["ECDHE-RSA-AES256-GCM-SHA384"]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ----------------------------- analyze_backup -----------------------------
+
+def _backup_export():
+    return {"organization": "GmbH", "backups": [
+        {"name": "fs", "copies": 1, "offline_or_immutable": False}]}
+
+
+def test_analyze_backup_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "bk.json", _backup_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "Backup-/Resilienzanalyse" in r.content
+    assert len(state.findings) == 2
+
+
+def test_analyze_backup_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_backup_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_backup_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_backup_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _backup_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_backup_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {"backups": [
+        {"name": "erp", "copies": 3, "offsite": True, "offline_or_immutable": True,
+         "encrypted": True, "restore_tested": True, "last_restore_test_days": 30,
+         "mfa_on_console": True, "retention_days": 90}], "policy": {"documented": True}})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

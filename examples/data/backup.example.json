@@ -1,0 +1,14 @@
+{
+  "organization": "Muster Versicherung AG",
+  "backups": [
+    {"name": "fileserver-daily", "copies": 1, "offsite": false,
+     "offline_or_immutable": false, "encrypted": false,
+     "restore_tested": false, "last_restore_test_days": 500,
+     "mfa_on_console": false, "retention_days": 7},
+    {"name": "erp-datenbank", "copies": 3, "offsite": true,
+     "offline_or_immutable": true, "encrypted": true,
+     "restore_tested": true, "last_restore_test_days": 400,
+     "mfa_on_console": true, "retention_days": 90}
+  ],
+  "policy": {"documented": false}
+}

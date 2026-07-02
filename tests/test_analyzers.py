@@ -9,6 +9,7 @@ from specter.analyzers.active_directory import (
 )
 from specter.analyzers.aws import analyze_aws
 from specter.analyzers.azure import analyze_azure
+from specter.analyzers.backup import analyze_backup
 from specter.analyzers.dependency import (
     _satisfies, _split_op, analyze_dependencies,
 )
@@ -909,6 +910,115 @@ def test_tls_invalid_input_and_robustness():
                                           {"host": "a.de", "certificate": "x",
                                            "protocols": ["SSLv3"]}]})
     assert len(findings) == 1 and "SSLv3" in findings[0].title
+
+
+# ================== Backup / Ransomware-Resilienz ==========================
+
+def test_backup_single_copy_and_no_immutable():
+    findings = analyze_backup({"organization": "GmbH", "backups": [
+        {"name": "fs", "copies": 1, "offline_or_immutable": False}]})
+    titles = " ".join(f.title for f in findings)
+    assert "Single Point of Failure" in titles
+    assert "Immutable" in titles
+    assert all(f.category == "backup_resilience" for f in findings)
+    assert all(f.source == "backup_analyzer" for f in findings)
+
+
+def test_backup_too_few_copies_medium():
+    findings = analyze_backup({"backups": [{"name": "fs", "copies": 2}]})
+    assert any("Zu wenige Backup-Kopien" in f.title and f.severity is Severity.MITTEL
+               for f in findings)
+
+
+def test_backup_invalid_copies_ignored():
+    findings = analyze_backup({"backups": [{"name": "fs", "copies": "viele"}]})
+    assert findings == []
+
+
+def test_backup_no_offsite():
+    findings = analyze_backup({"backups": [{"name": "fs", "offsite": False}]})
+    assert any("Keine Offsite-Kopie" in f.title and f.severity is Severity.HOCH
+               for f in findings)
+
+
+def test_backup_restore_never_tested():
+    findings = analyze_backup({"backups": [{"name": "fs", "restore_tested": False}]})
+    assert any("nie getestet" in f.title and f.severity is Severity.HOCH
+               for f in findings)
+
+
+def test_backup_restore_test_overdue():
+    findings = analyze_backup({"backups": [
+        {"name": "fs", "restore_tested": True, "last_restore_test_days": 400}]})
+    assert any("ueberfaellig" in f.title and f.severity is Severity.HOCH
+               for f in findings)
+
+
+def test_backup_restore_recent_ok():
+    # Kuerzlich getestet -> kein Restore-Befund.
+    findings = analyze_backup({"backups": [
+        {"name": "fs", "restore_tested": True, "last_restore_test_days": 100}]})
+    assert findings == []
+
+
+def test_backup_restore_invalid_age_ignored():
+    findings = analyze_backup({"backups": [
+        {"name": "fs", "restore_tested": True, "last_restore_test_days": "nie"}]})
+    assert findings == []
+
+
+def test_backup_console_without_mfa():
+    findings = analyze_backup({"backups": [{"name": "fs", "mfa_on_console": False}]})
+    assert any("Konsole ohne MFA" in f.title and f.severity is Severity.MITTEL
+               for f in findings)
+
+
+def test_backup_not_encrypted():
+    findings = analyze_backup({"backups": [{"name": "fs", "encrypted": False}]})
+    assert any("nicht verschluesselt" in f.title and f.severity is Severity.MITTEL
+               for f in findings)
+
+
+def test_backup_short_retention():
+    findings = analyze_backup({"backups": [{"name": "fs", "retention_days": 7}]})
+    assert any("Zu kurze Backup-Aufbewahrung" in f.title for f in findings)
+
+
+def test_backup_retention_ok_and_invalid():
+    ok = analyze_backup({"backups": [{"name": "fs", "retention_days": 90}]})
+    assert ok == []
+    bad = analyze_backup({"backups": [{"name": "fs", "retention_days": "lang"}]})
+    assert bad == []
+
+
+def test_backup_policy_not_documented():
+    findings = analyze_backup({"policy": {"documented": False}})
+    assert len(findings) == 1
+    assert "Kein dokumentiertes Backup-" in findings[0].title
+    assert findings[0].severity is Severity.NIEDRIG
+
+
+def test_backup_policy_documented_ok():
+    assert analyze_backup({"policy": {"documented": True}}) == []
+
+
+def test_backup_fully_resilient_no_findings():
+    findings = analyze_backup({"backups": [
+        {"name": "erp", "copies": 3, "offsite": True, "offline_or_immutable": True,
+         "encrypted": True, "restore_tested": True, "last_restore_test_days": 30,
+         "mfa_on_console": True, "retention_days": 90}],
+        "policy": {"documented": True}})
+    assert findings == []
+
+
+def test_backup_invalid_input_and_robustness():
+    assert analyze_backup("nope") == []
+    assert analyze_backup({}) == []
+    # Nicht-Dict-Backups und Nicht-Dict-policy robust behandeln.
+    findings = analyze_backup({
+        "backups": ["kaputt", None, {"name": "fs", "offsite": False}],
+        "policy": "kaputt"})
+    assert len(findings) == 1 and "Keine Offsite-Kopie" in findings[0].title
 
 
 def test_entra_clean_tenant():

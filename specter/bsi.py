@@ -35,6 +35,7 @@ CATEGORY_TO_BSI: dict[str, tuple[str, str]] = {
     "outdated_component": ("OPS.1.1.3", "Patch- und Aenderungsmanagement"),
     "personal_data": ("CON.2", "Datenschutz"),
     "email_security": ("APP.5.3", "Allgemeiner E-Mail-Client und -Server"),
+    "backup_resilience": ("CON.3", "Datensicherungskonzept"),
     "other": ("ISMS.1", "Sicherheitsmanagement"),
 }
 
@@ -49,6 +50,7 @@ SOURCE_TO_BSI: dict[str, tuple[str, str]] = {
     "dependency_analyzer": ("OPS.1.1.3", "Patch- und Aenderungsmanagement"),
     "firewall_analyzer": ("NET.3.2", "Firewall"),
     "tls_analyzer": ("CON.1", "Kryptokonzept"),
+    "backup_analyzer": ("CON.3", "Datensicherungskonzept"),
 }
 
 # Einschraenkung/Annahme je Erkenntnisquelle.
@@ -63,6 +65,7 @@ SOURCE_LIMITATION: dict[str, str] = {
     "dependency_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Abhaengigkeits-/Advisory-Exports; kein Live-Abgleich mit Paket-Registries oder CVE-Feeds.",
     "firewall_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten Firewall-/VPN-Konfigurationsexports; keine Live-Verbindung zum Geraet.",
     "tls_analyzer": "Bewertung ausschliesslich anhand des bereitgestellten TLS-/Zertifikatsexports; kein Live-Handshake. Ablauf gemessen zum Erhebungszeitpunkt.",
+    "backup_analyzer": "Bewertung ausschliesslich anhand der bereitgestellten Backup-/Resilienz-Angaben; kein Live-Abgleich mit dem Backup-System.",
     "nmap": "Momentaufnahme des Netzwerk-Scans zum Pruefzeitpunkt.",
     "nikto": "Automatischer Webserver-Scan - moegliche Falsch-Positive, manuell zu pruefen.",
     "agent": "Vom Pruefer bestaetigtes Finding.",
