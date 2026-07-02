@@ -100,7 +100,12 @@ class Finding:
 
     def _make_id(self) -> str:
         basis = f"{self.category}|{self.asset}|{self.location}|{self.title}"
-        digest = hashlib.sha1(basis.encode("utf-8")).hexdigest()[:8]
+        # SHA1 dient hier nur der ID-Bildung (kurzer, stabiler Fingerabdruck) -
+        # kein Sicherheitskontext. usedforsecurity=False macht diese Absicht
+        # explizit und beruhigt statische Analyse (z. B. Bandit B324).
+        digest = hashlib.sha1(
+            basis.encode("utf-8"), usedforsecurity=False
+        ).hexdigest()[:8]
         return f"SPEC-{digest}"
 
     @property
