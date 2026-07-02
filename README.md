@@ -98,6 +98,7 @@ specter/
 ├── report.py          # produktionsreifer Bericht (Markdown + JSON)
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
 ├── handbook.py        # internes Lern-/Bedien-Handbuch (HTML -> PDF)
+├── trust.py           # Kunden-Vertrauens-/Sicherheits-One-Pager (HTML -> PDF)
 ├── integrations/      # opt-in ausgehende Aktionen
 │   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
@@ -375,6 +376,19 @@ python examples/build_handbook.py    # erzeugt reports/specter-handbuch.html
 
 Im Browser öffnen und über „Drucken → Als PDF speichern" ein PDF erstellen.
 
+## Vertrauen & Sicherheit (Kunden-Nachweis)
+
+Damit echte Firmen Specter an ihre Systeme lassen, gibt es einen kundentauglichen
+**Vertrauens-/Sicherheits-One-Pager**: er belegt die technischen Garantien
+(offline & lesend, kein Exploit, fail-closed Scope, aktive Scanner standardmäßig
+aus, keine Veränderung von Kundensystemen, vollständiges Audit-Log), den
+DSGVO-Umgang und den rechtlichen Rahmen (§202 StGB). Die Grundsätze stehen auch
+in [`SECURITY.md`](SECURITY.md).
+
+```bash
+python examples/build_trust_onepager.py   # reports/specter-vertrauen-onepager.html
+```
+
 ## Tests
 
 ```bash
@@ -382,7 +396,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**478 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**482 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
