@@ -8,7 +8,7 @@
 <p align="center"><strong>Defensive Security Intelligence — automatische IT-Sicherheitsprüfung für den Mittelstand.</strong></p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-541%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-560%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
   <img alt="Defensiv" src="https://img.shields.io/badge/Ausrichtung-rein%20defensiv-0D1B2A">
@@ -91,7 +91,7 @@ python examples/run_demo.py
 python examples/live_email_check.py kunde-domain.de
 ```
 
-**3) Tests laufen lassen** — 541 Tests, 100 % Coverage:
+**3) Tests laufen lassen** — 560 Tests, 100 % Coverage:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -135,11 +135,12 @@ python -m pytest
 
 ## Was Specter prüft
 
-Elf Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich zählen:
+Zwölf Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich zählen:
 
 | Bereich | Findet u. a. |
 |---|---|
 | **E-Mail-Schutz** | SPF, DKIM, DMARC gegen Spoofing & CEO-Fraud |
+| **DNS-Sicherheit** | fehlendes DNSSEC, fehlende CAA, offener Zonentransfer (AXFR), dangling CNAME |
 | **Web-Sicherheit** | fehlende HTTP-Header (HSTS/CSP/X-Frame), unsichere Cookies, Banner-Leaks |
 | **Active Directory** | schwache Policies, Kerberoasting, Golden-Ticket-Risiken |
 | **Microsoft 365 / Entra** | fehlende MFA, Legacy-Auth, zu viele Admins, offene Freigaben |
@@ -191,10 +192,10 @@ Siehe auch [`SECURITY.md`](SECURITY.md).
 
 ## Qualität
 
-**541 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**560 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle elf Analyzer (jede Regel +
-Fehlerfälle), die einundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
+Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle zwölf Analyzer (jede Regel +
+Fehlerfälle), die zweiundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
 BSI-Mapping sowie Markdown- und HTML-Report.
 
 ---
@@ -203,11 +204,11 @@ BSI-Mapping sowie Markdown- und HTML-Report.
 
 ```
 specter/            # Kern: Analyzer, Tools, Scope-Policy, Report, CVSS, BSI
-  analyzers/        # die elf Offline-Analyzer
-  tools/            # einundzwanzig Agenten-Werkzeuge
+  analyzers/        # die zwölf Offline-Analyzer
+  tools/            # zweiundzwanzig Agenten-Werkzeuge
 examples/           # Demo, Live-Check, Marketing-Generatoren, Beispieldaten
 docs/               # Website (GitHub Pages), Marke, Handbuch-PDF
-tests/              # 541 Tests (100 % Coverage)
+tests/              # 560 Tests (100 % Coverage)
 ```
 
 ---

@@ -99,6 +99,14 @@ DEFAULT_REMEDIATION: dict[str, str] = {
         "Cookies mit Secure, HttpOnly und SameSite ausliefern; Server-/X-Powered-By-"
         "Banner reduzieren, damit keine Softwareversionen preisgegeben werden."
     ),
+    "dns_security": (
+        "DNS absichern: DNSSEC aktivieren und die Zone signieren (Schutz vor "
+        "Cache-Poisoning/Spoofing), CAA-Records setzen, damit nur autorisierte "
+        "Zertifizierungsstellen ausstellen duerfen, Zonentransfer (AXFR) auf "
+        "berechtigte Secondaries beschraenken, Wildcard-Eintraege vermeiden bzw. "
+        "eng fassen und ungenutzte CNAME-Verweise (dangling) entfernen, um "
+        "Subdomain-Takeover zu verhindern."
+    ),
     "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
 }
 

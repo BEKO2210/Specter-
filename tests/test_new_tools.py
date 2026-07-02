@@ -17,6 +17,7 @@ from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
 from specter.tools.analyze_backup import AnalyzeBackupTool
 from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
+from specter.tools.analyze_dns import AnalyzeDnsTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
 from specter.tools.analyze_firewall import AnalyzeFirewallTool
@@ -724,6 +725,67 @@ def test_analyze_http_headers_no_findings(tmp_path):
         "Strict-Transport-Security": "max-age=31536000", "Content-Security-Policy": "x",
         "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "no-referrer", "Permissions-Policy": "x"}})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ------------------------------ analyze_dns -------------------------------
+
+def _dns_export():
+    return {"domain": "a.de", "dnssec": False, "caa": [], "zone_transfer": True}
+
+
+def test_analyze_dns_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "dns.json", _dns_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "DNS-Sicherheitsanalyse" in r.content
+    assert len(state.findings) >= 3
+
+
+def test_analyze_dns_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_dns_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_dns_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_dns_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _dns_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_dns_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {
+        "domain": "a.de", "dnssec": True, "caa": ["0 issue \"letsencrypt.org\""]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

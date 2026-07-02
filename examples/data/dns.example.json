@@ -1,0 +1,10 @@
+{
+  "domain": "musterversicherung.de",
+  "dnssec": false,
+  "caa": [],
+  "wildcard": true,
+  "zone_transfer": true,
+  "dangling_cnames": [
+    "alt-portal.musterversicherung.de -> muster-portal.azurewebsites.net"
+  ]
+}
