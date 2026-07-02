@@ -135,6 +135,8 @@ def main() -> int:
         {"path": str(data_dir / "aws_export.example.json")}).content)
     print(tools["analyze_azure"].run(
         {"path": str(data_dir / "azure_export.example.json")}).content)
+    print(tools["analyze_email_security"].run(
+        {"path": str(data_dir / "email_security.example.json")}).content)
 
     print("\n--- Phase 4: ANGRIFFSPFAD-KORRELATION ---")
     print(tools["correlate_paths"].run({}).content)

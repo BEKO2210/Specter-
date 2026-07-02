@@ -47,6 +47,7 @@ def build_registry(
     from .analyze_ad import AnalyzeAdTool
     from .analyze_aws import AnalyzeAwsTool
     from .analyze_azure import AnalyzeAzureTool
+    from .analyze_email_security import AnalyzeEmailSecurityTool
     from .analyze_entra import AnalyzeEntraTool
     from .analyze_exchange import AnalyzeExchangeTool
     from .code_scan import CodeScanTool
@@ -71,6 +72,7 @@ def build_registry(
         AnalyzeEntraTool(config, policy, audit, state),
         AnalyzeAwsTool(config, policy, audit, state),
         AnalyzeAzureTool(config, policy, audit, state),
+        AnalyzeEmailSecurityTool(config, policy, audit, state),
         # Aktiv / Haende
         RunCommandTool(config, policy, audit),
         RunScannerTool(config, policy, audit, state),

@@ -70,6 +70,7 @@ CATEGORIES: dict[str, str] = {
     "default_credentials": "Standard-/Default-Zugangsdaten",
     "outdated_component": "Veraltete Komponente/Abhaengigkeit (bekannte CVE)",
     "personal_data": "Personenbezogene Daten (DSGVO-relevant)",
+    "email_security": "E-Mail-Spoofing/Phishing (SPF/DKIM/DMARC)",
     "other": "Sonstiges",
 }
 

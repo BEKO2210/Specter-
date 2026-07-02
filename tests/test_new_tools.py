@@ -15,6 +15,7 @@ from specter.state import EngagementState
 from specter.tools.analyze_ad import AnalyzeAdTool
 from specter.tools.analyze_aws import AnalyzeAwsTool
 from specter.tools.analyze_azure import AnalyzeAzureTool
+from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
 from specter.tools.analyze_exchange import AnalyzeExchangeTool
 from specter.tools.run_scanner import RunScannerTool
@@ -337,6 +338,66 @@ def test_analyze_azure_no_findings(tmp_path):
         "subscription_id": "sub-clean",
         "storage_accounts": [{"name": "ok", "public_blob_access": False,
                               "https_only": True, "encryption": True}]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# ------------------------- analyze_email_security -------------------------
+
+def test_analyze_email_security_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "mail.json", {
+        "domain": "x.de", "spf": "v=spf1 +all", "dmarc": "v=DMARC1; p=none"})
+    r = tool.run({"path": path})
+    assert not r.is_error and "E-Mail-Security-Analyse" in r.content
+    assert len(state.findings) >= 2
+
+
+def test_analyze_email_security_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_email_security_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_email_security_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_email_security_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", {"domain": "x" * 50})
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_email_security_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {
+        "domain": "x.de", "spf": "v=spf1 -all",
+        "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
+        "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

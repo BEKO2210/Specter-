@@ -1,0 +1,10 @@
+{
+  "domain": "musterversicherung.de",
+  "spf": "v=spf1 include:_spf.google.com +all",
+  "dmarc": "v=DMARC1; p=none",
+  "dkim": [
+    { "selector": "google", "key_bits": 1024, "present": true },
+    { "selector": "legacy", "present": false }
+  ],
+  "mx": ["aspmx.l.google.com"]
+}

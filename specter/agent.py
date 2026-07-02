@@ -31,8 +31,9 @@ erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
 2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-/Cloud-Daten \
 offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 (Exchange-Daten), `analyze_entra` (Entra-ID/Microsoft-365-Export), \
-`analyze_aws` (AWS-Export: IAM/S3/Security-Groups) und `analyze_azure` \
-(Azure-Export: Storage/NSG/VM/Key-Vault/SQL/RBAC); aktiv - \
+`analyze_aws` (AWS-Export: IAM/S3/Security-Groups), `analyze_azure` \
+(Azure-Export: Storage/NSG/VM/Key-Vault/SQL/RBAC) und \
+`analyze_email_security` (DNS-Export: SPF/DKIM/DMARC gegen Spoofing/Phishing); aktiv - \
 nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).
