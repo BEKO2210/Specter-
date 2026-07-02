@@ -18,6 +18,7 @@ from specter.tools.analyze_azure import AnalyzeAzureTool
 from specter.tools.analyze_dependencies import AnalyzeDependenciesTool
 from specter.tools.analyze_email_security import AnalyzeEmailSecurityTool
 from specter.tools.analyze_entra import AnalyzeEntraTool
+from specter.tools.analyze_firewall import AnalyzeFirewallTool
 from specter.tools.analyze_exchange import AnalyzeExchangeTool
 from specter.tools.run_scanner import RunScannerTool
 
@@ -465,6 +466,70 @@ def test_analyze_dependencies_no_findings(tmp_path):
     tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "clean.json", {
         "dependencies": [{"name": "fastapi", "version": "0.110.0", "ecosystem": "pypi"}]})
+    r = tool.run({"path": path})
+    assert not r.is_error and "ohne Befunde" in r.content
+
+
+# --------------------------- analyze_firewall -----------------------------
+
+def _fw_export():
+    return {"device": "fw", "rules": [
+        {"name": "permit-all", "action": "allow", "source": "any",
+         "destination": "any", "service": "any"}]}
+
+
+def test_analyze_firewall_success(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "fw.json", _fw_export())
+    r = tool.run({"path": path})
+    assert not r.is_error and "Firewall-/VPN-Analyse" in r.content
+    assert len(state.findings) == 1
+
+
+def test_analyze_firewall_scope_denied(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": "/etc/passwd"})
+    assert r.is_error and "VERWEIGERT" in r.content
+
+
+def test_analyze_firewall_missing_file(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    r = tool.run({"path": str(tmp_path / "targets" / "weg.json")})
+    assert r.is_error and "existiert nicht" in r.content
+
+
+def test_analyze_firewall_invalid_json(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    p = tmp_path / "targets" / "bad.json"
+    p.write_text("nope", encoding="utf-8")
+    r = tool.run({"path": str(p)})
+    assert r.is_error and "JSON" in r.content
+
+
+def test_analyze_firewall_too_large(tmp_path):
+    cfg = _cfg(tmp_path, max_file_bytes=5)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "big.json", _fw_export())
+    r = tool.run({"path": path})
+    assert r.is_error and "zu gross" in r.content
+
+
+def test_analyze_firewall_no_findings(tmp_path):
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    path = _write_json(tmp_path, "clean.json", {"rules": [
+        {"name": "internal", "action": "allow", "source": "10.0.0.0/8",
+         "destination": "10.0.0.1", "service": "https", "port": 443}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
 

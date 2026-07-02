@@ -15,6 +15,7 @@ from specter.analyzers.dependency import (
 from specter.analyzers.email_security import analyze_email_security
 from specter.analyzers.entra_id import analyze_entra
 from specter.analyzers.exchange import analyze_exchange
+from specter.analyzers.firewall import analyze_firewall
 from specter.findings import Severity
 
 
@@ -671,6 +672,139 @@ def test_sca_split_op_helper():
     assert _split_op(">=2.0.0") == (">=", "2.0.0")
     assert _split_op("<1.0") == ("<", "1.0")
     assert _split_op("3.1.4") == ("==", "3.1.4")
+
+
+# ====================== Firewall-/VPN-Konfiguration =========================
+
+def test_fw_any_any_rule():
+    findings = analyze_firewall({"device": "fw", "rules": [
+        {"name": "permit-all", "action": "allow", "source": "any",
+         "destination": "any", "service": "any"}]})
+    assert len(findings) == 1
+    assert "Any-Any-Freigabe" in findings[0].title
+    assert findings[0].category == "misconfiguration" and findings[0].severity is Severity.HOCH
+
+
+def test_fw_denied_rule_is_ignored():
+    findings = analyze_firewall({"rules": [
+        {"name": "deny-all", "action": "deny", "source": "any",
+         "destination": "any", "service": "any"}]})
+    assert findings == []
+
+
+def test_fw_non_any_source_ignored():
+    findings = analyze_firewall({"rules": [
+        {"name": "internal", "action": "allow", "source": "10.0.0.0/8",
+         "destination": "any", "service": "any"}]})
+    assert findings == []
+
+
+def test_fw_rdp_from_internet_via_port():
+    findings = analyze_firewall({"rules": [
+        {"name": "rdp", "action": "allow", "source": "0.0.0.0/0",
+         "destination": "10.0.0.5", "service": "RDP", "port": 3389}]})
+    assert len(findings) == 1
+    assert "RDP aus dem Internet" in findings[0].title
+    assert findings[0].category == "remote_access" and findings[0].severity is Severity.HOCH
+
+
+def test_fw_ssh_from_internet_via_service_name():
+    # Kein numerisches Port-Feld -> Auswertung ueber den Servicenamen.
+    findings = analyze_firewall({"rules": [
+        {"name": "ssh", "action": "allow", "source": "any",
+         "destination": "10.0.0.5", "service": "ssh"}]})
+    assert "SSH aus dem Internet" in findings[0].title
+    assert findings[0].category == "remote_access"
+
+
+def test_fw_sensitive_service_from_internet():
+    findings = analyze_firewall({"rules": [
+        {"name": "db", "action": "allow", "source": "0.0.0.0/0",
+         "destination": "10.0.0.30", "service": "MSSQL", "port": 1433}]})
+    assert "Sensibler Dienst offen ins Internet (MSSQL)" in findings[0].title
+    assert findings[0].category == "exposed_service"
+
+
+def test_fw_all_ports_to_specific_host():
+    # source any, service any, aber Ziel konkret -> alle Ports offen.
+    findings = analyze_firewall({"rules": [
+        {"name": "host-any", "action": "allow", "source": "any",
+         "destination": "10.0.0.9", "service": "any"}]})
+    assert "Alle Ports aus dem Internet" in findings[0].title
+    assert findings[0].category == "exposed_service"
+
+
+def test_fw_internet_source_unknown_port_no_finding():
+    # source any, konkreter aber unkritischer Dienst -> kein Befund.
+    findings = analyze_firewall({"rules": [
+        {"name": "web", "action": "allow", "source": "0.0.0.0/0",
+         "destination": "10.0.0.40", "service": "https", "port": 443}]})
+    assert findings == []
+
+
+def test_fw_rule_port_invalid_value():
+    # Ungueltiges Port-Feld -> Fallback auf Servicenamen (hier unbekannt -> 0).
+    findings = analyze_firewall({"rules": [
+        {"name": "x", "action": "allow", "source": "any",
+         "destination": "10.0.0.1", "service": "https", "port": "kaputt"}]})
+    assert findings == []
+
+
+def test_fw_vpn_weak_crypto_ikev1_no_mfa_eol():
+    findings = analyze_firewall({"vpn": [
+        {"name": "legacy", "encryption": "3des", "ike_version": 1,
+         "mfa": False, "eol": True}]})
+    titles = " ".join(f.title for f in findings)
+    cats = {f.category for f in findings}
+    assert "schwacher Kryptographie" in titles
+    assert "veraltetes IKEv1" in titles
+    assert "ohne MFA" in titles
+    assert "abgekuendigtes VPN-Gateway" in titles
+    assert cats == {"crypto_weakness", "misconfiguration", "remote_access", "outdated_component"}
+
+
+def test_fw_vpn_outdated_flag_alias():
+    findings = analyze_firewall({"vpn": [
+        {"name": "old", "encryption": "aes256", "ike_version": 2, "outdated": True}]})
+    assert any(f.category == "outdated_component" for f in findings)
+
+
+def test_fw_vpn_clean_no_findings():
+    findings = analyze_firewall({"vpn": [
+        {"name": "modern", "encryption": "aes256", "ike_version": 2, "mfa": True}]})
+    assert findings == []
+
+
+def test_fw_management_public_with_ssh():
+    findings = analyze_firewall({"device": "fw", "management": {
+        "public": True, "exposed_interfaces": ["https", "ssh"]}})
+    cats = {f.category for f in findings}
+    assert cats == {"exposed_service", "remote_access"}
+    assert any("Management-Interface aus dem Internet" in f.title for f in findings)
+
+
+def test_fw_management_public_without_ssh():
+    findings = analyze_firewall({"management": {
+        "public": True, "exposed_interfaces": ["https"]}})
+    assert len(findings) == 1 and findings[0].category == "exposed_service"
+
+
+def test_fw_management_not_public_ignored():
+    findings = analyze_firewall({"management": {"public": False}})
+    assert findings == []
+
+
+def test_fw_invalid_input_and_robustness():
+    assert analyze_firewall("nope") == []
+    assert analyze_firewall({}) == []
+    # Nicht-Dict-Eintraege in rules/vpn und Nicht-Dict-management robust behandeln.
+    findings = analyze_firewall({
+        "rules": ["kaputt", None, {"name": "r", "action": "allow", "source": "any",
+                                   "destination": "any", "service": "any"}],
+        "vpn": ["kaputt", {"name": "v", "mfa": False}],
+        "management": "kaputt"})
+    assert any(f.category == "misconfiguration" for f in findings)
+    assert any(f.category == "remote_access" for f in findings)
 
 
 def test_entra_clean_tenant():

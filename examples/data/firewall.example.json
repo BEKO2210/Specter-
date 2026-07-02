@@ -1,0 +1,24 @@
+{
+  "device": "fw-hq-fortigate",
+  "rules": [
+    {"name": "permit-any-out", "action": "allow", "source": "any",
+     "destination": "any", "service": "any"},
+    {"name": "rdp-support", "action": "allow", "source": "0.0.0.0/0",
+     "destination": "10.0.0.20", "service": "RDP", "port": 3389},
+    {"name": "ssh-admin", "action": "allow", "source": "0.0.0.0/0",
+     "destination": "10.0.0.5", "service": "ssh"},
+    {"name": "db-exposed", "action": "allow", "source": "any",
+     "destination": "10.0.0.30", "service": "MSSQL", "port": 1433},
+    {"name": "internal-web", "action": "allow", "source": "10.0.0.0/8",
+     "destination": "10.0.0.40", "service": "https", "port": 443},
+    {"name": "deny-telnet", "action": "deny", "source": "any",
+     "destination": "any", "service": "telnet", "port": 23}
+  ],
+  "vpn": [
+    {"name": "site-to-site-legacy", "encryption": "3des", "ike_version": 1,
+     "mfa": false, "eol": true},
+    {"name": "remote-workers", "encryption": "aes256", "ike_version": 2,
+     "mfa": true}
+  ],
+  "management": {"public": true, "exposed_interfaces": ["https", "ssh"]}
+}
