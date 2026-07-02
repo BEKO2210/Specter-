@@ -102,6 +102,7 @@ specter/
 ├── landing.py         # kompakte Ein-Datei-Landingpage (eigenständiges HTML)
 ├── outreach.py        # personalisierte Erstkontakt-E-Mail-Vorlage
 ├── offer.py           # Angebots-/Preis-One-Pager (HTML -> PDF)
+├── acquisition.py     # Zielkunden-/Akquiseplan (HTML -> PDF)
 ├── integrations/      # opt-in ausgehende Aktionen
 │   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
@@ -383,6 +384,17 @@ Die reine Auswertelogik liegt getestet in `specter/email_live.py`; der
 Netzwerkabruf im Beispiel-Runner. DKIM-Selektoren variieren je Anbieter — findet
 der Check über gängige Namen keinen, ist das **kein** sicherer Beleg für
 fehlendes DKIM (dann den Selector beim Kunden erfragen).
+
+## Zielkunden &amp; Akquiseplan
+
+Ein interner **Vertriebs-Leitfaden** (HTML → PDF) für die Neukundengewinnung im
+Mittelstand (Schwerpunkt Ludwigsburg/Stuttgart): idealer Zielkunde, Zielbranchen,
+Fundstellen, ein sechsstufiger Akquiseprozess, Nachfass-Rhythmus,
+Einwand-Antworten und der rechtliche Rahmen (UWG):
+
+```bash
+python examples/build_acquisition_plan.py   # reports/specter-akquiseplan.html
+```
 
 ## Angebot &amp; Preise (One-Pager)
 
