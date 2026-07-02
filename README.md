@@ -97,6 +97,7 @@ specter/
 ├── retest.py          # Re-Test/Delta gegen früheren Bericht
 ├── report.py          # produktionsreifer Bericht (Markdown + JSON)
 ├── report_export.py   # markengerechter HTML-Report (PDF via Browser-Druck)
+├── handbook.py        # internes Lern-/Bedien-Handbuch (HTML -> PDF)
 ├── integrations/      # opt-in ausgehende Aktionen
 │   └── github_pr.py          # Draft-PRs (offline-Dateien + opt-in GitHub-API)
 └── tools/
@@ -361,6 +362,19 @@ Muster-Definitionen des Scanners selbst) — die KI-Schicht mit Fable 5
 verifiziert sie und trennt echte Befunde vom Rauschen. Genau diese
 Verifikationsstufe unterscheidet Specter von einem reinen Signatur-Scanner.
 
+## Handbuch für das eigene Team
+
+Ein einfaches, markengerechtes **Lern-/Bedien-Handbuch** (kein Vorwissen nötig)
+erklärt, was Specter ist, wie man einen Auftrag von der `scope.yaml` bis zum
+Kunden-PDF durchführt, wie ein Kundengespräch abläuft und wo die rechtlichen
+Grenzen liegen (§202 StGB, DSGVO):
+
+```bash
+python examples/build_handbook.py    # erzeugt reports/specter-handbuch.html
+```
+
+Im Browser öffnen und über „Drucken → Als PDF speichern" ein PDF erstellen.
+
 ## Tests
 
 ```bash
@@ -368,7 +382,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-**475 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**478 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`). Abgedeckt sind u. a.:
 
 - Scope-Durchsetzung (Pfad-Traversal, CIDR, Sperrliste, Allowlist, Metazeichen)
