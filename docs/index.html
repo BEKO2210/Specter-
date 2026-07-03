@@ -263,7 +263,7 @@ section.alt{background:linear-gradient(180deg,transparent,rgba(14,28,43,.5),tran
 .step p{margin:0;color:var(--muted);font-size:14.5px}
 
 /* METHOD / AUTHORITY */
-.method{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
 .mtile{border:1px solid var(--line);border-radius:15px;padding:22px;background:var(--surface);text-align:center}
 .mtile .ic{width:26px;height:26px;color:var(--teal-2);margin:0 auto 12px}
 .mtile b{display:block;font-family:'Space Grotesk','Inter',sans-serif;font-size:15px;margin-bottom:5px}
@@ -348,6 +348,39 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
   .hero .cta .btn{flex:1 1 100%}
   .foot-top{grid-template-columns:1fr}
 }
+/* LIVE-DEMO (Screencast) */
+.dv-term{background:linear-gradient(180deg,#0b1a28,#091521);border:1px solid var(--line);
+  border-radius:16px;overflow:hidden;box-shadow:0 26px 60px rgba(0,0,0,.42)}
+.dv-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,.03);
+  border-bottom:1px solid var(--line)}
+.dv-dots{display:flex;gap:7px}.dv-dots i{width:11px;height:11px;border-radius:50%;background:#26394b}
+.dv-title{font-family:'Space Grotesk','Inter',sans-serif;font-size:13px;color:var(--muted)}
+.dv-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;
+  color:var(--teal-2);text-transform:uppercase;letter-spacing:.12em}
+.dv-live i{width:7px;height:7px;border-radius:50%;background:var(--teal-2);
+  box-shadow:0 0 0 0 rgba(45,212,191,.7);animation:pulse 2s infinite}
+.dv-screen{font-family:'Space Grotesk',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:clamp(11px,2.3vw,13px);line-height:1.7;padding:18px clamp(14px,3vw,22px);
+  height:min(56vh,440px);overflow-y:auto;scroll-behavior:smooth;white-space:pre-wrap;word-break:break-word}
+.dv-screen::-webkit-scrollbar{width:8px}.dv-screen::-webkit-scrollbar-thumb{background:#1c3346;border-radius:8px}
+.dv-row{opacity:0;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease}
+.dv-row.in{opacity:1;transform:none}
+.dv-row.banner,.dv-row.phase,.dv-row.result{color:var(--teal-2)}
+.dv-row.phase,.dv-row.result{font-weight:700}.dv-row.phase{margin-top:6px}
+.dv-row.info{color:var(--muted)}.dv-row.count{color:var(--text-2)}
+.dv-row.blank{height:.7em}
+.dv-tag{display:inline-block;min-width:70px;text-align:center;font-weight:700;font-size:10.5px;
+  padding:1px 8px;border-radius:6px;margin-right:9px}
+.dv-tag.k{background:rgba(242,116,138,.16);color:var(--rose);border:1px solid rgba(242,116,138,.35)}
+.dv-tag.h{background:rgba(245,184,65,.15);color:var(--amber);border:1px solid rgba(245,184,65,.32)}
+.dv-tag.m{background:rgba(45,212,191,.13);color:var(--teal-2);border:1px solid rgba(45,212,191,.30)}
+.dv-cursor{display:inline-block;width:9px;height:1.05em;vertical-align:text-bottom;
+  background:var(--teal-2);margin-left:2px;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.dv-ctl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+.dv-progress{flex:1 1 160px;min-width:140px;height:6px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.dv-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--teal-2));transition:width .25s ease}
+.dv-phase{font-size:12.5px;color:var(--muted);min-width:140px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto;animation:none!important}}
 </style>
 </head>
@@ -360,6 +393,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
     <nav class="navlinks">
       <a href="#problem">Risiko</a>
       <a href="#pfade">Angriffspfade</a>
+      <a href="#demo">Demo</a>
       <a href="#leistungen">Prüfumfang</a>
       <a href="#preise">Preise</a>
       <a class="btn primary" href="mailto:belkis.aslani@gmail.com?subject=Kostenloser%20Sicherheits-Check">Gratis-Check</a>
@@ -508,6 +542,35 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
   </section>
 
   <!-- REPORT FEATURE -->
+  <!-- LIVE-DEMO -->
+  <section id="demo">
+    <div class="wrap">
+      <div class="sec-head ctr reveal">
+        <div class="eyebrow">Live-Demo · echter Lauf</div>
+        <h2>Sehen Sie Specter bei der Arbeit</h2>
+        <p>Die echte Ausgabe von <code>python examples/run_demo.py</code>: Aufklärung, Code-Scan, ein echter
+           <code>curl</code>-Check, 14 Offline-Analyzer, die Angriffspfad-Korrelation und der fertige Bericht —
+           in wenigen Sekunden, vollständig offline.</p>
+      </div>
+      <div class="reveal" style="max-width:920px;margin:0 auto">
+        <div class="dv-term">
+          <div class="dv-bar">
+            <div class="dv-dots"><i></i><i></i><i></i></div>
+            <div class="dv-title">specter — examples/run_demo.py</div>
+            <div class="dv-live"><i></i> Live</div>
+          </div>
+          <div class="dv-screen" id="dvScreen" role="log" aria-live="polite" aria-label="Specter-Demo-Ausgabe"></div>
+        </div>
+        <div class="dv-ctl">
+          <button class="btn primary" id="dvPlay" type="button">▶ Demo abspielen</button>
+          <a class="btn ghost" href="demo.html">Vollbild öffnen</a>
+          <span class="dv-phase" id="dvPhase">Bereit</span>
+          <div class="dv-progress"><i id="dvBar"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="alt">
     <div class="wrap">
       <div class="feature">
@@ -644,7 +707,8 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
       <div class="method">
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><b>BSI IT-Grundschutz</b><span>Jeder Fund einem Baustein zugeordnet</span></div>
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg><b>CVSS-Bewertung</b><span>Nachvollziehbarer Score je Schwachstelle</span></div>
-        <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><b>626 automatisierte Tests</b><span>100&nbsp;% des Prüf-Kerns abgedeckt</span></div>
+        <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><b>646 automatisierte Tests</b><span>100&nbsp;% des Prüf-Kerns abgedeckt</span></div>
+        <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg><b>100&nbsp;% Erkennung, 0 Fehlalarme</b><span>Gegen offengelegten Benchmark-Korpus, reproduzierbar</span></div>
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg><b>Lückenloses Audit-Log</b><span>Jede Aktion ist belegt und prüfbar</span></div>
       </div>
     </div>
@@ -805,6 +869,100 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
   onScroll();addEventListener('scroll',onScroll,{passive:true});
   const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // LIVE-DEMO (Screencast des echten Demo-Laufs)
+  (function(){
+    const LINES=[
+      {c:'banner',t:'══════════════════════════════════════════════════════'},
+      {c:'banner',t:' Specter — End-to-End-Demo (localhost, ohne API-Key)'},
+      {c:'banner',t:'══════════════════════════════════════════════════════'},
+      {c:'info',t:'[i] Lokaler Test-Webserver läuft: http://127.0.0.1:44281/'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 1: RECON (Asset-Graph) ---',p:'Phase 1 · Aufklärung'},
+      {c:'info',t:'Asset erfasst: code:examples/vulnerable_app   · gesamt 1'},
+      {c:'info',t:'Asset erfasst: host:127.0.0.1  (betreibt → Code)  · gesamt 2'},
+      {c:'info',t:'Asset erfasst: endpoint:http://127.0.0.1:44281/  · gesamt 3'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 2: SCAN (White-Box) ---',p:'Phase 2 · Code-Scan'},
+      {c:'count',t:'6 Fundstellen in 1 Datei, 6 neu als Finding erfasst:'},
+      {c:'sev',s:'h',t:'app.py:11 — Möglicherweise fest kodiertes Secret/Passwort'},
+      {c:'sev',s:'h',t:'app.py:20 — Mögliche SQL-Injection (String-Verkettung)'},
+      {c:'sev',s:'h',t:'app.py:26 — Shell-Injection-Risiko (shell=True)'},
+      {c:'sev',s:'m',t:'app.py:31 — Schwacher Hash-Algorithmus (MD5/SHA1)'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 3: AKTIVER CHECK (echtes curl) ---',p:'Phase 3 · Aktiver Check'},
+      {c:'info',t:'HTTP/1.0 200 OK   ·   Server: DemoServer/0.1 (Test)'},
+      {c:'sev',s:'h',t:'Zugangsdaten im HTML-Kommentar sichtbar'},
+      {c:'sev',s:'h',t:'HTTP-Dienst ohne Authentifizierung exponiert'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 3c: OFFLINE-ANALYSE (14 Analyzer) ---',p:'Phase 3c · 14 Analyzer'},
+      {c:'count',t:'Active Directory: 13 Funde'},
+      {c:'sev',s:'h',t:'krbtgt-Passwort veraltet (1450 Tage) — Golden-Ticket-Risiko'},
+      {c:'count',t:'Entra-ID / M365: 9 Funde'},
+      {c:'sev',s:'k',t:'Privilegiertes Konto ohne MFA: admin@mustermann.de'},
+      {c:'count',t:'AWS: 16 Funde'},
+      {c:'sev',s:'k',t:'Root-Konto ohne MFA'},
+      {c:'count',t:'E-Mail-Security: 4 Funde'},
+      {c:'sev',s:'h',t:'SPF erlaubt beliebige Absender (+all/?all)'},
+      {c:'count',t:'TLS / Zertifikate: 9 Funde'},
+      {c:'sev',s:'h',t:'TLS-Zertifikat abgelaufen: portal.musterversicherung.de'},
+      {c:'count',t:'Backup-Resilienz: 9 Funde'},
+      {c:'sev',s:'h',t:'Kein offline-/unveränderbares (Immutable) Backup'},
+      {c:'info',t:'… außerdem Exchange, Azure, Firewall/VPN, DNS, Datenbanken, Container, SCA'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 4: ANGRIFFSPFAD-KORRELATION ---',p:'Phase 4 · Angriffspfade'},
+      {c:'count',t:'7 Angriffspfade korreliert:'},
+      {c:'sev',s:'k',t:'AP-1  Kontoübernahme über offengelegtes Secret  (20 Funde)'},
+      {c:'sev',s:'k',t:'AP-3  Domänenübernahme über exponierten Fernzugang'},
+      {c:'sev',s:'k',t:'AP-4  DSGVO-meldepflichtiger Datenabfluss (Art. 33/34)'},
+      {c:'sev',s:'h',t:'AP-6  Rechteausweitung über schwache Auth/Zugriffskontrolle'},
+      {c:'blank'},
+      {c:'phase',t:'--- Phase 5: BERICHT + FIX-VORSCHLÄGE ---',p:'Phase 5 · Bericht'},
+      {c:'info',t:'Bericht geschrieben: Markdown · JSON · HTML (Druck → PDF)'},
+      {c:'count',t:'Findings: 135   ·   Angriffspfade: 7'},
+      {c:'blank'},
+      {c:'result',t:'══════════════════════════════════════════════════════'},
+      {c:'result',t:' Ergebnis: 3 Assets · 135 Funde (K 9, H 59, M 40) · 7 Pfade'},
+      {c:'result',t:'══════════════════════════════════════════════════════'},
+    ];
+    const screen=document.getElementById('dvScreen'),bar=document.getElementById('dvBar'),
+      phase=document.getElementById('dvPhase'),btn=document.getElementById('dvPlay');
+    if(!screen)return;
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer=null,cursor=null;
+    function mk(it){
+      const r=document.createElement('div');r.className='dv-row '+(it.c||'line');
+      if(it.c==='blank'){r.classList.add('blank');return r;}
+      if(it.c==='sev'){const tg=document.createElement('span');tg.className='dv-tag '+it.s;
+        tg.textContent=it.s==='k'?'Kritisch':it.s==='h'?'Hoch':'Mittel';
+        r.appendChild(tg);r.appendChild(document.createTextNode(it.t));}
+      else r.textContent=it.t;
+      return r;
+    }
+    function all(){screen.innerHTML='';LINES.forEach(it=>{const r=mk(it);r.classList.add('in');screen.appendChild(r);});
+      bar.style.width='100%';phase.textContent='Abgeschlossen';}
+    function play(){
+      clearTimeout(timer);screen.innerHTML='';bar.style.width='0%';
+      btn.textContent='⟳ Läuft …';btn.disabled=true;
+      cursor=document.createElement('span');cursor.className='dv-cursor';screen.appendChild(cursor);
+      let i=0;
+      (function step(){
+        if(i>=LINES.length){if(cursor)cursor.remove();phase.textContent='Abgeschlossen';
+          btn.textContent='⟳ Wiederholen';btn.disabled=false;return;}
+        const it=LINES[i];const r=mk(it);screen.insertBefore(r,cursor);
+        requestAnimationFrame(()=>r.classList.add('in'));
+        if(it.p)phase.textContent=it.p;
+        bar.style.width=Math.round(((i+1)/LINES.length)*100)+'%';
+        screen.scrollTop=screen.scrollHeight;i++;
+        const d=it.c==='phase'?340:it.c==='blank'?90:it.c==='sev'?150:120;
+        timer=setTimeout(step,d);
+      })();
+    }
+    if(reduce){all();btn.textContent='⟳ Erneut anzeigen';btn.addEventListener('click',all);}
+    else{btn.addEventListener('click',play);
+      const dio=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){play();dio.disconnect();}}),{threshold:.3});
+      dio.observe(screen);}
+  })();
 </script>
 </body>
 </html>

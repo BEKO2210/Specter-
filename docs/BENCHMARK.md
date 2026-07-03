@@ -1,0 +1,150 @@
+# Specter-Benchmark — Methodik
+
+> **Kurzfassung:** Gegen einen offengelegten, reproduzierbaren Korpus aus **53
+> markierten Szenarien** über **alle 14 Analyzer** erkennt Specter **144 von 144**
+> gepflanzten Schwachstellen (**Recall 100 %**) und erzeugt dabei **null
+> Fehlalarme** (**Präzision 100 %**), auch auf 23 gehärteten und
+> Täuschungs-Szenarien. Jeder Schweregrad stimmt (100 %). Nachrechnen:
+> `python examples/benchmark/run.py`.
+
+Dieses Dokument erklärt, **was** gemessen wird, **wie** und **warum das ehrlich
+ist**. Es ist bewusst nüchtern gehalten: keine Marketing-Quote, sondern eine
+Zahl, die jeder auf dem eigenen Rechner in Millisekunden reproduziert.
+
+---
+
+## Warum diese Benchmark existiert
+
+Sicherheitssoftware wird gern mit unüberprüfbaren „Erkennungsraten" beworben
+(„99,9 % aller Angriffe"). Solche Zahlen sind wertlos, weil die Grundgesamtheit
+niemand kennt. Specter geht den umgekehrten Weg: Wir veröffentlichen **die
+Wahrheit, gegen die gemessen wird** — einen konkreten, lesbaren Korpus mit
+bekanntem Soll-Ergebnis — und messen ausschließlich dagegen. Die Zahl ist damit
+nicht beeindruckend *weil sie groß ist*, sondern *weil sie nachprüfbar ist*.
+
+Zwei Kennzahlen zählen gleichermaßen:
+
+- **Erkennung (Recall):** Wird jede vorhandene Lücke gefunden? Ein Werkzeug, das
+  nichts übersieht, aber ständig Fehlalarme wirft, ist im Alltag unbrauchbar.
+- **Präzision (1 − Falsch-Positiv-Rate):** Wird *nur* gemeldet, was wirklich ein
+  Problem ist? Genau hier scheitern viele Scanner — und genau hier prüft die
+  Benchmark am härtesten.
+
+---
+
+## Der Korpus
+
+| Kennzahl | Wert |
+|---|---|
+| Szenarien | **53** |
+| Abgedeckte Analyzer | **14 / 14** |
+| Markierte Soll-Funde (Ground Truth) | **144** |
+| Gehärtete/negative Szenarien (Soll: 0 Funde) | **23** |
+
+Jedes Szenario ist ein realistischer, aber synthetischer Export (E-Mail-DNS,
+`docker inspect`, AD-Struktur, Firewall-Regelwerk, …) mit **exakt bekanntem**
+Soll-Ergebnis. Es gibt vier Arten:
+
+| Art | Anzahl | Zweck |
+|---|---|---|
+| **Gepflanzte Lücke** (`vuln`) | 16 | Bekannte Schwachstellen, die gefunden werden **müssen**. |
+| **Gehärtet** (`hardened`) | 14 | Sauberer Soll-Zustand — es darf **kein** Fund entstehen. |
+| **Schwellenwert** (`boundary`) | 9 | Werte exakt auf der Entscheidungsgrenze. |
+| **Täuschung** (`confuser`) | 14 | Sieht gefährlich aus, ist es nicht — oder umgekehrt. |
+
+### Was die Benchmark „schwer" macht
+
+Ein oberflächlicher Test pflanzt nur offensichtliche Lücken und freut sich über
+100 %. Dieser Korpus ist **adversarial** gebaut — er greift genau die Stellen an,
+an denen reale Werkzeuge scheitern:
+
+- **Grenzwerte exakt auf der Kante.** DKIM mit **1024** Bit (grenzwertig) neben
+  **1023** (zu schwach) und **2048** (sauber). Passwort-Mindestlänge **12** (ok)
+  gegen **11**. Zertifikat mit **30** Tagen Restlaufzeit (Warnung) gegen **31**
+  (still). krbtgt mit **180** Tagen (ok) gegen **181**. Access-Key mit exakt
+  **180** Tagen. Ein Off-by-One in einer Regel fällt hier sofort auf.
+
+- **Numerischer statt alphabetischer Versionsvergleich.** `internal-lib 2.9.0`
+  unter dem Constraint `< 2.10.0` **muss** als verwundbar gelten. Ein naiver
+  String-Vergleich (`"2.9.0" > "2.10.0"`, weil `'9' > '1'`) würde die Lücke
+  übersehen — ein klassischer, gefährlicher SCA-Bug.
+
+- **Semantische Täuschungen.** Ein öffentlich erreichbarer Webserver auf Port
+  **443/80** ist legitim und darf **nicht** als „offener Port" gemeldet werden;
+  ein interner RDP-Zugang ebenso wenig. Ein **EC-Schlüssel mit 256 Bit** ist
+  stark und darf nicht mit einem 1024-Bit-RSA verwechselt werden. Ein M365-Tenant
+  ohne Security Defaults, aber mit passender **Conditional-Access-Richtlinie** ist
+  abgesichert — eine **deaktivierte** Richtlinie dagegen schützt nicht und muss
+  weiterhin als Lücke gelten.
+
+- **Fehlende Felder ≠ unsicher.** Ein Datenbank-Datensatz, der nur `engine` und
+  `port` angibt, darf keinen Fund erzeugen — Specter bewertet nur, was explizit
+  als unsicher belegt ist.
+
+---
+
+## Wie gemessen wird
+
+Für jedes Szenario ruft die Benchmark den echten Analyzer auf und gleicht seine
+Funde mit der Ground Truth ab. Weil das Datenmodell **keine** stabilen
+Fund-Codes kennt (die Finding-`id` ist ein Hash aus Kategorie/Asset/Ort/Titel),
+wird — wie schon in den Labor-Harnessen — über **(Kategorie, Titel-Teilstring,
+Schweregrad)** gematcht.
+
+Die Erwartungsliste eines Szenarios ist **vollständig**: Jeder tatsächliche Fund,
+der zu keiner Erwartung passt, zählt als **Fehlalarm (False Positive)**. Bei
+gehärteten Szenarien ist die Erwartung leer — dort ist **jeder** Fund ein
+Fehlalarm. Daraus ergeben sich:
+
+```
+Recall      = erkannte Soll-Funde / alle Soll-Funde          (Ziel: 100 %)
+Präzision   = korrekte Funde / (korrekte Funde + Fehlalarme)  (Ziel: 100 %)
+Spezifität  = gehärtete Szenarien ohne Fehlalarm / alle davon (Ziel: 100 %)
+Schweregrad = korrekte Schweregrade / getroffene Erwartungen  (Ziel: 100 %)
+```
+
+---
+
+## Ausführen
+
+```bash
+# Farbige Scorecard (Konsole)
+python examples/benchmark/run.py
+
+# Maschinenlesbar (für Skripte/CI)
+python examples/benchmark/run.py --json
+
+# Jede Zeile einzeln
+python examples/benchmark/run.py --details
+```
+
+Der Läufer endet mit **Exit-Code 1**, sobald die Erkennung unter 100 % fällt, ein
+Fehlalarm auftritt oder ein Schweregrad nicht stimmt — er ist damit zugleich ein
+Gate.
+
+## Als Regressionswächter in der CI
+
+Die Benchmark läuft bei **jedem Commit** über `tests/test_benchmark.py` in der
+regulären Testsuite mit (auf Python 3.11 und 3.12). Sie schlägt fehl, sobald
+
+- eine gepflanzte Lücke nicht mehr erkannt wird,
+- ein gehärtetes/Schwellen-/Täuschungs-Szenario plötzlich einen Fehlalarm wirft,
+- oder sich ein Schweregrad verschiebt.
+
+So kann niemand versehentlich eine Erkennungsregel lockern und dabei die
+Falsch-Positiv-Rate hochziehen, ohne dass die CI es meldet.
+
+---
+
+## Grenzen (ehrlich benannt)
+
+- Der Korpus misst die **Analyzer-Logik** gegen bekannte Fehlerklassen, nicht die
+  Vollständigkeit gegenüber *allen* denkbaren Angriffen. Er beweist Korrektheit
+  und Präzision auf einem definierten, offengelegten Umfang — nicht „Sicherheit"
+  im absoluten Sinn.
+- Die Szenarien sind synthetisch (dafür deterministisch und reproduzierbar). Die
+  **Labor-Harnesse** (`examples/live_lab/`) ergänzen das um Läufe gegen *echte*,
+  selbst gestartete Server, Datenbanken und Container.
+- Erweiterungen sind erwünscht: Neue Fehlerklassen werden als weitere Szenarien
+  in `examples/benchmark/corpus.py` aufgenommen — jede Regel bekommt so ihren
+  festen Platz in der Wahrheit, gegen die gemessen wird.

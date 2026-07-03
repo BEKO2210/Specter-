@@ -11,8 +11,9 @@
 E-Mail-Betrug, offenes RDP, fehlende Backups: Specter deckt die Angriffspfade auf, erklärt sie verständlich und belegt jeden Fund.</p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-626%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-646%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
+  <img alt="Benchmark" src="https://img.shields.io/badge/Erkennung-100%25%20%C2%B7%200%20Fehlalarme-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
   <img alt="Defensiv" src="https://img.shields.io/badge/Ausrichtung-rein%20defensiv-0D1B2A">
 </p>
@@ -64,6 +65,8 @@ und rechtlich sauber.
 
 <p align="center"><img src="docs/assets/img/screens/report.jpg" alt="Specter Sicherheitsbericht" width="720"></p>
 
+▶️ **Der komplette Lauf als animierte Live-Demo:** [**docs/demo.html**](https://beko2210.github.io/Specter-/demo.html) — Aufklärung, Code-Scan, 14 Analyzer, Angriffspfade und Bericht in wenigen Sekunden. Oder selbst starten: `python examples/run_demo.py`.
+
 ---
 
 ## Beweise statt Behauptungen
@@ -72,16 +75,22 @@ Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **
 
 1. **Jeder Fund trägt seinen Beweis.** Die Analyzer arbeiten deterministisch und regelbasiert: Zu jedem Fund gehören die konkrete Evidenz (der DNS-Eintrag, der Header, die Firewall-Regel), ein CVSS-Score und die BSI-IT-Grundschutz-Zuordnung. Kein Fund ohne Beleg — dieselben Eingaben liefern denselben Bericht. Das hält die False-Positive-Diskussion kurz: Was im Bericht steht, lässt sich zeigen.
 
-2. **Geprüft gegen echte Server, nicht nur Fixtures.** Die mitgelieferten Labore starten reale, absichtlich verwundbare Systeme und weisen nach, dass Specter die Schwachstellen findet — siehe [Labor-Beweise](#labor-beweise-selbst-nachprüfbar) unten.
+2. **Messbare Erkennungs- und Falsch-Positiv-Rate.** Statt einer erfundenen Marketing-Quote misst Specter gegen einen **offengelegten, reproduzierbaren Korpus**: 53 markierte Szenarien über alle 14 Analyzer mit bekanntem Soll-Ergebnis. Das Resultat — **144/144 gepflanzte Lücken erkannt (Recall 100 %), null Fehlalarme (Präzision 100 %)** auch auf 23 gehärteten und adversarialen Täuschungs-Szenarien. Selbst nachrechnen (Millisekunden):
+   ```bash
+   python examples/benchmark/run.py
+   ```
+   → [Methodik & Ergebnis](docs/BENCHMARK.md) · [Korpus](examples/benchmark/corpus.py). Der Korpus ist bewusst *schwer* gebaut (Werte exakt auf der Schwelle, numerischer Versionsvergleich, semantische Täuschungen wie „öffentlicher 443-Port ist legitim") und läuft als Gate bei jedem Commit mit.
 
-3. **Specter prüft sich selbst.** Der Self-Audit setzt Specter auf den eigenen Quellcode an — derselbe Ablauf, den auch ein Kunde bekommt:
+3. **Geprüft gegen echte Server, nicht nur Fixtures.** Die mitgelieferten Labore starten reale, absichtlich verwundbare Systeme und weisen nach, dass Specter die Schwachstellen findet — siehe [Labor-Beweise](#labor-beweise-selbst-nachprüfbar) unten.
+
+4. **Specter prüft sich selbst.** Der Self-Audit setzt Specter auf den eigenen Quellcode an — derselbe Ablauf, den auch ein Kunde bekommt:
    ```bash
    python examples/self_audit.py
    ```
 
-4. **626 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
+5. **646 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
 
-5. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
+6. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
 
 ### Labor-Beweise (selbst nachprüfbar)
 
@@ -120,6 +129,29 @@ die gefährlichen Fehlkonfigurationen erkennt:
 ```bash
 python examples/live_lab/run_container_lab.py
 ```
+
+### Benchmark: Erkennung mit Zahl statt Behauptung
+
+Wo die Labore *einzelne* echte Systeme prüfen, misst die Benchmark die
+Analyzer-Logik **in der Breite** — gegen einen offengelegten Korpus aus 53
+markierten Szenarien mit bekanntem Soll-Ergebnis:
+
+```bash
+python examples/benchmark/run.py
+```
+
+| Kennzahl | Wert |
+|---|---|
+| Abgedeckte Analyzer | **14 / 14** |
+| Gepflanzte Lücken erkannt (Recall) | **144 / 144 = 100 %** |
+| Fehlalarme (auf 23 gehärteten/Täuschungs-Szenarien) | **0 → Präzision 100 %** |
+| Schweregrade korrekt | **100 %** |
+
+Der Korpus ist bewusst **adversarial**: Werte liegen exakt auf der
+Entscheidungsschwelle, Versionsvergleiche sind numerisch statt alphabetisch
+(`2.9.0 < 2.10.0` **muss** greifen), und Täuschungen wie ein *legitimer*
+öffentlicher 443-Port oder eine *deaktivierte* Conditional-Access-Richtlinie
+dürfen nicht zu Fehlalarmen führen. Details: [`docs/BENCHMARK.md`](docs/BENCHMARK.md).
 
 ---
 
@@ -272,7 +304,9 @@ Alles, was ein Kunde oder Partner vor der Beauftragung prüfen will, an einem Or
 | Dokument | Inhalt |
 |---|---|
 | [`SECURITY.md`](SECURITY.md) | Sicherheitsmodell, Meldeweg für Schwachstellen |
+| [Benchmark-Methodik](docs/BENCHMARK.md) | Wie Erkennungs- und Falsch-Positiv-Rate gemessen werden |
 | [Beispielbericht (PDF)](docs/Specter-Beispielbericht.pdf) | So sieht das Ergebnis aus — vor dem Kauf |
+| [Live-Demo (animiert)](https://beko2210.github.io/Specter-/demo.html) | Der End-to-End-Lauf als Screencast |
 | [Handbuch (PDF)](docs/Specter-Handbuch.pdf) | Vollständige Bedienungs- und Lernunterlage |
 | [Investoren-Onepager (PDF)](docs/Specter-Investoren-Onepager.pdf) | Markt, Modell, Positionierung auf einer Seite |
 | [Live-Demo-Skript](docs/Specter-Live-Demo-Skript.md) | Reproduzierbare Demo für Kundengespräche |
@@ -286,6 +320,8 @@ Alles, was ein Kunde oder Partner vor der Beauftragung prüfen will, an einem Or
 |---|---|---|
 | **Website** | Online-Auftritt (GitHub Pages) | `docs/index.html` |
 | **Handbuch** | dein Lern-/Bedienheft (PDF) | `python examples/build_handbook.py` |
+| **Benchmark** | Erkennungsrate belegen | `python examples/benchmark/run.py` |
+| **Live-Demo** | animierter End-to-End-Lauf | `docs/demo.html` |
 | **Live-Check** | kostenloser Türöffner | `python examples/live_email_check.py <domain>` |
 | **Erstkontakt-Mail** | individuelle Ansprache | `python examples/build_outreach_email.py <domain>` |
 | **Angebot** | Pakete & Preise | `python examples/build_offer.py` |
@@ -332,17 +368,21 @@ richtige Schutz; Specter beantwortet den Teil, der im Mittelstand meist fehlt.
 
 ## Roadmap
 
-Die Softwarequalität steht (626 Tests, 100 % Coverage, Labor-Beweise). Der Fokus
-liegt jetzt auf Marktreife und Vertrauensaufbau:
+Die Softwarequalität steht (646 Tests, 100 % Coverage, Labor-Beweise,
+reproduzierbare Benchmark). Der Fokus liegt jetzt auf Marktreife und
+Vertrauensaufbau:
 
+- ✅ **Benchmark-Suite** — reproduzierbare Erkennungs-Messung mit offengelegter
+  Methodik statt Marketing-Zahlen. **Erledigt:** [`docs/BENCHMARK.md`](docs/BENCHMARK.md),
+  `python examples/benchmark/run.py`.
+- ✅ **Live-Demo** — der End-to-End-Lauf als animierter Screencast auf der Website
+  ([`docs/demo.html`](https://beko2210.github.io/Specter-/demo.html)).
 - **Referenzen & Fallstudien** — anonymisierte Ergebnisse aus echten Aufträgen
   (Funde, Behebungsquote, Nachtest-Delta) als belastbarer Nutzen-Nachweis.
-- **Benchmark-Suite** — reproduzierbare Erkennungs-Messung gegen die Labor-Umgebungen,
-  veröffentlicht mit Methodik statt Marketing-Zahlen.
-- **Weitere Analyzer** — u. a. Google Workspace, Netzwerk-Segmentierung, Patch-Stand.
+- **Weitere Analyzer** — u. a. Google Workspace, Netzwerk-Segmentierung, Patch-Stand;
+  jede neue Regel bekommt ihr Szenario im Benchmark-Korpus.
 - **Integrationen** — Export der Funde nach Ticket-Systemen (Jira, GitLab) für die
   Behebung im Kundenteam.
-- **Demo-Video** — der End-to-End-Lauf als 3-Minuten-Video für die Website.
 - **Englische Berichte** — gleiche Engine, zweite Berichtssprache.
 
 Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/issues).
@@ -351,11 +391,13 @@ Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/
 
 ## Qualität
 
-**626 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**646 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
 Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle vierzehn Analyzer (jede Regel +
 Fehlerfälle), die vierundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
-BSI-Mapping sowie Markdown- und HTML-Report.
+BSI-Mapping sowie Markdown- und HTML-Report. Zusätzlich läuft die
+**Benchmark als Regressions-Gate** mit (`tests/test_benchmark.py`): sinkt die
+Erkennung oder entsteht ein Fehlalarm, schlägt die CI fehl.
 
 ---
 
@@ -366,8 +408,10 @@ specter/            # Kern: Analyzer, Tools, Scope-Policy, Report, CVSS, BSI
   analyzers/        # die vierzehn Offline-Analyzer
   tools/            # vierundzwanzig Agenten-Werkzeuge
 examples/           # Demo, Live-Check, Labore, Self-Audit, Marketing-Generatoren
-docs/               # Website (GitHub Pages), Marke, Handbuch, Trust-Dokumente
-tests/              # 626 Tests (100 % Coverage)
+  benchmark/        # markierter Korpus + Scorecard (python examples/benchmark/run.py)
+  live_lab/         # Läufe gegen echte Server/DB/Container
+docs/               # Website + Live-Demo (demo.html), Benchmark-Methodik, Trust-Dokumente
+tests/              # 646 Tests (100 % Coverage), inkl. Benchmark-Gate
 ```
 
 ---
