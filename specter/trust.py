@@ -190,8 +190,8 @@ def build_trust_html(customer_name: str = "Ihr Unternehmen",
              "<li><strong>Nachtest (Re-Test)</strong> belegt die Behebung nach der "
              "Umsetzung.</li></ul>")
 
-    p.append("<div class='ok'><strong>Kurz gesagt:</strong> Specter prüft wie ein "
-             "TÜV - gründlich, nachvollziehbar und ohne Ihre Systeme zu "
+    p.append("<div class='ok'><strong>Kurz gesagt:</strong> Specter prüft "
+             "unabhängig und gründlich - nachvollziehbar und ohne Ihre Systeme zu "
              "gefährden. Sie behalten jederzeit die Kontrolle.</div>")
 
     p.append("<footer>Vertrauens- &amp; Sicherheitszusage, erstellt mit Specter "

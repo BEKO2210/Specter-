@@ -19,7 +19,7 @@ und tragen das **Original-Specter-Logo** (siehe [`README.md`](README.md)).
 |---|---|
 | **Marke** | Specter — Sicherheits-Audit für den deutschen Mittelstand |
 | **Kernbotschaft** | „Wir gehen den Weg des Angreifers zuerst — legal, kontrolliert, dokumentiert." |
-| **Positionierung** | Der **TÜV für Ihre IT**: unabhängig, nachvollziehbar, verständlich für Geschäftsführung *und* IT |
+| **Positionierung** | Der **unabhängige Sicherheits-Check für Ihre IT**: nachvollziehbar, verständlich für Geschäftsführung *und* IT |
 | **Zielgruppe** | Geschäftsführung, IT-Leitung & IT-Verantwortliche in KMU/Mittelstand (DACH) |
 | **Tonalität** | Seriös, ruhig, kompetent — kein Angst-Marketing, sondern Klarheit & Kontrolle |
 | **Sprache** | Deutsch (Sie-Form) |
@@ -29,7 +29,7 @@ und tragen das **Original-Specter-Logo** (siehe [`README.md`](README.md)).
 ### Content-Säulen
 1. **Aufklären** — wie Angriffe wirklich ablaufen (Karussell, Reels).
 2. **Beweisen** — belegter Angriffspfad, nachvollziehbare Ergebnisse (Infografik, Benchmark).
-3. **Vertrauen** — Unabhängigkeit, Datenschutz, „TÜV"-Prinzip, deutsche Wertarbeit.
+3. **Vertrauen** — Unabhängigkeit, Datenschutz, Prüf-Prinzip, deutsche Wertarbeit.
 4. **Handeln** — klarer CTA: Sicherheits-Audit / Erstgespräch anfragen.
 
 ### Beste Posting-Zeiten (DACH, B2B)
@@ -80,7 +80,7 @@ Nicht alle gleichzeitig — pro Post das passende Set kombinieren.
 **Assets:** `linkedin-1200x627.png` (LinkedIn) · `hero-feed-4x5.png` (IG/FB)
 
 **LinkedIn-Text:**
-> **Der TÜV für Ihre IT.**
+> **Der unabhängige Sicherheits-Check für Ihre IT.**
 >
 > Beim Auto ist es selbstverständlich: alle zwei Jahre unabhängig prüfen lassen,
 > ob alles sicher ist. Bei der IT — dem Nervensystem Ihres Unternehmens —
@@ -101,8 +101,8 @@ Nicht alle gleichzeitig — pro Post das passende Set kombinieren.
 **Instagram/Facebook-Text:**
 > 🛡️ **Angriffe stoppen, bevor sie beginnen.**
 >
-> Specter ist der TÜV für Ihre IT: eine unabhängige Sicherheitsprüfung, die den
-> Weg eines echten Angreifers nachgeht — legal, kontrolliert, dokumentiert.
+> Specter ist der unabhängige Sicherheits-Check für Ihre IT: eine Sicherheitsprüfung,
+> die den Weg eines echten Angreifers nachgeht — legal, kontrolliert, dokumentiert.
 >
 > Diese Woche nehmen wir Sie mit: Wie läuft ein Angriff auf ein Unternehmen
 > wirklich ab? Und wo lässt er sich aufhalten? Bleiben Sie dran. 🔒
@@ -224,7 +224,7 @@ Nicht alle gleichzeitig — pro Post das passende Set kombinieren.
 **Facebook-Text (für Boosting geeignet):**
 > **Angriffe stoppen, bevor sie beginnen.**
 > Specter prüft Ihre IT wie ein echter Angreifer — unabhängig, dokumentiert,
-> verständlich. Der TÜV für Ihre IT.
+> verständlich. Der unabhängige Sicherheits-Check für Ihre IT.
 > 👉 Kostenloses Erstgespräch: [LINK]
 >
 > #Specter #ITSicherheit #Mittelstand

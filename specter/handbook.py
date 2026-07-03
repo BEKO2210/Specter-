@@ -165,9 +165,9 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
              "findet Schwachstellen und schreibt einen verständlichen Bericht mit "
              "konkreten Empfehlungen - so wie es große Sicherheitsfirmen tun, nur "
              "günstiger und schneller.</p>")
-    p.append("<div class='callout'>Merksatz: Specter ist wie ein <strong>TÜV für "
-             "die IT</strong>. Er repariert nichts selbst und bricht nirgends ein - "
-             "er prüft, dokumentiert und empfiehlt.</div>")
+    p.append("<div class='callout'>Merksatz: Specter ist wie ein <strong>unabhängiger "
+             "Sicherheits-Check für die IT</strong>. Er repariert nichts selbst und "
+             "bricht nirgends ein - er prüft, dokumentiert und empfiehlt.</div>")
     p.append("<p>Das Besondere: Specter arbeitet <strong>offline</strong>. Er wertet "
              "Export-Dateien aus, die der Kunde bereitstellt. Er verbindet sich nicht "
              "heimlich mit fremden Systemen. Das macht ihn sicher - und rechtlich sauber.</p>")

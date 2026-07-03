@@ -13,10 +13,10 @@ pixelgenau einkomponiert (das Logo stammt aus `../docs/brand/`, nicht aus der KI
 | Datei | Format | Kanal / Platzierung | Motiv & Text |
 |---|---|---|---|
 | [`hero-feed-4x5.png`](hero-feed-4x5.png) | 4:5 · 2K | IG/FB **Feed** | Teal-Wächter — *„Angriffe stoppen, bevor sie beginnen"* |
-| [`story-9x16.png`](story-9x16.png) | 9:16 · 2K | **Story / Reel-Cover** | Teal-Schild über Gewerbegebiet — *„Der TÜV für Ihre IT"* |
+| [`story-9x16.png`](story-9x16.png) | 9:16 · 2K | **Story / Reel-Cover** | Teal-Schild über Gewerbegebiet — *„Der unabhängige Sicherheits-Check für Ihre IT"* |
 | [`attack-path-1x1.png`](attack-path-1x1.png) | 1:1 · 2K | Feed / **Karussell** | Angriffspfad-Infografik — *„Wir finden den Weg des Angreifers — zuerst"* |
 | [`facebook-16x9.png`](facebook-16x9.png) | 16:9 · 1200×630 | **Facebook** Querformat / Link / Ad | Hero-Szene + Logo — *„Angriffe stoppen, bevor sie beginnen"* |
-| [`linkedin-1200x627.png`](linkedin-1200x627.png) | 1.91:1 · 1200×627 | **LinkedIn** Einzelbild | *„Der TÜV für Ihre IT"* |
+| [`linkedin-1200x627.png`](linkedin-1200x627.png) | 1.91:1 · 1200×627 | **LinkedIn** Einzelbild | *„Der unabhängige Sicherheits-Check für Ihre IT"* |
 | [`carousel-1-aufklaerung.png`](carousel-1-aufklaerung.png) … [`-5-specter.png`](carousel-5-specter.png) | 1:1 · 1080 ×5 | IG/FB **Karussell** | „So läuft ein Angriff" — 5 Schritte, Folie 5 mit CTA + Logo |
 | [`reel-attack-cover-9x16.png`](reel-attack-cover-9x16.png) | 9:16 · 1080×1920 | **Reel/Story-Cover** | Cover zum Angriff-Reel |
 

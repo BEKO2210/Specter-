@@ -46,7 +46,7 @@ Die großen Plattformen (EDR, Cloud Security, SIEM) **überwachen den laufenden 
 ## Was ist Specter?
 
 Specter ist eine **automatische, defensive Sicherheitsprüfung**. Man kann sich das
-wie einen **TÜV für die IT** vorstellen: Er schaut sich die IT einer Firma an, findet
+wie einen **unabhängigen Sicherheits-Check für die IT** vorstellen: Er schaut sich die IT einer Firma an, findet
 Schwachstellen und schreibt einen verständlichen Bericht mit klaren Prioritäten — so
 wie es große Sicherheitsfirmen tun, nur schneller und günstiger.
 
