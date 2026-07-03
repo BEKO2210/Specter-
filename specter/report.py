@@ -51,6 +51,44 @@ def _now_iso() -> str:
     return _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
 
 
+# ---- Markdown-Injection-Schutz ----------------------------------------------
+# Belege, Titel und Assets stammen teils aus dem GEPRÜFTEN System (Server-Banner,
+# HTML-Kommentare, Zertifikatsfelder). Markdown erlaubt eingebettetes HTML —
+# ein <script> in einem Banner würde also beim Rendern der .md (GitHub, Viewer,
+# Markdown->PDF) als Stored XSS gegen den Prüfer ausgeführt. Diese Helfer
+# entschärfen angreiferkontrollierten Text, ohne gutartige Ausgaben zu verändern.
+
+def _md_inline(text: Any) -> str:
+    """Neutralisiert HTML-Tags und Struktur-Injection für Inline-Markdown."""
+    s = str(text).replace("\r\n", "\n").replace("\r", "\n")
+    # HTML-Tags entschärfen (killt <script>, <img onerror=...> beim Rendern).
+    s = s.replace("<", "&lt;").replace(">", "&gt;")
+    # Zeilenumbrüche zu Leerzeichen: verhindert das Einschmuggeln neuer
+    # Markdown-Blöcke (z. B. "\n## Gefälschte Überschrift") in ein Inline-Feld.
+    return s.replace("\n", " ").strip()
+
+
+def _md_cell(text: Any) -> str:
+    """Wie _md_inline, zusätzlich Pipe-sicher für Tabellenzellen."""
+    return _md_inline(text).replace("|", "\\|")
+
+
+def _md_fence(text: Any) -> str:
+    """Beleg in einem ausbruchsicheren Codeblock.
+
+    In einem Codeblock wird HTML nicht gerendert; ein Fence, der länger ist als
+    jeder Backtick-Lauf im Inhalt, kann nicht von innen geschlossen werden
+    (CommonMark). Damit sind auch bösartige Belege ungefährlich.
+    """
+    s = str(text).replace("\r\n", "\n").replace("\r", "\n").strip()
+    longest = run = 0
+    for ch in s:
+        run = run + 1 if ch == "`" else 0
+        longest = max(longest, run)
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}\n{s}\n{fence}"
+
+
 def _top_risks(findings: FindingsStore, limit: int = 5) -> list[Finding]:
     return [f for f in findings.all() if f.severity >= Severity.HOCH][:limit]
 
@@ -105,7 +143,7 @@ def _section_executive(config: Config, assets: AssetGraph, findings: FindingsSto
     if top:
         lines.append("**Wichtigste Risiken:**")
         for f in top:
-            lines.append(f"- [{f.severity.label}] {f.title} ({f.asset})")
+            lines.append(f"- [{f.severity.label}] {_md_inline(f.title)} ({_md_inline(f.asset)})")
         lines.append("")
     if krit or hoch:
         lines.append(
@@ -134,14 +172,14 @@ def _section_attack_paths(paths: list[AttackPath]) -> list[str]:
     for i, p in enumerate(paths, start=1):
         suffix = f"  ·  {p.instances} Kombinationen" if p.instances > 1 else ""
         lines.append(
-            f"### AP-{i}: {p.title}  ·  Schweregrad: {p.severity.label}{suffix}"
+            f"### AP-{i}: {_md_inline(p.title)}  ·  Schweregrad: {p.severity.label}{suffix}"
         )
         lines.append("")
         for step_no, step in enumerate(p.steps, start=1):
-            lines.append(f"{step_no}. {step}")
+            lines.append(f"{step_no}. {_md_inline(step)}")
         lines.append("")
         if p.rationale:
-            lines.append(f"> {p.rationale}")
+            lines.append(f"> {_md_inline(p.rationale)}")
         if p.finding_ids:
             lines.append(f"> Findings: {', '.join(p.finding_ids)}")
         lines.append("")
@@ -162,12 +200,12 @@ def _section_delta(delta: Any) -> list[str]:
     if delta.resolved:
         lines.append("**Behoben seit dem letzten Bericht:**")
         for r in delta.resolved:
-            lines.append(f"- {r.get('title', r.get('id'))} ({r.get('severity', '')})")
+            lines.append(f"- {_md_inline(r.get('title', r.get('id')))} ({_md_inline(r.get('severity', ''))})")
         lines.append("")
     if delta.new:
         lines.append("**Neu hinzugekommen:**")
         for f in delta.new:
-            lines.append(f"- [{f.severity.label}] {f.title} ({f.asset})")
+            lines.append(f"- [{f.severity.label}] {_md_inline(f.title)} ({_md_inline(f.asset)})")
         lines.append("")
     return lines
 
@@ -185,8 +223,8 @@ def _section_choke_points(findings: FindingsStore, paths: list[AttackPath]) -> l
     lines.append("")
     for cp in chokes:
         f = findings.get(cp.finding_id)
-        titel = f.title if f else cp.finding_id
-        asset = f" ({f.asset})" if f else ""
+        titel = _md_inline(f.title) if f else cp.finding_id
+        asset = f" ({_md_inline(f.asset)})" if f else ""
         lines.append(
             f"- **{titel}**{asset} [`{cp.finding_id}`] → bricht "
             f"{cp.paths_broken} Angriffspfad(e)"
@@ -202,7 +240,7 @@ def _section_quick_wins(findings: FindingsStore) -> list[str]:
         lines += ["_Keine unmittelbaren Quick Wins identifiziert._", ""]
         return lines
     for f in wins:
-        lines.append(f"- **{f.title}** ({f.asset}): {remediation_for(f)}")
+        lines.append(f"- **{_md_inline(f.title)}** ({_md_inline(f.asset)}): {_md_inline(remediation_for(f))}")
     lines.append("")
     return lines
 
@@ -214,7 +252,7 @@ def _section_long_term(findings: FindingsStore) -> list[str]:
         lines += ["_Keine strategischen Maßnahmen abgeleitet._", ""]
         return lines
     for m in measures:
-        lines.append(f"- {m}")
+        lines.append(f"- {_md_inline(m)}")
     lines.append("")
     return lines
 
@@ -227,18 +265,18 @@ def _section_findings(findings: FindingsStore) -> list[str]:
     for f in findings.all():
         cwe = f" · {f.cwe}" if f.cwe else ""
         score = cvss_score(f.category, f.severity)
-        lines.append(f"### {f.id}: {f.title}")
+        lines.append(f"### {f.id}: {_md_inline(f.title)}")
         lines.append("")
         lines.append(
             f"- **Schweregrad:** {f.severity.label}{cwe}  ·  "
             f"**CVSS-Lite:** {score:.1f} ({cvss_rating(score)})  ·  "
             f"**Kategorie:** {f.category_label}  ·  **Status:** {f.status}"
         )
-        lines.append(f"- **Asset:** {f.asset}  ·  **Fundstelle:** {f.location or 'n/a'}")
-        lines.append(f"- **Owner:** {f.owner or 'noch zuzuweisen'}  ·  **Quelle:** {f.source}")
+        lines.append(f"- **Asset:** {_md_inline(f.asset)}  ·  **Fundstelle:** {_md_inline(f.location) or 'n/a'}")
+        lines.append(f"- **Owner:** {_md_inline(f.owner) or 'noch zuzuweisen'}  ·  **Quelle:** {_md_inline(f.source)}")
         if f.evidence:
-            lines += ["", "**Beleg:**", "```", f.evidence.strip(), "```"]
-        lines += ["", f"**Gegenmaßnahme:** {remediation_for(f)}", ""]
+            lines += ["", "**Beleg:**", _md_fence(f.evidence)]
+        lines += ["", f"**Gegenmaßnahme:** {_md_inline(remediation_for(f))}", ""]
     return lines
 
 
@@ -256,10 +294,8 @@ def _section_bsi(findings: FindingsStore) -> list[str]:
     lines.append("| Finding | Risiko | Bereich | BSI-Bezug | Priorität |")
     lines.append("|---|---|---|---|---|")
     for m in mappings:
-        risiko = m.risiko.replace("|", "/")
-        bereich = m.bereich.replace("|", "/")
         lines.append(
-            f"| {m.finding_id} | {risiko} | {bereich} | {m.bsi_bezug} | {m.priorität} |"
+            f"| {m.finding_id} | {_md_cell(m.risiko)} | {_md_cell(m.bereich)} | {_md_cell(m.bsi_bezug)} | {m.priorität} |"
         )
     lines.append("")
     return lines
@@ -275,8 +311,8 @@ def _section_scanners(scanner_runs: list[dict[str, Any]]) -> list[str]:
     for run in scanner_runs:
         hinweis = run.get("error") or ("gekürzt" if run.get("truncated") else "-")
         lines.append(
-            f"| {run.get('scanner')} | {run.get('target')} | "
-            f"{run.get('finding_count', 0)} | {run.get('returncode')} | {hinweis} |"
+            f"| {_md_cell(run.get('scanner'))} | {_md_cell(run.get('target'))} | "
+            f"{run.get('finding_count', 0)} | {run.get('returncode')} | {_md_cell(hinweis)} |"
         )
     lines.append("")
     return lines

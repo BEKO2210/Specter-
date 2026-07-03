@@ -44,17 +44,26 @@ def _published_ports(network_settings: dict[str, Any]) -> list[str]:
     return out
 
 
-def normalize_container(obj: dict[str, Any]) -> dict[str, Any]:
-    """Normalisiert ein einzelnes `docker inspect`-Objekt in die flache Form."""
+def normalize_container(obj: Any) -> dict[str, Any]:
+    """Normalisiert ein einzelnes `docker inspect`-Objekt in die flache Form.
+
+    Defensiv: `docker inspect` einer manipulierten/fremden Quelle kann beliebige
+    Typen liefern. Nicht-Dicts und falsch typisierte Felder (z. B. ``CapAdd``
+    als Zahl) dürfen keinen Absturz auslösen.
+    """
+    if not isinstance(obj, dict):
+        obj = {}
     host_config = obj.get("HostConfig") if isinstance(obj.get("HostConfig"), dict) else {}
     config = obj.get("Config") if isinstance(obj.get("Config"), dict) else {}
     net = obj.get("NetworkSettings") if isinstance(obj.get("NetworkSettings"), dict) else {}
+    caps = host_config.get("CapAdd")
+    cap_add = list(caps) if isinstance(caps, list) else ([caps] if isinstance(caps, str) else [])
     return {
         "name": str(obj.get("Name", "")).lstrip("/") or "Container",
         "image": str(config.get("Image", "")),
         "privileged": bool(host_config.get("Privileged", False)),
         "host_network": host_config.get("NetworkMode") == "host",
-        "cap_add": list(host_config.get("CapAdd") or []),
+        "cap_add": cap_add,
         "user": str(config.get("User", "")),
         "docker_socket_mounted": _socket_mounted(host_config, obj.get("Mounts")),
         "ports": _published_ports(net),

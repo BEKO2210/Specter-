@@ -1,0 +1,7 @@
+# Specter — nur der defensive Offline-Kern, ohne KI-Abhängigkeit.
+# Damit laufen alle 14 Analyzer, der Report, die Scope-Policy, die Benchmark
+# und die Live-Labore. Für den optionalen KI-gesteuerten Lauf zusätzlich:
+#   pip install anthropic     (bzw.  pip install .[ai])
+
+PyYAML>=6.0             # Scope- und Konfigurationsdateien
+rich>=13.0              # Lesbare Terminal-Ausgabe (Reports, Logs)

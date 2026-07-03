@@ -15,8 +15,9 @@ class AnthropicLLM:
             import anthropic
         except ImportError as exc:
             raise LLMError(
-                "Das Paket 'anthropic' fehlt. Installiere die Abhängigkeiten mit "
-                "`pip install -r requirements.txt`."
+                "Das Paket 'anthropic' fehlt. Es wird nur für den KI-gesteuerten "
+                "Lauf benötigt (der Offline-Kern läuft ohne). Installiere es mit "
+                "`pip install anthropic` bzw. `pip install .[ai]`."
             ) from exc
         self._anthropic = anthropic
 
