@@ -31,27 +31,41 @@ einer Open-Source-Lizenz bereitgestellt.
 3. Ansehen und Bewertung
    Das Betrachten des öffentlich einsehbaren Quellcodes zu Zwecken der
    Sicherheits- und Qualitätsbewertung ist gestattet. Daraus entsteht kein
-   Recht zur Nutzung, Ausführung oder Weitergabe im Sinne von Ziffer 2.
+   Recht zur Nutzung, Ausführung oder Weitergabe im Sinne von Ziffer 2,
+   soweit Ziffer 4 nichts anderes bestimmt.
 
-4. Bestimmungsgemäße, defensive Nutzung
+4. Evaluierung und Nachprüfung (begrenzte Ausführungserlaubnis)
+   Abweichend von Ziffer 2 ist die **lokale, nicht-kommerzielle Ausführung**
+   der Software zum alleinigen Zweck gestattet, die im Repository
+   dokumentierten Aussagen selbst nachzuprüfen und die Software zu bewerten —
+   insbesondere das Ausführen der mitgelieferten Demo
+   (`examples/run_demo.py`), der Benchmark (`examples/benchmark/run.py`),
+   der Testsuite (`python -m pytest`) und der Labor-Harnesse
+   (`examples/live_lab/`) auf dem eigenen Rechner, gegen die mitgelieferten
+   Beispieldaten oder gegen eigene bzw. schriftlich freigegebene Systeme.
+   Nicht gestattet bleiben insbesondere: jede produktive oder kommerzielle
+   Nutzung, Prüfungen für Dritte oder gegen fremde Systeme, Weitergabe und
+   abgeleitete Werke. Im Übrigen gilt Ziffer 2.
+
+5. Bestimmungsgemäße, defensive Nutzung
    Sofern der Rechteinhaber eine Nutzung schriftlich gestattet, darf die
    Software ausschließlich zu **defensiven, autorisierten** Sicherheitsprüfungen
    im Rahmen einer schriftlichen Beauftragung und innerhalb des vereinbarten,
    rechtlich zulässigen Prüfumfangs eingesetzt werden (vgl. § 202a–c StGB,
    DSGVO). Jede offensive oder unautorisierte Nutzung ist untersagt.
 
-5. Gewährleistungsausschluss
+6. Gewährleistungsausschluss
    DIE SOFTWARE WIRD „WIE BESEHEN" OHNE JEGLICHE GEWÄHRLEISTUNG BEREITGESTELLT,
    WEDER AUSDRÜCKLICH NOCH KONKLUDENT, EINSCHLIESSLICH — ABER NICHT BESCHRÄNKT
    AUF — DER GEWÄHRLEISTUNG DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN
    ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER.
 
-6. Haftungsbeschränkung
+7. Haftungsbeschränkung
    IN KEINEM FALL HAFTET DIE RECHTEINHABERIN FÜR ANSPRÜCHE, SCHÄDEN ODER SONSTIGE
    HAFTUNG, GLEICH OB AUS VERTRAG, UNERLAUBTER HANDLUNG ODER ANDERWEITIG, DIE SICH
    AUS DER SOFTWARE ODER IHRER NUTZUNG ERGEBEN, SOWEIT GESETZLICH ZULÄSSIG.
 
-7. Anfragen und Genehmigungen
+8. Anfragen und Genehmigungen
    Anfragen zu Lizenzierung, Nutzung oder Vertrieb sind an den Rechteinhaber
    zu richten: Belkis Aslani <belkis.aslani@gmail.com>.
 
