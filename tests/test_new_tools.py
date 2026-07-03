@@ -278,6 +278,29 @@ def test_analyze_aws_too_large(tmp_path):
     assert r.is_error and "zu groß" in r.content
 
 
+def test_analyze_aws_accepts_raw_cli_bundle(tmp_path):
+    # Bündel echter AWS-CLI-Antworten (PascalCase) — KEIN vor-normalisierter
+    # Export: das Tool muss das Roh-Format selbst erkennen und ableiten.
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeAwsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    raw = {
+        "account_summary": {"SummaryMap": {"AccountMFAEnabled": 0}},
+        "security_groups": {"SecurityGroups": [
+            {"GroupName": "db-sg", "IpPermissions": [
+                {"IpProtocol": "tcp", "FromPort": 3389, "ToPort": 3389,
+                 "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}]}]},
+        "buckets": [{"Name": "kunden", "PolicyStatus": {"IsPublic": True}}],
+    }
+    path = _write_json(tmp_path, "aws_cli.json", raw)
+    r = tool.run({"path": path})
+    assert not r.is_error and "AWS-Analyse" in r.content
+    titles = " ".join(f.title for f in state.findings.all())
+    assert "Root-Konto ohne MFA" in titles
+    assert "Port 3389" in titles
+    assert "Öffentlicher S3-Bucket: kunden" in titles
+
+
 def test_analyze_aws_no_findings(tmp_path):
     cfg = _cfg(tmp_path)
     state = EngagementState()
