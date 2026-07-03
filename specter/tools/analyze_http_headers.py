@@ -2,74 +2,20 @@
 
 from __future__ import annotations
 
-import json
-from typing import Any
-
 from ..analyzers import analyze_http_headers
-from ..audit import AuditLog
-from ..config import Config
-from ..safety import SafetyPolicy, ScopeViolation
-from ..state import EngagementState
-from .base import ToolResult
+from .base import FileAnalysisTool
 
 
-class AnalyzeHttpHeadersTool:
+class AnalyzeHttpHeadersTool(FileAnalysisTool):
     name = "analyze_http_headers"
-    active = False
-
-    def __init__(self, config: Config, policy: SafetyPolicy, audit: AuditLog,
-                 state: EngagementState) -> None:
-        self.config = config
-        self.policy = policy
-        self.audit = audit
-        self.state = state
-
-    @property
-    def spec(self) -> dict[str, Any]:
-        return {
-            "name": self.name,
-            "description": (
-                "Analysiert einen bereitgestellten Export der HTTP-Antwort-Header "
-                "(und optional Cookies) rein defensiv und erfasst Web-Sicherheits-"
-                "lücken als Findings: fehlendes/kurzes HSTS, fehlende CSP, fehlendes "
-                "X-Frame-Options, X-Content-Type-Options, Referrer-/Permissions-"
-                "Policy, verraterische Server-/X-Powered-By-Banner sowie Cookies ohne "
-                "Secure/HttpOnly/SameSite. Keine Live-Abfrage - nur die lokale Datei "
-                "im Scope."
-            ),
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "Pfad zum JSON-Export (im Scope)."},
-                },
-                "required": ["path"],
-            },
-        }
-
-    def run(self, arguments: dict[str, Any]) -> ToolResult:
-        raw_path = str(arguments.get("path", "")).strip()
-        try:
-            path = self.policy.check_path(raw_path)
-        except ScopeViolation as exc:
-            self.audit.record("analyze_http_headers.denied", path=raw_path, reason=str(exc))
-            return ToolResult(f"VERWEIGERT: {exc}", is_error=True)
-        if not path.is_file():
-            return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
-        if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu groß.", is_error=True)
-        try:
-            data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
-        except (OSError, json.JSONDecodeError) as exc:
-            self.audit.record("analyze_http_headers.parse_error", path=str(path), reason=str(exc))
-            return ToolResult(f"Konnte JSON nicht lesen: {exc}", is_error=True)
-
-        findings = analyze_http_headers(data)
-        recorded = self.state.findings.extend(findings)
-        self.audit.record("analyze_http_headers.ok", path=str(path),
-                          findings=len(findings), recorded=recorded)
-        if not findings:
-            return ToolResult("HTTP-Header-Analyse ohne Befunde (oder unbekannte Struktur).")
-        lines = [f"HTTP-Header-Analyse: {len(findings)} Finding(s), {recorded} neu erfasst:"]
-        for f in findings[:30]:
-            lines.append(f"  [{f.severity.label}] {f.title}")
-        return ToolResult("\n".join(lines))
+    label = "HTTP-Header-Analyse"
+    description = (
+        "Analysiert einen bereitgestellten Export der HTTP-Antwort-Header (und "
+        "optional Cookies) rein defensiv und erfasst Web-Sicherheits-lücken als "
+        "Findings: fehlendes/kurzes HSTS, fehlende CSP, fehlendes "
+        "X-Frame-Options, X-Content-Type-Options, Referrer-/Permissions-Policy, "
+        "verraterische Server-/X-Powered-By-Banner sowie Cookies ohne "
+        "Secure/HttpOnly/SameSite. Keine Live-Abfrage - nur die lokale Datei im "
+        "Scope."
+    )
+    analyzer = staticmethod(analyze_http_headers)

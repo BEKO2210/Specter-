@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from ..audit import AuditLog
 from ..config import Config
-from ..safety import SafetyPolicy
+from ..findings import Finding
+from ..safety import SafetyPolicy, ScopeViolation
 from ..state import EngagementState
 
 
@@ -34,6 +36,82 @@ class Tool(Protocol):
 
     def run(self, arguments: dict[str, Any]) -> ToolResult:
         ...
+
+
+class FileAnalysisTool:
+    """Gemeinsame Basis aller ``analyze_*``-Datei-Tools.
+
+    Der Ablauf ist bei jedem Offline-Analyzer identisch und lebt deshalb nur
+    hier: Pfad gegen den Scope prüfen (fail-closed), Datei- und Größen-Check,
+    JSON lesen, Analyzer anwenden, Findings in den Engagement-Zustand
+    übernehmen und das Ergebnis knapp fürs Modell formatieren. Die konkreten
+    Tools liefern nur noch ``name``, ``label``, ``description`` und den
+    Analyzer selbst — dadurch verhalten sich alle Datei-Tools garantiert
+    gleich (Audit-Events, Fehlertexte, Limits).
+
+    ``_coerce`` ist der Haken für Roh-Formate: Ein Tool kann dort eine echte
+    Vendor-Ausgabe (z. B. ``docker inspect``) erkennen und in die vom
+    Analyzer erwartete Struktur normalisieren.
+    """
+
+    name: str = ""
+    label: str = ""
+    description: str = ""
+    active = False
+    analyzer: Callable[[Any], list[Finding]]
+
+    def __init__(self, config: Config, policy: SafetyPolicy, audit: AuditLog,
+                 state: EngagementState) -> None:
+        self.config = config
+        self.policy = policy
+        self.audit = audit
+        self.state = state
+
+    @property
+    def spec(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Pfad zum JSON-Export (im Scope)."},
+                },
+                "required": ["path"],
+            },
+        }
+
+    def _coerce(self, data: Any) -> Any:
+        """Normalisiert Roh-Formate; Standard: Daten unverändert durchreichen."""
+        return data
+
+    def run(self, arguments: dict[str, Any]) -> ToolResult:
+        raw_path = str(arguments.get("path", "")).strip()
+        try:
+            path = self.policy.check_path(raw_path)
+        except ScopeViolation as exc:
+            self.audit.record(f"{self.name}.denied", path=raw_path, reason=str(exc))
+            return ToolResult(f"VERWEIGERT: {exc}", is_error=True)
+        if not path.is_file():
+            return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
+        if path.stat().st_size > self.config.max_file_bytes:
+            return ToolResult("Datei zu groß.", is_error=True)
+        try:
+            data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, json.JSONDecodeError) as exc:
+            self.audit.record(f"{self.name}.parse_error", path=str(path), reason=str(exc))
+            return ToolResult(f"Konnte JSON nicht lesen: {exc}", is_error=True)
+
+        findings = type(self).analyzer(self._coerce(data))
+        recorded = self.state.findings.extend(findings)
+        self.audit.record(f"{self.name}.ok", path=str(path),
+                          findings=len(findings), recorded=recorded)
+        if not findings:
+            return ToolResult(f"{self.label} ohne Befunde (oder unbekannte Struktur).")
+        lines = [f"{self.label}: {len(findings)} Finding(s), {recorded} neu erfasst:"]
+        for f in findings[:30]:
+            lines.append(f"  [{f.severity.label}] {f.title}")
+        return ToolResult("\n".join(lines))
 
 
 class SafeTool:
