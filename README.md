@@ -5,7 +5,10 @@
   </picture>
 </p>
 
-<p align="center"><strong>Defensive Security Intelligence — automatische IT-Sicherheitsprüfung für den Mittelstand.</strong></p>
+<h3 align="center">Findet die Schwachstellen, über die Unternehmen wirklich kompromittiert werden — bevor Schaden entsteht.</h3>
+
+<p align="center"><strong>Die defensive Security-Plattform für den Mittelstand.</strong><br>
+E-Mail-Betrug, offenes RDP, fehlende Backups: Specter deckt die Angriffspfade auf, erklärt sie verständlich und belegt jeden Fund.</p>
 
 <p align="center">
   <img alt="Tests" src="https://img.shields.io/badge/Tests-626%20passing-14B8A6">
@@ -18,13 +21,30 @@
   <img src="docs/assets/img/screens/website.jpg" alt="Specter Website" width="820">
 </p>
 
-> Specter deckt die Schwachstellen auf, über die im Mittelstand **wirklich** Schäden entstehen — E-Mail-Betrug, offenes RDP, fehlende Backups — und erklärt sie verständlich. **Rein defensiv:** keine Angriffe, kein Eingriff in fremde Systeme, nur im schriftlich vereinbarten Rahmen (§ 202 StGB).
+> **Rein defensiv:** keine Angriffe, kein Eingriff in fremde Systeme, nur im schriftlich vereinbarten Rahmen (§ 202 StGB). Eine Prüfung darf nie selbst zum Risiko werden — deshalb ist Specter von Grund auf so gebaut.
+
+---
+
+## Warum Specter — in fünf Sekunden
+
+Die großen Plattformen (EDR, Cloud Security, SIEM) **überwachen den laufenden Betrieb** — sie schlagen Alarm, *während* ein Angriff passiert. Specter setzt **davor** an: Es findet die Fehlkonfigurationen und Versäumnisse, über die der Angriff überhaupt erst möglich wird — und liefert einen Bericht, den auch die Geschäftsführung versteht.
+
+|  | **Specter** | Typische Enterprise-Plattform (EDR / Cloud Security) |
+|---|---|---|
+| **Aufgabe** | Prävention: Angriffspfade finden und schließen, *bevor* etwas passiert | Detektion: laufende Angriffe erkennen und stoppen |
+| **Zielgruppe** | Mittelstand ohne eigenes Security-Team | Konzerne mit SOC und Security-Budget |
+| **Eingriff ins System** | Keiner — offline, lesend, keine Agenten | Agenten auf jedem Endpoint, Dauerbetrieb |
+| **Ergebnis** | Verständlicher Bericht mit Prioritäten, CVSS und BSI-Zuordnung | Dashboards und Alerts für Spezialisten |
+| **Rechtsrahmen** | Fail-closed Scope, Audit-Log, § 202 StGB dokumentiert | Vom Betreiber selbst zu verantworten |
+| **Kosten** | Einzelne Prüfung statt Lizenz pro Endpoint | Laufende Abo-Kosten pro Gerät/Nutzer |
+
+**Kein Entweder-oder:** Specter ersetzt kein EDR — es beantwortet die Frage, die davor kommt: *„Wo sind wir gerade angreifbar, und was beheben wir zuerst?"* Genau diese Frage bleibt im Mittelstand meist unbeantwortet, bis es zu spät ist.
 
 ---
 
 ## Was ist Specter?
 
-Specter ist ein **automatischer, defensiver Sicherheits-Prüfer**. Man kann sich das
+Specter ist eine **automatische, defensive Sicherheitsprüfung**. Man kann sich das
 wie einen **TÜV für die IT** vorstellen: Er schaut sich die IT einer Firma an, findet
 Schwachstellen und schreibt einen verständlichen Bericht mit klaren Prioritäten — so
 wie es große Sicherheitsfirmen tun, nur schneller und günstiger.
@@ -40,19 +60,35 @@ und rechtlich sauber.
 
 <p align="center"><img src="docs/assets/img/screens/terminal.jpg" alt="Specter Terminal-Lauf" width="820"></p>
 
-**Der fertige Bericht** (markengerechtes HTML, per Browser-Druck als PDF an den Kunden):
+**Der fertige Bericht** (markengerechtes HTML, per Browser-Druck als PDF an den Kunden — [Beispielbericht als PDF](docs/Specter-Beispielbericht.pdf)):
 
 <p align="center"><img src="docs/assets/img/screens/report.jpg" alt="Specter Sicherheitsbericht" width="720"></p>
 
 ---
 
-## Gegen echte Server geprüft
+## Beweise statt Behauptungen
 
-Specter wird nicht nur an Fixtures getestet, sondern gegen **echte, selbst
-gestartete Server**: Das Labor-Harness mintet ein echtes (abgelaufenes,
-selbstsigniertes) TLS-Zertifikat, startet damit einen echten HTTPS-Server mit
-absichtlich fehlenden Sicherheits-Headern und einem unsicheren Cookie, greift ihn
-real ab (`curl` + `openssl`) und prüft, dass Specter die Schwachstellen findet.
+Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **nachprüfbar** ist — von jedem, in Minuten, auf dem eigenen Rechner:
+
+1. **Jeder Fund trägt seinen Beweis.** Die Analyzer arbeiten deterministisch und regelbasiert: Zu jedem Fund gehören die konkrete Evidenz (der DNS-Eintrag, der Header, die Firewall-Regel), ein CVSS-Score und die BSI-IT-Grundschutz-Zuordnung. Kein Fund ohne Beleg — dieselben Eingaben liefern denselben Bericht. Das hält die False-Positive-Diskussion kurz: Was im Bericht steht, lässt sich zeigen.
+
+2. **Geprüft gegen echte Server, nicht nur Fixtures.** Die mitgelieferten Labore starten reale, absichtlich verwundbare Systeme und weisen nach, dass Specter die Schwachstellen findet — siehe [Labor-Beweise](#labor-beweise-selbst-nachprüfbar) unten.
+
+3. **Specter prüft sich selbst.** Der Self-Audit setzt Specter auf den eigenen Quellcode an — derselbe Ablauf, den auch ein Kunde bekommt:
+   ```bash
+   python examples/self_audit.py
+   ```
+
+4. **626 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
+
+5. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
+
+### Labor-Beweise (selbst nachprüfbar)
+
+Das Labor-Harness mintet ein echtes (abgelaufenes, selbstsigniertes) TLS-Zertifikat,
+startet damit einen echten HTTPS-Server mit absichtlich fehlenden Sicherheits-Headern
+und einem unsicheren Cookie, greift ihn real ab (`curl` + `openssl`) und prüft, dass
+Specter die Schwachstellen findet:
 
 ```bash
 python examples/live_lab/run_lab.py
@@ -61,7 +97,7 @@ python examples/live_lab/run_lab.py
 <p align="center"><img src="docs/assets/img/screens/lab.jpg" alt="Specter Labor-Beweis gegen echten Server" width="760"></p>
 
 Denselben Live-Check kannst du gegen eine **eigene, freigegebene Domain oder einen
-eigenen Server** laufen lassen (nur eigene/freigegebene Systeme — §202 StGB):
+eigenen Server** laufen lassen (nur eigene/freigegebene Systeme — § 202 StGB):
 
 ```bash
 python examples/live_web_check.py meine-domain.de
@@ -84,6 +120,43 @@ die gefährlichen Fehlkonfigurationen erkennt:
 ```bash
 python examples/live_lab/run_container_lab.py
 ```
+
+---
+
+## Architektur
+
+Vom Kundendaten-Export bis zum unterschriftsreifen Bericht — mit dem Scope als
+technisch erzwungener Grenze um alles herum:
+
+```mermaid
+flowchart LR
+    subgraph Eingaben
+        A["Export-Dateien<br/>(M365, AD, Firewall, AWS, …)"]
+        B["Öffentliche Daten<br/>(DNS, TLS, HTTP-Header)"]
+    end
+
+    subgraph Scope["scope.yaml — fail-closed, alles außerhalb wird verweigert"]
+        C["Agent<br/>(mit oder ohne KI-Steuerung)"]
+        D["14 Offline-Analyzer<br/>deterministisch, regelbasiert"]
+        E["Angriffspfad- &<br/>Choke-Point-Analyse"]
+        F["CVSS-Score +<br/>BSI-Grundschutz-Zuordnung"]
+    end
+
+    subgraph Ausgaben
+        G["Bericht<br/>(HTML / PDF, Markdown, JSON)"]
+        H["Audit-Log<br/>(jede Aktion nachweisbar)"]
+        I["Nachtest<br/>(Delta zum letzten Bericht)"]
+    end
+
+    A --> C
+    B --> C
+    C --> D --> E --> F --> G
+    C -.-> H
+    G --> I
+```
+
+Ohne KI-Schlüssel laufen die Analyzer direkt; mit Schlüssel steuert das KI-Modell den
+Ablauf — die Funde selbst kommen in beiden Fällen aus denselben deterministischen Regeln.
 
 ---
 
@@ -151,9 +224,12 @@ python -m pytest
 
 ---
 
-## Was Specter prüft
+## Was Specter verhindert
 
-Vierzehn Offline-Analyzer decken die Bereiche ab, die im Mittelstand wirklich zählen:
+Die drei teuersten Schadensfälle im Mittelstand beginnen fast immer gleich:
+**CEO-Fraud** über gefälschte Absender, **Ransomware** über offenes RDP oder fehlende MFA,
+und der **Totalverlust**, wenn nach dem Vorfall kein brauchbares Backup da ist.
+Vierzehn Offline-Analyzer decken genau diese Einfallstore ab:
 
 | Bereich | Findet u. a. |
 |---|---|
@@ -189,7 +265,18 @@ defensiv gebaut:
 - **Vollständiges Audit-Log** — jede Aktion ist nachweisbar.
 - **Nur mit schriftlicher Beauftragung** — im vereinbarten Rahmen (§ 202a-c StGB), DSGVO-konform.
 
-Siehe auch [`SECURITY.md`](SECURITY.md).
+### Trust Center
+
+Alles, was ein Kunde oder Partner vor der Beauftragung prüfen will, an einem Ort:
+
+| Dokument | Inhalt |
+|---|---|
+| [`SECURITY.md`](SECURITY.md) | Sicherheitsmodell, Meldeweg für Schwachstellen |
+| [Beispielbericht (PDF)](docs/Specter-Beispielbericht.pdf) | So sieht das Ergebnis aus — vor dem Kauf |
+| [Handbuch (PDF)](docs/Specter-Handbuch.pdf) | Vollständige Bedienungs- und Lernunterlage |
+| [Investoren-Onepager (PDF)](docs/Specter-Investoren-Onepager.pdf) | Markt, Modell, Positionierung auf einer Seite |
+| [Live-Demo-Skript](docs/Specter-Live-Demo-Skript.md) | Reproduzierbare Demo für Kundengespräche |
+| [Datenschutz](docs/datenschutz.html) · [Impressum](docs/impressum.html) | Rechtliche Pflichtangaben der Website |
 
 ---
 
@@ -210,6 +297,58 @@ Siehe auch [`SECURITY.md`](SECURITY.md).
 
 ---
 
+## FAQ für Geschäftsführer
+
+**Muss dafür etwas auf unseren Systemen installiert werden?**
+Nein. Specter wertet Export-Dateien aus, die Ihre IT bereitstellt, und öffentliche
+Daten wie DNS-Einträge. Es läuft kein Agent auf Ihren Rechnern, nichts wird verändert.
+
+**Kann die Prüfung unseren Betrieb stören?**
+Nein. Specter greift nicht in laufende Systeme ein — kein Scan-Traffic, keine
+Anmeldeversuche, keine Last. Aktive Scanner sind standardmäßig abgeschaltet und
+laufen nur nach ausdrücklicher Freigabe.
+
+**Ist das legal?**
+Ja — und zwar nachweisbar. Geprüft wird nur, was schriftlich beauftragt und in der
+Scope-Datei freigegeben ist; alles andere verweigert die Software technisch
+(fail-closed). Jede Aktion steht im Audit-Log. Rahmen: § 202a-c StGB, DSGVO.
+
+**Was bekommen wir am Ende?**
+Einen Bericht in verständlichem Deutsch: die Funde mit Beweis, ein Schweregrad
+(CVSS), die Zuordnung zum BSI-IT-Grundschutz und eine priorisierte Liste, was zuerst
+zu tun ist. [So sieht er aus.](docs/Specter-Beispielbericht.pdf)
+
+**Woher wissen wir, dass die Behebung gewirkt hat?**
+Durch den Nachtest: Der zweite Lauf vergleicht gegen den ersten Bericht und zeigt
+schwarz auf weiß, welche Funde geschlossen sind.
+
+**Wir haben schon einen Virenschutz / Defender. Wozu noch Specter?**
+Virenschutz und EDR reagieren, *wenn* ein Angriff läuft. Specter findet vorher die
+offenen Türen — die falsch konfigurierte Firewall, die fehlende MFA, das fehlende
+Backup — durch die der Angriff überhaupt erst hereinkommt. Beides zusammen ist der
+richtige Schutz; Specter beantwortet den Teil, der im Mittelstand meist fehlt.
+
+---
+
+## Roadmap
+
+Die Softwarequalität steht (626 Tests, 100 % Coverage, Labor-Beweise). Der Fokus
+liegt jetzt auf Marktreife und Vertrauensaufbau:
+
+- **Referenzen & Fallstudien** — anonymisierte Ergebnisse aus echten Aufträgen
+  (Funde, Behebungsquote, Nachtest-Delta) als belastbarer Nutzen-Nachweis.
+- **Benchmark-Suite** — reproduzierbare Erkennungs-Messung gegen die Labor-Umgebungen,
+  veröffentlicht mit Methodik statt Marketing-Zahlen.
+- **Weitere Analyzer** — u. a. Google Workspace, Netzwerk-Segmentierung, Patch-Stand.
+- **Integrationen** — Export der Funde nach Ticket-Systemen (Jira, GitLab) für die
+  Behebung im Kundenteam.
+- **Demo-Video** — der End-to-End-Lauf als 3-Minuten-Video für die Website.
+- **Englische Berichte** — gleiche Engine, zweite Berichtssprache.
+
+Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/issues).
+
+---
+
 ## Qualität
 
 **626 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
@@ -226,8 +365,8 @@ BSI-Mapping sowie Markdown- und HTML-Report.
 specter/            # Kern: Analyzer, Tools, Scope-Policy, Report, CVSS, BSI
   analyzers/        # die vierzehn Offline-Analyzer
   tools/            # vierundzwanzig Agenten-Werkzeuge
-examples/           # Demo, Live-Check, Marketing-Generatoren, Beispieldaten
-docs/               # Website (GitHub Pages), Marke, Handbuch-PDF
+examples/           # Demo, Live-Check, Labore, Self-Audit, Marketing-Generatoren
+docs/               # Website (GitHub Pages), Marke, Handbuch, Trust-Dokumente
 tests/              # 626 Tests (100 % Coverage)
 ```
 
