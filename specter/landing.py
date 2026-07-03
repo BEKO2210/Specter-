@@ -155,7 +155,7 @@ def _now_iso() -> str:
 
 
 def build_landing_html(brand: str = "Specter",
-                       contact_email: str = "belkis.aslani@gmail.com",
+                       contact_email: str = "kontakt@example.de",
                        generated_at: str | None = None) -> str:
     """Erzeugt die vollständige Landingpage als HTML-String."""
     ts = generated_at or _now_iso()
@@ -192,7 +192,7 @@ def build_landing_html(brand: str = "Specter",
              "Kostenlosen E-Mail-Check anfordern</a>"
              "<a class='btn ghost' href='#leistungen'>Was wird geprüft?</a>")
     p.append("<div class='trustbar'><span>Offline &amp; lesend</span>"
-             "<span>Keine Angriffe</span><span>DSGVO-konform</span>"
+             "<span>Keine Angriffe</span><span>Datensparsam &amp; lokal (DSGVO)</span>"
              "<span>Nur im vereinbarten Rahmen</span></div>")
     p.append("</div></header>")
 
@@ -228,11 +228,11 @@ def build_landing_html(brand: str = "Specter",
              "<div class='card'><h3>Im festen Rahmen</h3><p>Geprüft wird nur, was "
              "schriftlich freigegeben ist (&sect;202 StGB). Alles andere wird "
              "technisch verweigert.</p></div>"
-             "<div class='card'><h3>DSGVO-konform</h3><p>Datenminimierung, lokale "
+             "<div class='card'><h3>Datenschutz nach DSGVO-Grunds&auml;tzen</h3><p>Datenminimierung, lokale "
              "Verarbeitung, Löschkonzept und auf Wunsch ein "
              "Auftragsverarbeitungsvertrag.</p></div>"
              "<div class='card'><h3>Nachvollziehbar</h3><p>Lückenloses Audit-Log, "
-             "CVSS-Bewertung und BSI-IT-Grundschutz-Bezug &ndash; die Sprache, die "
+             "CVSS-Lite-Bewertung und BSI-IT-Grundschutz-Bezug &ndash; die Sprache, die "
              "Ihre IT und Ihre Versicherung verstehen.</p></div>"
              "</div></div></section>")
 
@@ -280,7 +280,7 @@ def build_landing_html(brand: str = "Specter",
 
 def write_landing(directory: str | Path = "reports",
                   brand: str = "Specter",
-                  contact_email: str = "belkis.aslani@gmail.com") -> Path:
+                  contact_email: str = "kontakt@example.de") -> Path:
     """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)

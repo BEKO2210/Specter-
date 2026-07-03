@@ -75,3 +75,33 @@ def normalize_inspect(inspect_json: Any) -> dict[str, Any]:
     items = inspect_json if isinstance(inspect_json, list) else [inspect_json]
     containers = [normalize_container(o) for o in items if isinstance(o, dict)]
     return {"containers": containers}
+
+
+# Schlüssel, an denen eine echte `docker inspect`-Ausgabe zu erkennen ist.
+_INSPECT_MARKERS = ("HostConfig", "Config", "NetworkSettings")
+
+
+def _is_inspect_object(obj: Any) -> bool:
+    return isinstance(obj, dict) and any(k in obj for k in _INSPECT_MARKERS)
+
+
+def looks_like_docker_inspect(data: Any) -> bool:
+    """Erkennt eine rohe `docker inspect`-Ausgabe (Liste oder Einzelobjekt).
+
+    Der normalisierte Analyzer-Export ({"containers": [...]}) hat keine der
+    Docker-PascalCase-Schlüssel und wird daher nie als roh eingestuft.
+    """
+    if isinstance(data, list):
+        return bool(data) and all(_is_inspect_object(o) for o in data)
+    return _is_inspect_object(data)
+
+
+def coerce_container_export(data: Any) -> Any:
+    """Normalisiert rohe `docker inspect`-Daten; alles andere bleibt unverändert.
+
+    Damit akzeptiert die Kundenanalyse dieselbe Datei, die `docker inspect`
+    wirklich ausgibt — ohne dass jemand die Felder von Hand umtragen muss.
+    """
+    if looks_like_docker_inspect(data):
+        return normalize_inspect(data)
+    return data

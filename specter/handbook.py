@@ -201,7 +201,7 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
     p.append("</table>")
     p.append("<p>Zusätzlich: automatische <strong>Angriffspfad-Analyse</strong> "
              "(welche kleinen Lücken zusammen gefährlich werden), ein "
-             "<strong>CVSS-Score</strong> je Fund, <strong>BSI-IT-Grundschutz</strong>-"
+             "<strong>CVSS-Lite-Score</strong> je Fund, <strong>BSI-IT-Grundschutz</strong>-"
              "Zuordnung und ein <strong>Nachtest</strong> (was wurde behoben?).</p>")
 
     # 4
@@ -309,7 +309,7 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
              "<p>Im Zweifel weniger prüfen, nicht mehr. Halte dich an die "
              "<code>scope.yaml</code> und frage beim Kunden nach.</p>")
     p.append("<h3>Wie überzeuge ich technische Ansprechpartner?</h3>"
-             "<p>Zeig die BSI-IT-Grundschutz-Zuordnung und den CVSS-Score im "
+             "<p>Zeig die BSI-IT-Grundschutz-Zuordnung und den CVSS-Lite-Score im "
              "Bericht - das ist die Sprache, die IT-Abteilungen kennen.</p>")
 
     # 10

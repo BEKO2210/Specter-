@@ -40,7 +40,7 @@ def test_offer_data_shape():
 def test_offer_default_customer_and_date_branch():
     html = build_offer_html()
     assert "Ihr Unternehmen" in html
-    assert "belkis.aslani@gmail.com" in html
+    assert "kontakt@example.de" in html
 
 
 def test_write_offer_creates_file(tmp_path):

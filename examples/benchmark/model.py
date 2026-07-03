@@ -38,15 +38,36 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from datetime import date  # noqa: E402
+
 from specter.analyzers import (  # noqa: E402
     analyze_ad, analyze_aws, analyze_azure, analyze_backup, analyze_container,
     analyze_database, analyze_dependencies, analyze_dns, analyze_email_security,
     analyze_entra, analyze_exchange, analyze_firewall, analyze_http_headers,
     analyze_tls,
 )
+from specter.aws_raw import normalize_aws_bundle  # noqa: E402
+from specter.container_live import coerce_container_export  # noqa: E402
 from specter.findings import Finding, Severity  # noqa: E402
 
-# Registry: stabiler Schlüssel -> öffentliche Analyzer-Funktion.
+# Festes Referenzdatum für zeitabhängige Roh-Ableitungen (Schlüssel-Alter),
+# damit der Korpus auch in Jahren noch exakt dasselbe Ergebnis liefert.
+_RAW_REFERENCE_DATE = date(2026, 7, 1)
+
+
+def _analyze_container_raw(data: dict) -> list[Finding]:
+    """Roh-Route: echte `docker inspect`-Ausgabe durch den Produktiv-Normalisierer."""
+    return analyze_container(coerce_container_export(data))
+
+
+def _analyze_aws_raw(data: dict) -> list[Finding]:
+    """Roh-Route: echtes AWS-CLI-Bündel durch den Produktiv-Normalisierer."""
+    return analyze_aws(normalize_aws_bundle(data, now=_RAW_REFERENCE_DATE))
+
+
+# Registry: stabiler Schlüssel -> öffentliche Analyzer-Funktion. Die *_raw-
+# Routen messen zusätzlich die Normalisierung echter Vendor-Formate — dieselben
+# Code-Pfade, die auch die Kundenanalyse benutzt.
 ANALYZERS: dict[str, Callable[[dict], list[Finding]]] = {
     "email": analyze_email_security,
     "dns": analyze_dns,
@@ -54,10 +75,12 @@ ANALYZERS: dict[str, Callable[[dict], list[Finding]]] = {
     "tls": analyze_tls,
     "database": analyze_database,
     "container": analyze_container,
+    "container_raw": _analyze_container_raw,
     "dependency": analyze_dependencies,
     "backup": analyze_backup,
     "firewall": analyze_firewall,
     "aws": analyze_aws,
+    "aws_raw": _analyze_aws_raw,
     "azure": analyze_azure,
     "ad": analyze_ad,
     "entra": analyze_entra,
@@ -72,10 +95,12 @@ ANALYZER_LABELS: dict[str, str] = {
     "tls": "TLS/Zertifikate",
     "database": "Datenbanken",
     "container": "Container/Docker",
+    "container_raw": "Container (roh: docker inspect)",
     "dependency": "Abhängigkeiten (SCA)",
     "backup": "Backup-Resilienz",
     "firewall": "Firewall/VPN",
     "aws": "AWS",
+    "aws_raw": "AWS (roh: CLI-Bündel)",
     "azure": "Azure",
     "ad": "Active Directory",
     "entra": "Entra-ID/M365",

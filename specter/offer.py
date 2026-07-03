@@ -33,7 +33,7 @@ PACKAGES: list[tuple[str, str, str, list[str], bool]] = [
      ["E-Mail-, TLS-, Firewall- und Backup-Prüfung",
       "Verständlicher Bericht mit Prioritäten",
       "Konkrete Handlungsempfehlungen",
-      "CVSS-Bewertung je Finding"], True),
+      "CVSS-Lite-Bewertung je Finding"], True),
     ("Voll-Audit", "ab 2.500 €",
      "Das vollständige Lagebild über alle Prüfbereiche.",
      ["Alle vierzehn Prüfbereiche (AD, M365, Cloud, Web, DNS, DB, Container, …)",
@@ -109,7 +109,7 @@ def _now_iso() -> str:
 
 
 def build_offer_html(customer_name: str = "Ihr Unternehmen",
-                     contact_email: str = "belkis.aslani@gmail.com",
+                     contact_email: str = "kontakt@example.de",
                      generated_at: str | None = None) -> str:
     """Erzeugt den Angebots-/Preis-One-Pager als HTML-String."""
     ts = generated_at or _now_iso()
@@ -161,7 +161,7 @@ def build_offer_html(customer_name: str = "Ihr Unternehmen",
     p.append("<div class='trust'>Specter prüft rein <strong>defensiv</strong>: "
              "keine Angriffe, kein Eingriff in Ihre Systeme, nur bereitgestellte bzw. "
              "öffentliche Daten. Ausschließlich im schriftlich vereinbarten Rahmen "
-             "(&sect;202 StGB), DSGVO-konform, mit lückenlosem Audit-Log.</div>")
+             "(&sect;202 StGB), nach DSGVO-Grunds&auml;tzen, mit lückenlosem Audit-Log.</div>")
 
     p.append(f"<footer>Interesse oder Fragen? Schreiben Sie an "
              f"<a href='mailto:{mail}'>{mail}</a>. Dieses Angebot ist freibleibend; "
@@ -173,7 +173,7 @@ def build_offer_html(customer_name: str = "Ihr Unternehmen",
 
 def write_offer(directory: str | Path = "reports",
                 customer_name: str = "Ihr Unternehmen",
-                contact_email: str = "belkis.aslani@gmail.com") -> Path:
+                contact_email: str = "kontakt@example.de") -> Path:
     """Schreibt den Angebots-One-Pager als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)

@@ -1,14 +1,21 @@
 # Specter-Benchmark — Methodik
 
-> **Kurzfassung:** Gegen einen offengelegten, reproduzierbaren Korpus aus **64
-> markierten Szenarien** über **alle 14 Analyzer** erkennt Specter **176 von 176**
-> gepflanzten Schwachstellen (**Recall 100 %**) und erzeugt dabei **null
-> Fehlalarme** (**Präzision 100 %**), auch auf 23 gehärteten und
-> Täuschungs-Szenarien. Jeder Schweregrad stimmt (100 %). Nachrechnen:
-> `python examples/benchmark/run.py`.
+> **Kurzfassung:** Gegen einen offengelegten, reproduzierbaren
+> **Regressionskorpus** aus **71 markierten Szenarien** über **alle 14 Analyzer**
+> (plus zwei Roh-Format-Routen) erkennt Specter **197 von 197** gepflanzten
+> Schwachstellen (**Recall 100 %**) und erzeugt dabei **null Fehlalarme**
+> (**Präzision 100 %**), auch auf 27 gehärteten und Täuschungs-Szenarien. Jeder
+> Schweregrad stimmt (100 %). Nachrechnen: `python examples/benchmark/run.py`.
+>
+> **Was diese Zahl ist — und was nicht:** Korpus und Erkennungsregeln stammen
+> vom selben Autor; die 100 % sind eine **korpus-relative Regressions-Garantie**
+> („keine bekannte Fehlerklasse geht je wieder verloren, kein bekannter
+> Täuschungsfall wird je zum Fehlalarm"), **keine Real-World-Erkennungsrate**.
+> Eine solche Rate kann seriös niemand angeben, dessen Grundgesamtheit unbekannt
+> ist — deshalb veröffentlichen wir stattdessen die Messlatte selbst.
 
-Dieses Dokument erklärt, **was** gemessen wird, **wie** und **warum das ehrlich
-ist**. Es ist bewusst nüchtern gehalten: keine Marketing-Quote, sondern eine
+Dieses Dokument erklärt, **was** gemessen wird, **wie** und **wo die Grenzen
+liegen**. Es ist bewusst nüchtern gehalten: keine Marketing-Quote, sondern eine
 Zahl, die jeder auf dem eigenen Rechner in Millisekunden reproduziert.
 
 ---
@@ -21,6 +28,13 @@ niemand kennt. Specter geht den umgekehrten Weg: Wir veröffentlichen **die
 Wahrheit, gegen die gemessen wird** — einen konkreten, lesbaren Korpus mit
 bekanntem Soll-Ergebnis — und messen ausschließlich dagegen. Die Zahl ist damit
 nicht beeindruckend *weil sie groß ist*, sondern *weil sie nachprüfbar ist*.
+
+Dazu gehört auch die Kehrseite offen benannt: Wer die Regeln schreibt **und**
+den Korpus, misst zwangsläufig gegen die eigene Erwartung. Der Wert des
+Verfahrens liegt deshalb nicht im Erreichen der 100 % (die sind per Gate
+erzwungen), sondern darin, dass (a) jede jemals gefundene Fehlerklasse als
+Szenario **festgeschrieben** wird und nie wieder unbemerkt kaputtgehen kann,
+und (b) jeder den Korpus lesen, kritisieren und um eigene Fälle erweitern kann.
 
 Zwei Kennzahlen zählen gleichermaßen:
 
@@ -36,10 +50,10 @@ Zwei Kennzahlen zählen gleichermaßen:
 
 | Kennzahl | Wert |
 |---|---|
-| Szenarien | **64** |
-| Abgedeckte Analyzer | **14 / 14** |
-| Markierte Soll-Funde (Ground Truth) | **176** |
-| Gehärtete/negative Szenarien (Soll: 0 Funde) | **23** |
+| Szenarien | **71** |
+| Abgedeckte Analyzer | **14 / 14** (+ 2 Roh-Format-Routen) |
+| Markierte Soll-Funde (Ground Truth) | **197** |
+| Gehärtete/negative Szenarien (Soll: 0 Funde) | **27** |
 
 Jedes Szenario ist ein realistischer, aber synthetischer Export (E-Mail-DNS,
 `docker inspect`, AD-Struktur, Firewall-Regelwerk, …) mit **exakt bekanntem**
@@ -47,10 +61,30 @@ Soll-Ergebnis. Es gibt vier Arten:
 
 | Art | Anzahl | Zweck |
 |---|---|---|
-| **Gepflanzte Lücke** (`vuln`) | 16 | Bekannte Schwachstellen, die gefunden werden **müssen**. |
-| **Gehärtet** (`hardened`) | 14 | Sauberer Soll-Zustand — es darf **kein** Fund entstehen. |
-| **Schwellenwert** (`boundary`) | 10 | Werte exakt auf der Entscheidungsgrenze. |
-| **Täuschung** (`confuser`) | 24 | Sieht gefährlich aus, ist es nicht — oder umgekehrt (inkl. „schmutziger" Exporte mit String-Werten). |
+| **Gepflanzte Lücke** (`vuln`) | 18 | Bekannte Schwachstellen, die gefunden werden **müssen**. |
+| **Gehärtet** (`hardened`) | 16 | Sauberer Soll-Zustand — es darf **kein** Fund entstehen. |
+| **Schwellenwert** (`boundary`) | 11 | Werte exakt auf der Entscheidungsgrenze. |
+| **Täuschung** (`confuser`) | 26 | Sieht gefährlich aus, ist es nicht — oder umgekehrt (inkl. „schmutziger" Exporte mit String-Werten). |
+
+### Roh-Formate: echte Vendor-Ausgaben statt vorgeformter Exporte
+
+Ein berechtigter Einwand gegen synthetische Korpora lautet: *„Die Eingaben sind
+auf das Schema des Werkzeugs zugeschnitten — die Antwort steckt schon in der
+Frage."* Deshalb enthält der Korpus eine eigene Dimension mit **unveränderten
+Roh-Formaten**, wie die Werkzeuge sie wirklich ausgeben:
+
+- **`container_raw`** — die echte, verschachtelte `docker inspect`-JSON-Ausgabe
+  (PascalCase, `HostConfig`/`Binds`/`NetworkSettings`), inklusive eines
+  Täuschungsfalls (`/var/run/docker.sock.backup` ist *nicht* das Docker-Socket).
+- **`aws_raw`** — ein Bündel echter AWS-CLI-Antworten (`get-account-summary`,
+  `describe-security-groups`, `get-bucket-policy-status`, …). Weltoffene Ports
+  werden aus `IpPermissions`/`CidrIp` abgeleitet, die Vertrauensweite aus dem
+  echten `AssumeRolePolicyDocument`, das Schlüssel-Alter aus `CreateDate` gegen
+  ein festes Referenzdatum — die Bewertung steckt hier **nicht** in der Eingabe.
+
+Beide Routen laufen durch **dieselben Normalisierer wie die Kundenanalyse**
+(`specter/container_live.py`, `specter/aws_raw.py`) — gemessen wird also der
+Produktiv-Codepfad, nicht eine Benchmark-Sonderlocke.
 
 ### Was die Benchmark „schwer" macht
 
@@ -147,13 +181,23 @@ Falsch-Positiv-Rate hochziehen, ohne dass die CI es meldet.
 
 ## Grenzen (ehrlich benannt)
 
+- **Korpus und Regeln haben denselben Autor.** Die Benchmark ist damit ein
+  Regressions-Gate, kein unabhängiger Test: Sie beweist, dass keine dokumentierte
+  Fehlerklasse jemals still kaputtgeht — nicht, dass Specter in fremden,
+  ungesehenen Umgebungen dieselbe Quote erreicht. Die 100 % sind per Gate
+  erzwungen (`MIN_RECALL = 1.0`) und daher **konstruktionsbedingt**, solange die
+  CI grün ist.
 - Der Korpus misst die **Analyzer-Logik** gegen bekannte Fehlerklassen, nicht die
   Vollständigkeit gegenüber *allen* denkbaren Angriffen. Er beweist Korrektheit
   und Präzision auf einem definierten, offengelegten Umfang — nicht „Sicherheit"
   im absoluten Sinn.
 - Die Szenarien sind synthetisch (dafür deterministisch und reproduzierbar). Die
-  **Labor-Harnesse** (`examples/live_lab/`) ergänzen das um Läufe gegen *echte*,
-  selbst gestartete Server, Datenbanken und Container.
+  **Roh-Format-Dimension** (`container_raw`, `aws_raw`) verringert die Distanz
+  zur Realität, ersetzt sie aber nicht; die **Labor-Harnesse**
+  (`examples/live_lab/`) ergänzen das um Läufe gegen *echte*, selbst gestartete
+  Server, Datenbanken und Container.
 - Erweiterungen sind erwünscht: Neue Fehlerklassen werden als weitere Szenarien
   in `examples/benchmark/corpus.py` aufgenommen — jede Regel bekommt so ihren
-  festen Platz in der Wahrheit, gegen die gemessen wird.
+  festen Platz in der Wahrheit, gegen die gemessen wird. Extern beigesteuerte
+  Szenarien (die der Autor **nicht** kennt, bevor sie laufen) sind der beste
+  Weg, die Selbstreferenz dieses Korpus aufzubrechen.

@@ -278,6 +278,29 @@ def test_analyze_aws_too_large(tmp_path):
     assert r.is_error and "zu groß" in r.content
 
 
+def test_analyze_aws_accepts_raw_cli_bundle(tmp_path):
+    # Bündel echter AWS-CLI-Antworten (PascalCase) — KEIN vor-normalisierter
+    # Export: das Tool muss das Roh-Format selbst erkennen und ableiten.
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeAwsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    raw = {
+        "account_summary": {"SummaryMap": {"AccountMFAEnabled": 0}},
+        "security_groups": {"SecurityGroups": [
+            {"GroupName": "db-sg", "IpPermissions": [
+                {"IpProtocol": "tcp", "FromPort": 3389, "ToPort": 3389,
+                 "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}]}]},
+        "buckets": [{"Name": "kunden", "PolicyStatus": {"IsPublic": True}}],
+    }
+    path = _write_json(tmp_path, "aws_cli.json", raw)
+    r = tool.run({"path": path})
+    assert not r.is_error and "AWS-Analyse" in r.content
+    titles = " ".join(f.title for f in state.findings.all())
+    assert "Root-Konto ohne MFA" in titles
+    assert "Port 3389" in titles
+    assert "Öffentlicher S3-Bucket: kunden" in titles
+
+
 def test_analyze_aws_no_findings(tmp_path):
     cfg = _cfg(tmp_path)
     state = EngagementState()
@@ -919,6 +942,31 @@ def test_analyze_container_no_findings(tmp_path):
          "docker_socket_mounted": False, "ports": ["127.0.0.1:3000->3000/tcp"]}]})
     r = tool.run({"path": path})
     assert not r.is_error and "ohne Befunde" in r.content
+
+
+def test_analyze_container_accepts_raw_docker_inspect(tmp_path):
+    # Echte (verkürzte) `docker inspect`-Ausgabe — KEIN vor-normalisierter
+    # Export: das Tool muss das Roh-Format selbst erkennen und analysieren.
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    raw = [{
+        "Id": "9f3a1c7e2b4d",
+        "Name": "/legacy-web",
+        "Config": {"Image": "nginx:latest", "User": ""},
+        "HostConfig": {"Privileged": True, "NetworkMode": "host",
+                       "CapAdd": ["SYS_ADMIN"],
+                       "Binds": ["/var/run/docker.sock:/var/run/docker.sock"]},
+        "NetworkSettings": {"Ports": {
+            "80/tcp": [{"HostIp": "0.0.0.0", "HostPort": "8080"}]}},
+    }]
+    path = _write_json(tmp_path, "inspect.json", raw)
+    r = tool.run({"path": path})
+    assert not r.is_error and "Container-Analyse" in r.content
+    titles = " ".join(f.title for f in state.findings.all())
+    assert "Privilegierter Container" in titles
+    assert "Docker-Socket" in titles
+    assert "Host-Networking" in titles
 
 
 # ------------------------------ run_scanner -------------------------------

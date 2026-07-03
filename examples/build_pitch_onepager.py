@@ -240,14 +240,14 @@ def render_html(m: dict) -> str:
 
   <footer>
     <div>Belkis Aslani &middot; Einzelunternehmen (IT-Sicherheit) &middot; 71691 Freiberg am Neckar</div>
-    <div><b>belkis.aslani@gmail.com</b> &middot; 0176 81462526</div>
+    <div><b>kontakt@example.de</b></div>
   </footer>
 </div></body></html>"""
 
 
 def main() -> int:
     m = compute_metrics()
-    m["tests"] = count_tests() or 626
+    m["tests"] = count_tests() or 806
     out = REPO_ROOT / "reports" / "specter-investoren-onepager.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_html(m), encoding="utf-8")
