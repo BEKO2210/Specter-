@@ -315,7 +315,6 @@ Alles, was ein Kunde oder Partner vor der Beauftragung prüfen will, an einem Or
 | [Beispielbericht (PDF)](docs/Specter-Beispielbericht.pdf) | So sieht das Ergebnis aus — vor dem Kauf |
 | [Live-Demo (animiert)](https://beko2210.github.io/Specter-/demo.html) | Der End-to-End-Lauf als Screencast |
 | [Handbuch (PDF)](docs/Specter-Handbuch.pdf) | Vollständige Bedienungs- und Lernunterlage |
-| [Investoren-Onepager (PDF)](docs/Specter-Investoren-Onepager.pdf) | Markt, Modell, Positionierung auf einer Seite |
 | [Live-Demo-Skript](docs/Specter-Live-Demo-Skript.md) | Reproduzierbare Demo für Kundengespräche |
 | [Datenschutz](docs/datenschutz.html) · [Impressum](docs/impressum.html) | Rechtliche Pflichtangaben der Website |
 
@@ -340,6 +339,10 @@ Source: **GitHub Actions***. Danach übernimmt der mitgelieferte Workflow
 [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) den
 Deploy aus `docs/` — mit automatischer Wiederholung gegen transiente
 Pages-Fehler. Live unter `https://beko2210.github.io/Specter-/`.
+
+> Social-Media-Material (Motive, Reels, Redaktionsplan) und der
+> Investoren-Onepager liegen getrennt vom Produktcode im Branch
+> [`marketing`](https://github.com/BEKO2210/Specter-/tree/marketing).
 
 ---
 
