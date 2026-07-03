@@ -175,18 +175,21 @@ section.alt{background:linear-gradient(180deg,transparent,rgba(14,28,43,.5),tran
 .pathmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px;font-size:13px;color:var(--muted)}
 .pathmeta .proven{display:inline-flex;align-items:center;gap:7px;color:var(--teal-2);font-weight:600;
   background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);padding:5px 12px;border-radius:999px}
-.chain{display:flex;align-items:stretch;gap:0;min-width:640px}
-.hop{flex:1;min-width:120px;position:relative;padding:0 6px}
+.chain{display:flex;align-items:stretch;gap:26px;min-width:700px}
+.hop{flex:1;min-width:120px;position:relative;padding:0}
 .hop .node{height:100%;background:linear-gradient(180deg,var(--elev),var(--surface));
   border:1px solid var(--line);border-radius:14px;padding:15px 14px;position:relative}
 .hop .step{font-family:'Space Grotesk','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em}
 .hop h3{margin:8px 0 5px;font-size:14.5px;font-family:'Space Grotesk','Inter',sans-serif;font-weight:600;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
 .hop p{margin:0;font-size:12px;color:var(--muted);line-height:1.5;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
 .hop .sv{position:absolute;top:12px;right:12px;width:9px;height:9px;border-radius:50%}
-.hop:not(:last-child)::after{content:"";position:absolute;top:50%;right:-6px;width:16px;height:2px;
-  background:linear-gradient(90deg,var(--teal),var(--teal-2));z-index:2}
-.hop:not(:last-child)::before{content:"";position:absolute;top:calc(50% - 4px);right:-9px;
-  border:5px solid transparent;border-left-color:var(--teal-2);z-index:3}
+/* Verbindungspfeil in der 26px-Lücke: Schaft + Spitze bilden einen sauberen Pfeil. */
+.hop:not(:last-child)::after{content:"";position:absolute;top:50%;right:-25px;width:24px;height:2.5px;
+  transform:translateY(-50%);border-radius:2px;
+  background:linear-gradient(90deg,var(--teal),var(--teal-2));z-index:4}
+.hop:not(:last-child)::before{content:"";position:absolute;top:50%;right:-25px;
+  transform:translateY(-50%);border:5px solid transparent;
+  border-left:9px solid var(--teal-2);z-index:5}
 .hop.n1 .sv{background:var(--amber)} .hop.n2 .sv{background:var(--amber)}
 .hop.n3 .sv{background:var(--rose)} .hop.n4 .sv{background:var(--rose)} .hop.n5 .sv{background:var(--rose)}
 .hop.crit .node{border-color:rgba(242,116,138,.45);box-shadow:0 0 30px rgba(242,116,138,.12)}
@@ -335,10 +338,11 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
   .chain{flex-direction:column;min-width:0;gap:26px}
   .hop{width:100%;padding:0}
   .hop .node{height:auto}
-  .hop:not(:last-child)::after{top:auto;left:50%;right:auto;bottom:-18px;width:2px;height:12px;
-    background:linear-gradient(180deg,var(--teal),var(--teal-2))}
-  .hop:not(:last-child)::before{top:auto;left:calc(50% - 5px);right:auto;bottom:-22px;
-    border:5px solid transparent;border-top-color:var(--teal-2);border-left-color:transparent}
+  .hop:not(:last-child)::after{top:auto;left:50%;right:auto;bottom:-20px;width:2.5px;height:18px;
+    transform:translateX(-50%);background:linear-gradient(180deg,var(--teal),var(--teal-2))}
+  .hop:not(:last-child)::before{top:auto;left:50%;right:auto;bottom:-20px;
+    transform:translateX(-50%);border:5px solid transparent;
+    border-left:5px solid transparent;border-top:9px solid var(--teal-2)}
 }
 @media(max-width:560px){
   .stats .wrap{grid-template-columns:repeat(2,1fr);gap:22px 12px}
