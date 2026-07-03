@@ -85,3 +85,26 @@ def test_normalize_ports_default_hostip():
            "NetworkSettings": {"Ports": {"5432/tcp": [{"HostPort": "5432"}]}}}
     # Fehlendes HostIp -> 0.0.0.0 (alle Interfaces).
     assert normalize_container(obj)["ports"] == ["0.0.0.0:5432->5432/tcp"]
+
+
+def test_looks_like_docker_inspect_detects_raw_and_rejects_normalized():
+    from specter.container_live import looks_like_docker_inspect
+
+    assert looks_like_docker_inspect(_INSPECT) is True
+    assert looks_like_docker_inspect(_INSPECT[0]) is True
+    # Normalisierter Analyzer-Export darf NICHT als roh eingestuft werden.
+    assert looks_like_docker_inspect({"containers": [{"name": "web"}]}) is False
+    # Leere Liste, gemischte Liste und Nicht-Dicts sind kein Inspect-Format.
+    assert looks_like_docker_inspect([]) is False
+    assert looks_like_docker_inspect([_INSPECT[0], "junk"]) is False
+    assert looks_like_docker_inspect("nope") is False
+
+
+def test_coerce_container_export_normalizes_raw_and_passes_through():
+    from specter.container_live import coerce_container_export
+
+    coerced = coerce_container_export(_INSPECT)
+    assert coerced["containers"][0]["privileged"] is True
+    # Bereits normalisierte Exporte bleiben unverändert (Identität).
+    normalized = {"containers": [{"name": "web", "privileged": True}]}
+    assert coerce_container_export(normalized) is normalized

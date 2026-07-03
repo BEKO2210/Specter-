@@ -921,6 +921,31 @@ def test_analyze_container_no_findings(tmp_path):
     assert not r.is_error and "ohne Befunde" in r.content
 
 
+def test_analyze_container_accepts_raw_docker_inspect(tmp_path):
+    # Echte (verkürzte) `docker inspect`-Ausgabe — KEIN vor-normalisierter
+    # Export: das Tool muss das Roh-Format selbst erkennen und analysieren.
+    cfg = _cfg(tmp_path)
+    state = EngagementState()
+    tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
+    raw = [{
+        "Id": "9f3a1c7e2b4d",
+        "Name": "/legacy-web",
+        "Config": {"Image": "nginx:latest", "User": ""},
+        "HostConfig": {"Privileged": True, "NetworkMode": "host",
+                       "CapAdd": ["SYS_ADMIN"],
+                       "Binds": ["/var/run/docker.sock:/var/run/docker.sock"]},
+        "NetworkSettings": {"Ports": {
+            "80/tcp": [{"HostIp": "0.0.0.0", "HostPort": "8080"}]}},
+    }]
+    path = _write_json(tmp_path, "inspect.json", raw)
+    r = tool.run({"path": path})
+    assert not r.is_error and "Container-Analyse" in r.content
+    titles = " ".join(f.title for f in state.findings.all())
+    assert "Privilegierter Container" in titles
+    assert "Docker-Socket" in titles
+    assert "Host-Networking" in titles
+
+
 # ------------------------------ run_scanner -------------------------------
 
 def _scanner_tool(cfg, tmp_path, approval=None):
