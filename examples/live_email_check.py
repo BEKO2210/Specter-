@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""LIVE-E-Mail-Sicherheits-Check fuer eine echte Domain (Kunden-Tueroeffner).
+"""LIVE-E-Mail-Sicherheits-Check für eine echte Domain (Kunden-Türöffner).
 
-Holt die tatsaechlichen SPF-/DKIM-/DMARC-Eintraege einer Domain ueber
+Holt die tatsächlichen SPF-/DKIM-/DMARC-Einträge einer Domain über
 DNS-over-HTTPS (dns.google) und wertet sie mit demselben Offline-Analyzer aus,
-der auch im Kundenauftrag laeuft (`analyze_email_security`). Ideal als
-kostenloser Erst-Check: es werden ausschliesslich *oeffentliche* DNS-Eintraege
+der auch im Kundenauftrag läuft (`analyze_email_security`). Ideal als
+kostenloser Erst-Check: es werden ausschließlich *öffentliche* DNS-Einträge
 gelesen - kein Zugriff auf Systeme, kein Mailversand, kein Eingriff.
 
 Aufruf (aus dem Repo-Wurzelverzeichnis):
     python examples/live_email_check.py kunde-domain.de
     python examples/live_email_check.py kunde-domain.de --selectors s1,s2,intern
 
-Ohne --selectors werden gaengige DKIM-Selector-Namen abgetastet. DKIM-Selektoren
-sind pro Anbieter unterschiedlich; findet der Check keinen, heisst das *nicht*
+Ohne --selectors werden gängige DKIM-Selector-Namen abgetastet. DKIM-Selektoren
+sind pro Anbieter unterschiedlich; findet der Check keinen, heißt das *nicht*
 zwingend, dass kein DKIM existiert - dann den Selector beim Kunden erfragen.
 """
 
@@ -35,7 +35,7 @@ from specter.email_live import (  # noqa: E402
 
 
 def doh(name: str, rtype: str = "TXT") -> dict:
-    """Fragt DNS-Eintraege eines Namens per DNS-over-HTTPS ab (nur lesend)."""
+    """Fragt DNS-Einträge eines Namens per DNS-over-HTTPS ab (nur lesend)."""
     try:
         raw = subprocess.run(
             ["curl", "-s", "--max-time", "15",
@@ -92,7 +92,7 @@ def main() -> int:
         sel = ", ".join(f"{d['selector']}({d.get('key_bits', '?')} Bit)"
                         for d in export["dkim"])
     else:
-        sel = "(ueber gaengige Selektoren keiner gefunden - beim Kunden erfragen)"
+        sel = "(über gängige Selektoren keiner gefunden - beim Kunden erfragen)"
     print(f"  DKIM  : {sel}")
     print(f"  DNSSEC: {'aktiv (AD-Flag)' if dns_export['dnssec'] else 'NICHT aktiv'}")
     print(f"  CAA   : {', '.join(dns_export['caa']) or '(keine CAA-Records gefunden)'}")
@@ -107,9 +107,9 @@ def main() -> int:
     else:
         print(" Keine Befunde - E-Mail- und DNS-Schutz dieser Domain sind vorbildlich.")
     print("=" * 74)
-    print(" Hinweis: nur oeffentliche DNS-Eintraege gelesen; kein Eingriff. "
+    print(" Hinweis: nur öffentliche DNS-Einträge gelesen; kein Eingriff. "
           "DKIM-Selektoren\n variieren je Anbieter - fehlender DKIM-Treffer ist "
-          "kein sicherer Beleg fuer\n fehlendes DKIM.")
+          "kein sicherer Beleg für\n fehlendes DKIM.")
     return 0
 
 

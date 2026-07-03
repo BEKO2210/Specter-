@@ -29,6 +29,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # HSTS gilt unter ~180 Tagen als zu kurz (Preload verlangt >= 1 Jahr).
 MIN_HSTS_SECONDS = 15552000
@@ -104,7 +105,7 @@ def _analyze_endpoint(ep: dict[str, Any]) -> list[Finding]:
             f"X-Powered-By verrät Software: {xpb}", "web_security", Severity.NIEDRIG,
             url, f"X-Powered-By: {xpb}", location=loc, cwe="CWE-200"))
 
-    for c in (ep.get("cookies") or []):
+    for c in as_list(ep.get("cookies")):
         if not isinstance(c, dict):
             continue
         name = str(c.get("name", "cookie"))

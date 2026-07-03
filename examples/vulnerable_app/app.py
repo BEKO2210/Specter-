@@ -1,4 +1,4 @@
-"""ABSICHTLICH VERWUNDBARE Beispiel-App - nur fuer Specter-Demos/Tests.
+"""ABSICHTLICH VERWUNDBARE Beispiel-App - nur für Specter-Demos/Tests.
 
 NICHT in Produktion verwenden. Enthaelt bewusst typische Schwachstellen,
 damit Specter sie im White-Box-Scan findet.

@@ -3,9 +3,9 @@
 
 Kein Test-Projekt, sondern echte Software: Dieses Skript erfasst die echte
 Konfiguration eines Containers per `docker inspect`, normalisiert sie mit
-`specter.container_live.normalize_inspect` und laesst den echten Specter-Analyzer
-`analyze_container` darueber laufen - er MUSS die realen Fehlkonfigurationen
-(privilegiert, gemountetes docker.sock, Host-Networking, gefaehrliche Capabilities)
+`specter.container_live.normalize_inspect` und lässt den echten Specter-Analyzer
+`analyze_container` darüber laufen - er MUSS die realen Fehlkonfigurationen
+(privilegiert, gemountetes docker.sock, Host-Networking, gefährliche Capabilities)
 erkennen.
 
 Zwei echte Betriebsarten (automatische Auswahl):
@@ -16,7 +16,7 @@ Zwei echte Betriebsarten (automatische Auswahl):
      (aus einem realen Docker-Daemon aufgenommen: examples/data/
      docker_inspect.example.json) und weist explizit darauf hin.
 
-In beiden Faellen wertet Specter eine echte docker-inspect-Struktur aus - der
+In beiden Fällen wertet Specter eine echte docker-inspect-Struktur aus - der
 Analyzer wird nicht umgangen. Rein lokales Eigen-System -> defensiv, §202-konform.
 
 Aufruf (aus dem Repo-Wurzelverzeichnis):
@@ -84,7 +84,7 @@ def collect() -> tuple[str, dict]:
     sample = REPO_ROOT / "examples" / "data" / "docker_inspect.example.json"
     raw = json.loads(sample.read_text(encoding="utf-8"))
     return ("echte, aufgenommene docker-inspect-Ausgabe "
-            "(Docker in dieser Umgebung nicht verfuegbar)"), normalize_inspect(raw)
+            "(Docker in dieser Umgebung nicht verfügbar)"), normalize_inspect(raw)
 
 
 def main() -> int:
@@ -111,7 +111,7 @@ def main() -> int:
 
     alle_ok = all(erwartet.values())
     print("\n" + "=" * 74)
-    print(" ERGEBNIS: " + ("BESTANDEN — Specter erkennt gefaehrliche Container-"
+    print(" ERGEBNIS: " + ("BESTANDEN — Specter erkennt gefährliche Container-"
                            "Fehlkonfigurationen aus echter docker-inspect-Ausgabe."
                            if alle_ok else
                            "FEHLGESCHLAGEN — ein erwarteter Befund fehlt."))

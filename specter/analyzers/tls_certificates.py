@@ -36,6 +36,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # Ablauf-Schwellen (Tage).
 EXPIRY_WARN_DAYS = 30
@@ -115,7 +116,7 @@ def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
 def _analyze_protocols(protocols: Any, host: str) -> list[Finding]:
     out: list[Finding] = []
     loc = f"{host}/protocols"
-    for proto in (protocols or []):
+    for proto in as_list(protocols):
         key = str(proto).strip().lower().replace(" ", "")
         sev = _WEAK_PROTOCOLS.get(key)
         if sev is not None:
@@ -131,7 +132,7 @@ def _analyze_protocols(protocols: Any, host: str) -> list[Finding]:
 def _analyze_ciphers(ciphers: Any, host: str) -> list[Finding]:
     out: list[Finding] = []
     loc = f"{host}/ciphers"
-    for cipher in (ciphers or []):
+    for cipher in as_list(ciphers):
         text = str(cipher).strip().lower()
         if any(marker in text for marker in _WEAK_CIPHER_MARKERS):
             out.append(_mk(

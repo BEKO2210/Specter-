@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Erzeugt die Specter-Landingpage als eigenstaendiges HTML.
+"""Erzeugt die Specter-Landingpage als eigenständiges HTML.
 
 So aufrufen (aus dem Repo-Wurzelverzeichnis):
     python examples/build_landing.py
 
-Danach die Datei im Browser oeffnen (Vorschau) oder direkt hosten. Die
-Kontaktadresse laesst sich anpassen:
+Danach die Datei im Browser öffnen (Vorschau) oder direkt hosten. Die
+Kontaktadresse lässt sich anpassen:
     python examples/build_landing.py deine@mailadresse.de
 """
 
@@ -28,7 +28,7 @@ def main() -> int:
     print("=" * 70)
     print(f"[i] Datei: {out}")
     print(f"[i] Kontaktadresse: {contact}")
-    print("[i] Im Browser oeffnen (Vorschau) oder auf deinem Webspace hochladen.")
+    print("[i] Im Browser öffnen (Vorschau) oder auf deinem Webspace hochladen.")
     return 0
 
 

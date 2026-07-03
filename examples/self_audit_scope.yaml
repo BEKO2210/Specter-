@@ -11,7 +11,7 @@
 # Voll autonomer KI-Lauf mit Fable 5:
 #     export ANTHROPIC_API_KEY=sk-ant-...
 #     python examples/self_audit.py            # nutzt automatisch das Modell unten
-#   oder direkt ueber die CLI:
+#   oder direkt über die CLI:
 #     python main.py --scope examples/self_audit_scope.yaml --yes \
 #       --objective "Auditiere den Specter-Quellcode in ./specter auf Schwachstellen."
 # =============================================================================

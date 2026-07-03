@@ -39,6 +39,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # Werte, die eine nicht festgelegte ("ungepinnte") Version markieren.
 _UNPINNED = {"", "*", "latest", "any", "x"}
@@ -182,9 +183,9 @@ def analyze_dependencies(data: dict[str, Any]) -> list[Finding]:
     if not isinstance(data, dict):
         return []
     project = str(data.get("project", "Projekt"))
-    advisories = [a for a in (data.get("advisories") or []) if isinstance(a, dict)]
+    advisories = [a for a in as_list(data.get("advisories")) if isinstance(a, dict)]
     findings: list[Finding] = []
-    for dep in (data.get("dependencies") or []):
+    for dep in as_list(data.get("dependencies")):
         if isinstance(dep, dict):
             findings += _analyze_dependency(dep, advisories, project)
     return findings

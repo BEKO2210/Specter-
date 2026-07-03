@@ -110,7 +110,7 @@ def build_html(
     p: list[str] = []
 
     p.append("<!doctype html><html lang='de'><head><meta charset='utf-8'>")
-    p.append(f"<title>Sicherheitsbericht - {_e(eng.name)}</title>")
+    p.append(f"<title>Sicherheitsbericht &ndash; {_e(eng.name)}</title>")
     p.append(f"<style>{_CSS}</style></head><body><div class='wrap'>")
 
     # Kopf

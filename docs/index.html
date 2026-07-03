@@ -37,6 +37,10 @@ body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden;
   line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--teal-2);outline-offset:2px;border-radius:3px}
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100;background:var(--teal-2);
+  color:#04211d;padding:10px 16px;font-weight:600;border-radius:0 0 8px 0}
+.skip-link:focus{left:0}
 h1,h2,h3,.brandmark,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:clamp(11px,2.6vw,12.5px);font-weight:600;
@@ -348,6 +352,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
 </style>
 </head>
 <body>
+<a class="skip-link" href="#top">Zum Inhalt springen</a>
 
 <header class="nav" id="nav">
   <div class="wrap">
@@ -387,7 +392,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
       </div>
       <!-- Live risk snapshot -->
       <div class="snap reveal" aria-hidden="true">
-        <div class="st"><b>Lagebild · Muster GmbH</b><span class="live"><i></i>Live</span></div>
+        <div class="st"><b>Lagebild · Muster GmbH</b><span class="live"><i></i>Beispiel</span></div>
         <div class="sev">
           <div class="k"><b>9</b><span>Kritisch</span></div>
           <div class="h"><b>58</b><span>Hoch</span></div>
@@ -473,7 +478,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
       <div class="pathwrap reveal">
         <div class="pathmeta">
           <span class="proven"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Belegter Angriffspfad</span>
-          <span>5 Schritte · vom Internet bis zum Backup · aus einzelnen Findings korreliert</span>
+          <span>5 Schritte · vom Internet bis zum Backup · aus einzelnen Funden korreliert</span>
         </div>
         <div class="chain">
           <div class="hop n1"><div class="node"><span class="sv"></span><div class="step">SCHRITT 01</div><h3>Offenes RDP</h3><p>Fernzugang aus dem Internet erreichbar.</p></div></div>
@@ -491,11 +496,11 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
     <div class="wrap">
       <div class="sec-head reveal">
         <div class="eyebrow">Klarheit statt Alarm-Lawine</div>
-        <h2>Aus hunderten Findings werden wenige klare Prioritäten</h2>
+        <h2>Aus hunderten Funden werden wenige klare Prioritäten</h2>
         <p>Sie ersticken nicht in einer Liste. Specter verdichtet Funde zu Angriffspfaden und zeigt die Choke-Points — die wenigen Stellen, an denen Sie mit einem Handgriff den größten Hebel haben.</p>
       </div>
       <div class="funnel">
-        <div class="fstep f1 reveal"><div class="fbar"></div><b>135</b><div class="lb">Einzel-Findings</div><div class="dt">Über alle 14 Prüfbereiche zusammengetragen und mit CVSS bewertet.</div></div>
+        <div class="fstep f1 reveal"><div class="fbar"></div><b>135</b><div class="lb">Einzel-Funde</div><div class="dt">Über alle 14 Prüfbereiche zusammengetragen und mit CVSS bewertet.</div></div>
         <div class="fstep f2 reveal"><div class="fbar"></div><b>7</b><div class="lb">Angriffspfade</div><div class="dt">Zu echten, nachvollziehbaren Ketten korreliert — statt isolierter Einzelmeldungen.</div></div>
         <div class="fstep f3 reveal"><div class="fbar"></div><b>3</b><div class="lb">Choke-Points</div><div class="dt">Die Stellen mit dem größten Hebel. Hier zuerst ansetzen — der Rest fällt mit.</div></div>
       </div>
@@ -512,7 +517,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
           <h2 style="font-size:clamp(24px,5vw,34px);margin:12px 0 10px;line-height:1.15">Ein Bericht, den auch die Geschäftsführung versteht</h2>
           <p style="color:var(--muted);font-size:16px;margin:0">Keine kryptische Tool-Ausgabe, sondern ein klares Lagebild mit Prioritäten — für IT und Chefetage gleichermaßen. Als PDF, direkt vorzeigbar.</p>
           <ul>
-            <li><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Findings nach Schweregrad, mit CVSS-Bewertung</li>
+            <li><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Funde nach Schweregrad, mit CVSS-Bewertung</li>
             <li><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Konkrete Handlungsempfehlung je Punkt</li>
             <li><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>BSI-IT-Grundschutz-Bezug für Ihre Nachweise</li>
             <li><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Nachtest belegt schwarz auf weiß die Behebung</li>
@@ -537,7 +542,8 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg><div><strong>E-Mail-Schutz</strong><span>SPF, DKIM, DMARC gegen Spoofing &amp; Phishing</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><div><strong>Active Directory</strong><span>Schwache Policies, Kerberoasting, Golden-Ticket-Risiken</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 17a5 5 0 010-10 6 6 0 0111-2 4.5 4.5 0 011 8.9"/></svg><div><strong>Microsoft 365 / Entra</strong><span>MFA, Legacy-Auth, zu viele Admins, offene Freigaben</span></div></div>
-        <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 17a5 5 0 010-10 6 6 0 0111-2 4.5 4.5 0 011 8.9"/><path d="M9 13l3 3 3-3"/></svg><div><strong>AWS &amp; Azure</strong><span>Offene Speicher, zu weite Rechte, offene Ports</span></div></div>
+        <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 17a5 5 0 010-10 6 6 0 0111-2 4.5 4.5 0 011 8.9"/><path d="M9 13l3 3 3-3"/></svg><div><strong>AWS</strong><span>Root ohne MFA, offene S3-Buckets, zu weite IAM-Rechte</span></div></div>
+        <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 17a5 5 0 010-10 6 6 0 0111-2 4.5 4.5 0 011 8.9"/><path d="M12 10v6"/></svg><div><strong>Azure</strong><span>Offene Storage-Accounts, NSG-Ports ins Internet, Key-Vaults</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 5v14"/></svg><div><strong>Firewall &amp; VPN</strong><span>Any-Any-Regeln, offenes RDP/SSH, VPN ohne MFA</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><div><strong>TLS &amp; Zertifikate</strong><span>Abgelaufen, schwache Verschlüsselung, alte Protokolle</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h8M8 14h5"/></svg><div><strong>Software-Bibliotheken</strong><span>Bekannte Lücken (Log4Shell-Klasse), veraltete Pakete</span></div></div>
@@ -547,7 +553,6 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg><div><strong>Web-Sicherheit</strong><span>HSTS/CSP/X-Frame-Options, unsichere Cookies, Banner-Leaks</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></svg><div><strong>Datenbanken</strong><span>Offene Ports, fehlende Auth (Redis/Mongo), Default-Creds, ohne TLS</span></div></div>
         <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="1.5"/><path d="M7 8V6h4v2M13 12h4M7 12h2"/></svg><div><strong>Container / Docker</strong><span>Privileged, gemountetes docker.sock, Host-Networking, root</span></div></div>
-        <div class="cov reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h6a4 4 0 014 4v6"/></svg><div><strong>Angriffspfade</strong><span>Wie kleine Lücken zusammen gefährlich werden</span></div></div>
       </div>
     </div>
   </section>
@@ -557,7 +562,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
     <div class="wrap">
       <div class="sec-head ctr reveal">
         <div class="eyebrow">Warum Specter</div>
-        <h2>Kein Alarm-Rauschen. Belege, die Sie schließen können.</h2>
+        <h2>Kein Alarm-Rauschen. Klare Belege, mit denen Sie Lücken schließen.</h2>
       </div>
       <div class="grid cols-4">
         <div class="vcard reveal"><b>100%</b><h3>Offline &amp; lesend</h3><p>Nur bereitgestellte Export-Dateien und öffentliche Daten. Keine Live-Verbindung.</p></div>
@@ -639,7 +644,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
       <div class="method">
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><b>BSI IT-Grundschutz</b><span>Jeder Fund einem Baustein zugeordnet</span></div>
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg><b>CVSS-Bewertung</b><span>Nachvollziehbarer Score je Schwachstelle</span></div>
-        <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><b>603 automatisierte Tests</b><span>100&nbsp;% des Prüf-Kerns abgedeckt</span></div>
+        <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><b>626 automatisierte Tests</b><span>100&nbsp;% des Prüf-Kerns abgedeckt</span></div>
         <div class="mtile reveal"><svg class="ic" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg><b>Lückenloses Audit-Log</b><span>Jede Aktion ist belegt und prüfbar</span></div>
       </div>
     </div>

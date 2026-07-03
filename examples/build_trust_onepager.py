@@ -4,8 +4,8 @@
 So aufrufen (aus dem Repo-Wurzelverzeichnis):
     python examples/build_trust_onepager.py
 
-Danach die erzeugte Datei im Browser oeffnen und ueber
-"Drucken -> Als PDF speichern" ein schoenes Kunden-PDF erstellen.
+Danach die erzeugte Datei im Browser öffnen und über
+"Drucken -> Als PDF speichern" ein schönes Kunden-PDF erstellen.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ def main() -> int:
     print(" Specter - Vertrauens-/Sicherheits-One-Pager erzeugt")
     print("=" * 70)
     print(f"[i] Datei: {out}")
-    print("[i] Im Browser oeffnen und 'Drucken -> Als PDF speichern' waehlen.")
+    print("[i] Im Browser öffnen und 'Drucken -> Als PDF speichern' wählen.")
     return 0
 
 

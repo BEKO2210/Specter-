@@ -33,6 +33,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 MAX_GLOBAL_ADMINS = 5
 STALE_GUEST_DAYS = 90
@@ -134,7 +135,7 @@ def _analyze_user(user: dict[str, Any], tenant: str) -> list[Finding]:
 
 def _analyze_apps(apps: Any, tenant: str) -> list[Finding]:
     out: list[Finding] = []
-    for app in (apps or []):
+    for app in as_list(apps):
         if not isinstance(app, dict):
             continue
         name = str(app.get("name", "App"))
@@ -167,7 +168,7 @@ def analyze_entra(data: dict[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     findings += _analyze_baseline(data, tenant)
     findings += _analyze_roles(data.get("roles") or {}, tenant)
-    for user in (data.get("users") or []):
+    for user in as_list(data.get("users")):
         if isinstance(user, dict):
             findings += _analyze_user(user, tenant)
     findings += _analyze_apps(data.get("app_registrations"), tenant)

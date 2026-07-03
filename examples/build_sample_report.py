@@ -9,7 +9,7 @@ Vertrauensbeweis für Interessenten - ohne echte Kundendaten.
 So aufrufen (aus dem Repo-Wurzelverzeichnis):
     python examples/build_sample_report.py
 
-Danach die erzeugte HTML-Datei im Browser öffnen und ueber
+Danach die erzeugte HTML-Datei im Browser öffnen und über
 "Drucken -> Als PDF speichern" ein PDF erstellen (oder per Chromium rendern).
 """
 
@@ -103,7 +103,7 @@ def main() -> int:
     print(f"[i] Datei: {out}")
     print(f"[i] {len(findings)} Findings (Kritisch {counts.get('Kritisch',0)}, "
           f"Hoch {counts.get('Hoch',0)}, Mittel {counts.get('Mittel',0)}) "
-          f"ueber {len(assets)} Assets, {len(paths)} Angriffspfade.")
+          f"über {len(assets)} Assets, {len(paths)} Angriffspfade.")
     print("[i] Im Browser öffnen und 'Drucken -> Als PDF speichern' wählen.")
     return 0
 
