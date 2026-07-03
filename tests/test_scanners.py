@@ -271,3 +271,22 @@ def test_nikto_parse_findings():
     assert any(f.category == "outdated_component" for f in findings)
     # Server-Banner erzeugt kein Finding.
     assert not any("Server: Apache" in f.title for f in findings)
+
+
+def test_nikto_parse_skips_status_and_summary_noise():
+    """Status-/Zusammenfassungs-/Banner-Zeilen dürfen keine Findings werden."""
+    s = NiktoScanner()
+    out = (
+        "+ Target IP:          127.0.0.1\n"
+        "+ SSL Info:        Subject: /CN=lab-expired.local\n"
+        "+ Root page / redirects to: https://example/\n"
+        "+ No CGI Directories found (use '-C all' to force check all dirs)\n"
+        "+ 6544 items checked: 0 error(s) and 4 item(s) reported on remote host\n"
+        "+ 1 host(s) tested\n"
+        "+ No web server found on 127.0.0.1\n"
+        # Ein echter Fund bleibt erhalten:
+        "+ The anti-clickjacking X-Frame-Options header is not present.\n"
+    )
+    findings = s.parse(out, "127.0.0.1")
+    assert len(findings) == 1
+    assert "X-Frame-Options" in findings[0].title

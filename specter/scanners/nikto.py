@@ -12,6 +12,22 @@ from .base import Scanner, ScannerError
 # Nikto -Tuning: '6' = Denial of Service. Immer verbieten.
 _FORBIDDEN_TUNING = set("6")
 
+# Reine Banner-/Kopfzeilen (Zeilenanfang) - kein Finding.
+_NOISE_PREFIXES = (
+    "target ip", "target hostname", "target port", "start time",
+    "end time", "server:", "ssl info:", "root page",
+)
+# Status-/Zusammenfassungszeilen von nikto - kein Finding. Diese beginnen oft
+# mit einer Zahl ("6544 items checked", "1 host(s) tested"), weshalb eine reine
+# startswith-Prüfung nicht greift; deshalb als Teilstring-Marker geprüft.
+_NOISE_MARKERS = (
+    "items checked",        # "6544 items checked: 0 error(s) ..."
+    "host(s) tested",       # "1 host(s) tested"
+    "no cgi directories",   # Statushinweis, kein Fund
+    "no web server found",
+    "item(s) reported on remote host",
+)
+
 
 class NiktoScanner(Scanner):
     name = "nikto"
@@ -58,10 +74,10 @@ class NiktoScanner(Scanner):
                 continue
             text = line[2:].strip()
             low = text.lower()
-            # Reine Banner-/Statuszeilen erzeugen keine Findings.
-            if low.startswith(("target ip", "target hostname", "target port",
-                               "start time", "end time", "host(s) tested",
-                               "server:")):
+            # Reine Banner-/Status-/Zusammenfassungszeilen erzeugen keine Findings.
+            if low.startswith(_NOISE_PREFIXES):
+                continue
+            if any(marker in low for marker in _NOISE_MARKERS):
                 continue
             category = "misconfiguration"
             severity = Severity.MITTEL
