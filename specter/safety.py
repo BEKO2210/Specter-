@@ -37,7 +37,21 @@ class SafetyPolicy:
             raise ScopeViolation(
                 "Kein Datei-Scope konfiguriert (filesystem.allowed_paths ist leer)."
             )
-        resolved = Path(raw_path).expanduser().resolve()
+        text = str(raw_path)
+        if not text.strip():
+            raise ScopeViolation("Leerer Pfad ist nicht zulässig.")
+        # Steuerzeichen (inkl. NUL) fail-closed abweisen: Ein NUL-Byte ließe
+        # sonst Path.resolve() mit einem ungefangenen ValueError abstürzen, und
+        # eingebettete Steuerzeichen sind in echten Pfaden ein Manipulations-
+        # Indikator, kein legitimer Dateiname.
+        if any(ord(c) < 32 for c in text):
+            raise ScopeViolation("Pfad enthält Steuerzeichen und wird verweigert.")
+        try:
+            resolved = Path(text).expanduser().resolve()
+        except (ValueError, OSError, RuntimeError) as exc:
+            # z. B. eingebettetes NUL (ValueError), zu langer Pfad (OSError),
+            # Symlink-Schleife (RuntimeError in pathlib). Immer fail-closed.
+            raise ScopeViolation(f"Pfad nicht auflösbar: {exc}") from exc
         for base in self.config.allowed_paths:
             if resolved == base or base in resolved.parents:
                 return resolved
@@ -107,14 +121,20 @@ class SafetyPolicy:
 
     @staticmethod
     def _reject_shell_metacharacters(command: str) -> None:
-        # Selbst ohne shell=True: keine Verkettungsversuche zulassen.
-        forbidden = [";", "|", "&", "$(", "`", ">", "<", "\n"]
+        # Selbst ohne shell=True: keine Verkettungs-/Umleitungs-/Expansions-
+        # versuche zulassen.
+        forbidden = [";", "|", "&", "$(", "${", "`", ">", "<", "\n", "\r", "\t"]
         for token in forbidden:
             if token in command:
                 raise ScopeViolation(
-                    f"Unerlaubtes Shell-Metazeichen im Befehl: '{token}'. "
+                    f"Unerlaubtes Shell-Metazeichen im Befehl: {token!r}. "
                     "Nur einzelne Programmaufrufe sind erlaubt."
                 )
+        # NUL und sonstige Steuerzeichen (Argument-Smuggling) generell abweisen.
+        if any(ord(c) < 32 and c not in " " for c in command):
+            raise ScopeViolation(
+                "Befehl enthält Steuerzeichen und wird verweigert."
+            )
 
     @staticmethod
     def _normalize_host(target: str) -> str:

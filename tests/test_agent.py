@@ -120,8 +120,12 @@ def test_agent_injects_approval_fn(config, tmp_path):
     audit = AuditLog(tmp_path / "audit")
     agent = SecurityAgent(config, llm, audit, printer=lambda _m: None,
                           approval_fn=lambda c: calls.append(c) or True)
-    # Das run_command-Tool muss die Approval-Funktion erhalten haben.
+    # Das run_command-Tool muss GENAU die injizierte Approval-Funktion
+    # erhalten haben (durch die SafeTool-Hülle hindurch, unter .inner).
     from specter.tools.run_command import RunCommandTool
-    cmd_tool = agent.tools["run_command"]
+    injected = agent.approval_fn if hasattr(agent, "approval_fn") else None
+    cmd_tool = agent.tools["run_command"].inner
     assert isinstance(cmd_tool, RunCommandTool)
-    assert cmd_tool.approval_fn is not None
+    # Der Callback ist nicht mehr der Default — er ruft unser calls.append auf.
+    cmd_tool.approval_fn("nmap -sV 127.0.0.1")
+    assert calls == ["nmap -sV 127.0.0.1"]

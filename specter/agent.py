@@ -87,11 +87,13 @@ class SecurityAgent:
         self.tools = build_registry(config, self.policy, audit, self.state)
 
         # Freigabe-Callback in alle aktiven Werkzeuge injizieren
-        # (Human-in-the-loop vor jedem Eingriff in fremde Systeme).
+        # (Human-in-the-loop vor jedem Eingriff in fremde Systeme). Die Tools
+        # liegen in einer SafeTool-Hülle; injiziert wird in das innere Tool.
         if approval_fn is not None:
             for tool in self.tools.values():
-                if getattr(tool, "active", False) and hasattr(tool, "approval_fn"):
-                    tool.approval_fn = approval_fn
+                inner = getattr(tool, "inner", tool)
+                if getattr(inner, "active", False) and hasattr(inner, "approval_fn"):
+                    inner.approval_fn = approval_fn
 
     @property
     def _system(self) -> str:

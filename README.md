@@ -11,7 +11,7 @@
 E-Mail-Betrug, offenes RDP, fehlende Backups: Specter deckt die Angriffspfade auf, erklärt sie verständlich und belegt jeden Fund.</p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-685%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-791%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
   <img alt="Benchmark" src="https://img.shields.io/badge/Erkennung-100%25%20%C2%B7%200%20Fehlalarme-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
@@ -88,7 +88,7 @@ Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **
    python examples/self_audit.py
    ```
 
-5. **685 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
+5. **791 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
 
 6. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
 
@@ -375,7 +375,7 @@ richtige Schutz; Specter beantwortet den Teil, der im Mittelstand meist fehlt.
 
 ## Roadmap
 
-Die Softwarequalität steht (685 Tests, 100 % Coverage, Labor-Beweise,
+Die Softwarequalität steht (791 Tests, 100 % Coverage, Labor-Beweise,
 reproduzierbare Benchmark). Der Fokus liegt jetzt auf Marktreife und
 Vertrauensaufbau:
 
@@ -398,13 +398,22 @@ Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/
 
 ## Qualität
 
-**685 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**791 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
 Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle vierzehn Analyzer (jede Regel +
 Fehlerfälle), die vierundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
 BSI-Mapping sowie Markdown- und HTML-Report. Zusätzlich läuft die
 **Benchmark als Regressions-Gate** mit (`tests/test_benchmark.py`): sinkt die
 Erkennung oder entsteht ein Fehlalarm, schlägt die CI fehl.
+
+Dazu kommen mehrere **adversariale Härtungs-Schichten**: SSRF-Resistenz der
+Scope-Grenze (verbotene Cloud-Metadaten-IP `169.254.169.254` wird in jeder
+Schreibweise verweigert — IPv6-gemappt, dezimal, oktal, hex), fail-closed gegen
+NUL-/Steuerzeichen und Symlink-Schleifen, eine Ausnahme-isolierende Hülle um alle
+Werkzeuge (kein Tool-Fehler bricht einen Lauf ab), Injection-Schutz im Report
+(kein Stored-XSS aus angreiferkontrollierter Evidenz) und **Property-Based-Tests
+(Hypothesis)** über alle Analyzer — tausende Zufallseingaben, die die Invarianten
+„nie Absturz, immer gültige Funde, deterministisch" beweisen.
 
 ---
 
@@ -418,7 +427,7 @@ examples/           # Demo, Live-Check, Labore, Self-Audit, Marketing-Generatore
   benchmark/        # markierter Korpus + Scorecard (python examples/benchmark/run.py)
   live_lab/         # Läufe gegen echte Server/DB/Container
 docs/               # Website + Live-Demo (demo.html), Benchmark-Methodik, Trust-Dokumente
-tests/              # 685 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
+tests/              # 791 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
 ```
 
 ---
