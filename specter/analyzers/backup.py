@@ -29,6 +29,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 MIN_COPIES = 3            # 3-2-1-Regel: mindestens 3 Kopien
 MIN_RETENTION_DAYS = 30   # unter der typischen Angreifer-Verweildauer riskant
@@ -59,7 +60,7 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
     copies = _int(b.get("copies"))
     if copies is not None and copies < 2:
         out.append(_mk(
-            f"Nur eine Backup-Kopie (Single Point of Failure): {name}",
+            f"Höchstens eine Backup-Kopie (Single Point of Failure): {name}",
             "backup_resilience", Severity.HOCH, loc,
             f"copies={copies} - 3-2-1-Regel verlangt mindestens {MIN_COPIES} Kopien",
             location=loc, cwe="CWE-693",
@@ -135,7 +136,7 @@ def analyze_backup(data: dict[str, Any]) -> list[Finding]:
         return []
     org = str(data.get("organization", "Organisation"))
     findings: list[Finding] = []
-    for b in (data.get("backups") or []):
+    for b in as_list(data.get("backups")):
         if isinstance(b, dict):
             findings += _analyze_backup(b, org)
     policy = data.get("policy")

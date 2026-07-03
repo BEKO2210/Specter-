@@ -32,6 +32,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # Werte, die "beliebig / aus dem Internet" bedeuten.
 _ANY = {"any", "*", "all", "0.0.0.0/0", "0.0.0.0", "::/0", ""}
@@ -151,7 +152,7 @@ def _analyze_management(mgmt: dict[str, Any], device: str) -> list[Finding]:
         return []
     loc = f"{device}/management"
     out: list[Finding] = []
-    exposed = [str(i).strip().lower() for i in (mgmt.get("exposed_interfaces") or [])]
+    exposed = [str(i).strip().lower() for i in as_list(mgmt.get("exposed_interfaces"))]
     out.append(_mk(
         "Management-Interface aus dem Internet erreichbar",
         "exposed_service", Severity.HOCH, loc,
@@ -173,10 +174,10 @@ def analyze_firewall(data: dict[str, Any]) -> list[Finding]:
         return []
     device = str(data.get("device", "Firewall"))
     findings: list[Finding] = []
-    for rule in (data.get("rules") or []):
+    for rule in as_list(data.get("rules")):
         if isinstance(rule, dict):
             findings += _analyze_rule(rule, device)
-    for vpn in (data.get("vpn") or []):
+    for vpn in as_list(data.get("vpn")):
         if isinstance(vpn, dict):
             findings += _analyze_vpn(vpn, device)
     mgmt = data.get("management")

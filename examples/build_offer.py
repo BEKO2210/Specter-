@@ -5,7 +5,7 @@ Aufruf (aus dem Repo-Wurzelverzeichnis):
     python examples/build_offer.py
     python examples/build_offer.py "Muster GmbH" belkis.aslani@gmail.com
 
-Danach die Datei im Browser oeffnen und ueber "Drucken -> Als PDF speichern"
+Danach die Datei im Browser öffnen und über "Drucken -> Als PDF speichern"
 ein sauberes Kunden-PDF erstellen.
 """
 
@@ -31,7 +31,7 @@ def main() -> int:
     print("=" * 70)
     print(f"[i] Datei: {out}")
     print(f"[i] Kunde: {customer}  ·  Kontakt: {contact}")
-    print("[i] Im Browser oeffnen und 'Drucken -> Als PDF speichern' waehlen.")
+    print("[i] Im Browser öffnen und 'Drucken -> Als PDF speichern' wählen.")
     return 0
 
 

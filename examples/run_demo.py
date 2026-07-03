@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""End-to-End-Demo OHNE API-Key: beweist, dass die Specter-Pipeline real laeuft.
+"""End-to-End-Demo OHNE API-Key: beweist, dass die Specter-Pipeline real läuft.
 
-Startet einen lokalen Test-Webserver (127.0.0.1) und fuehrt die echten
+Startet einen lokalen Test-Webserver (127.0.0.1) und führt die echten
 Werkzeuge in der Esprit-Reihenfolge aus:
   Recon -> Scan (White-Box) -> aktiver Check (curl) -> Findings ->
   Angriffspfad-Korrelation -> Bericht.
@@ -9,10 +9,10 @@ Werkzeuge in der Esprit-Reihenfolge aus:
 So aufrufen (aus dem Repo-Wurzelverzeichnis):
     python examples/run_demo.py
 
-Fuer den VOLL AUTONOMEN Lauf mit KI stattdessen:
+Für den VOLL AUTONOMEN Lauf mit KI stattdessen:
     export ANTHROPIC_API_KEY=sk-ant-...
     python main.py --scope examples/demo_scope.yaml \\
-        --objective "Pruefe die App in examples/vulnerable_app und 127.0.0.1."
+        --objective "Prüfe die App in examples/vulnerable_app und 127.0.0.1."
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ def main() -> int:
 
     httpd, port = _start_server()
     base = f"http://127.0.0.1:{port}/"
-    print(f"[i] Lokaler Test-Webserver laeuft: {base}")
+    print(f"[i] Lokaler Test-Webserver läuft: {base}")
 
     config = Config.load(REPO_ROOT / "examples" / "demo_scope.yaml")
     audit = AuditLog(REPO_ROOT / "audit")
@@ -102,7 +102,7 @@ def main() -> int:
 
     print("\n--- Phase 3: AKTIVER CHECK (echtes curl gegen den Testserver) ---")
     curl = tools["run_command"].run(
-        {"command": f"curl -s -i {base}", "rationale": "HTTP-Antwort/Header pruefen"}
+        {"command": f"curl -s -i {base}", "rationale": "HTTP-Antwort/Header prüfen"}
     )
     print(curl.content[:400] + (" ..." if len(curl.content) > 400 else ""))
     # Aus der Antwort ein Finding ableiten (Zugangsdaten im HTML-Kommentar).

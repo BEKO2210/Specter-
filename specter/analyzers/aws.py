@@ -33,6 +33,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 MIN_PASSWORD_LENGTH = 14
 ACCESS_KEY_MAX_AGE = 180
@@ -65,7 +66,7 @@ def _is_admin(policies: Any) -> bool:
 
 def _analyze_root(root: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
-    if not root:
+    if not isinstance(root, dict) or not root:
         return out
     if root.get("mfa_enabled") is False:
         out.append(_mk(
@@ -84,7 +85,7 @@ def _analyze_root(root: dict[str, Any], account: str) -> list[Finding]:
 
 def _analyze_password_policy(pol: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
-    if not pol:
+    if not isinstance(pol, dict) or not pol:
         return out
     ml = pol.get("minimum_length")
     if isinstance(ml, int) and ml < MIN_PASSWORD_LENGTH:
@@ -124,22 +125,25 @@ def _analyze_user(user: dict[str, Any], account: str) -> list[Finding]:
             f"attached_policies={pols[:3]}",
             location=loc, cwe="CWE-269",
         ))
-    for key in (user.get("access_keys") or []):
+    for idx, key in enumerate(as_list(user.get("access_keys"))):
         if not isinstance(key, dict):
             continue
+        # Schlüssel-Identität, damit zwei Keys desselben Users nicht durch die
+        # Dedup (Kategorie/Asset/Location/Titel) zu einem Finding verschmelzen.
+        kid = str(key.get("id") or key.get("access_key_id") or f"#{idx + 1}")
         age = key.get("age_days")
         if isinstance(age, int) and age > ACCESS_KEY_MAX_AGE:
             out.append(_mk(
-                f"Alter Access-Key ({age} Tage): {name}", "access_control",
-                Severity.MITTEL, name, f"access_key age_days={age}", location=loc,
-                cwe="CWE-798",
+                f"Alter Access-Key ({age} Tage): {name} [{kid}]", "access_control",
+                Severity.MITTEL, name, f"access_key {kid} age_days={age}",
+                location=f"{loc}#{kid}", cwe="CWE-798",
             ))
         used = key.get("last_used_days")
         if used is None or (isinstance(used, int) and used > ACCESS_KEY_UNUSED_DAYS):
             out.append(_mk(
-                f"Ungenutzter Access-Key: {name}", "access_control",
-                Severity.NIEDRIG, name, f"access_key last_used_days={used}",
-                location=loc,
+                f"Ungenutzter Access-Key: {name} [{kid}]", "access_control",
+                Severity.NIEDRIG, name, f"access_key {kid} last_used_days={used}",
+                location=f"{loc}#{kid}",
             ))
     return out
 
@@ -208,16 +212,16 @@ def analyze_aws(data: dict[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     findings += _analyze_root(data.get("root_account") or {}, account)
     findings += _analyze_password_policy(data.get("password_policy") or {}, account)
-    for user in (data.get("users") or []):
+    for user in as_list(data.get("users")):
         if isinstance(user, dict):
             findings += _analyze_user(user, account)
-    for role in (data.get("roles") or []):
+    for role in as_list(data.get("roles")):
         if isinstance(role, dict):
             findings += _analyze_role(role, account)
-    for bucket in (data.get("s3_buckets") or []):
+    for bucket in as_list(data.get("s3_buckets")):
         if isinstance(bucket, dict):
             findings += _analyze_bucket(bucket, account)
-    for sg in (data.get("security_groups") or []):
+    for sg in as_list(data.get("security_groups")):
         if isinstance(sg, dict):
             findings += _analyze_sg(sg, account)
     return findings

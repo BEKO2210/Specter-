@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Erzeugt eine personalisierte Erstkontakt-Mail auf Basis des Live-E-Mail-Checks.
 
-Kombiniert den Live-Check (echte SPF/DKIM/DMARC-Eintraege per DNS-over-HTTPS)
+Kombiniert den Live-Check (echte SPF/DKIM/DMARC-Einträge per DNS-over-HTTPS)
 mit der Erstkontakt-Vorlage zu einer fertigen, individuellen Mail.
 
 Aufruf (aus dem Repo-Wurzelverzeichnis):
@@ -10,9 +10,9 @@ Aufruf (aus dem Repo-Wurzelverzeichnis):
 
 RECHTLICHER HINWEIS: Unaufgeforderte Werbe-E-Mails an Unternehmen sind in
 Deutschland nach dem UWG heikel (i. d. R. ist eine vorherige Einwilligung oder
-ein sachlicher Anknuepfungspunkt noetig). Nutzen Sie diese Vorlage fuer einen
+ein sachlicher Anknüpfungspunkt nötig). Nutzen Sie diese Vorlage für einen
 individuellen Erstkontakt - idealerweise nach einem Telefonat, einer Empfehlung,
-einem Messekontakt oder ueber LinkedIn - nicht fuer Massenversand.
+einem Messekontakt oder über LinkedIn - nicht für Massenversand.
 """
 
 from __future__ import annotations
@@ -72,9 +72,9 @@ def main() -> int:
     print(mail["body"])
     print("=" * 74)
     print("RECHTLICHER HINWEIS: Kein Massenversand. Unaufgeforderte Werbung an")
-    print("Unternehmen ist nach UWG heikel - fuer individuellen Erstkontakt nutzen")
+    print("Unternehmen ist nach UWG heikel - für individuellen Erstkontakt nutzen")
     print("(idealerweise nach Telefonat/Empfehlung/LinkedIn). Bei Unsicherheit")
-    print("vorab kurz rechtlich abklaeren.")
+    print("vorab kurz rechtlich abklären.")
     return 0
 
 

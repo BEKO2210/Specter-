@@ -25,6 +25,20 @@ def test_invalid_yaml(tmp_path):
         Config.load(p)
 
 
+def test_scalar_yaml_rejected(tmp_path):
+    # Ein Skalar/Liste ist valides YAML, aber kein Mapping -> saubere ScopeError
+    # statt eines rohen AttributeError-Tracebacks.
+    p = _write(tmp_path / "s.yaml", "nur-ein-string\n")
+    with pytest.raises(ScopeError, match="YAML-Mapping"):
+        Config.load(p)
+
+
+def test_list_yaml_rejected(tmp_path):
+    p = _write(tmp_path / "s.yaml", "- a\n- b\n")
+    with pytest.raises(ScopeError, match="YAML-Mapping"):
+        Config.load(p)
+
+
 def test_missing_authorization(tmp_path):
     p = _write(tmp_path / "s.yaml", "engagement:\n  name: X\n")
     with pytest.raises(ScopeError, match="authorized_by"):

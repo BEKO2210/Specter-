@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Self-Audit: Specter prueft den EIGENEN Quellcode.
+"""Self-Audit: Specter prüft den EIGENEN Quellcode.
 
-Ein Reifenachweis fuer Kundengespraeche - wir setzen unser Werkzeug auf uns
-selbst an. Der Datei-Scope zeigt ausschliesslich auf `specter/`; es werden
+Ein Reifenachweis für Kundengespraeche - wir setzen unser Werkzeug auf uns
+selbst an. Der Datei-Scope zeigt ausschließlich auf `specter/`; es werden
 keine fremden Systeme und keine Netzwerkziele beruehrt.
 
 Zwei Betriebsarten (dieselbe Scope-Datei examples/self_audit_scope.yaml):
@@ -10,8 +10,8 @@ Zwei Betriebsarten (dieselbe Scope-Datei examples/self_audit_scope.yaml):
   1. OHNE API-Key (Standard): deterministischer statischer Selbst-Scan.
          python examples/self_audit.py
 
-  2. MIT API-Key: zusaetzlich der voll autonome KI-Lauf, gesteuert von dem in
-     der Scope-Datei gewaehlten Modell (per Default `claude-fable-5`):
+  2. MIT API-Key: zusätzlich der voll autonome KI-Lauf, gesteuert von dem in
+     der Scope-Datei gewählten Modell (per Default `claude-fable-5`):
          export ANTHROPIC_API_KEY=sk-ant-...
          python examples/self_audit.py
 """
@@ -45,7 +45,7 @@ def _summary_line(state: EngagementState) -> str:
 
 
 def deterministic_audit(config: Config, audit: AuditLog) -> EngagementState:
-    """Ohne API-Key: statischer Selbst-Scan ueber den eigenen Code."""
+    """Ohne API-Key: statischer Selbst-Scan über den eigenen Code."""
     state = EngagementState()
     policy = SafetyPolicy(config)
     tools = build_registry(config, policy, audit, state)
@@ -55,13 +55,13 @@ def deterministic_audit(config: Config, audit: AuditLog) -> EngagementState:
         {"type": "code", "name": "specter", "note": "Specter-Quellcode (Self-Audit)"}
     ).content)
 
-    print("\n--- SCAN: statische Codeanalyse ueber specter/ ---")
+    print("\n--- SCAN: statische Codeanalyse über specter/ ---")
     print(tools["scan_code"].run({"path": str(REPO_ROOT / "specter")}).content)
 
     print("\n" + "=" * 70)
     print(" Statischer Selbst-Scan abgeschlossen.")
     print(_summary_line(state))
-    print(" Hinweis: statische Treffer sind Kandidaten und muessen verifiziert")
+    print(" Hinweis: statische Treffer sind Kandidaten und müssen verifiziert")
     print(" werden (z. B. Muster-Definitionen im Scanner selbst sind erwartbar).")
     print("=" * 70)
     return state
@@ -79,7 +79,7 @@ def ai_audit(config: Config, audit: AuditLog) -> EngagementState:
         "Auditiere den Specter-Quellcode in ./specter rein statisch (White-Box). "
         "Erfasse die relevanten Bausteine als Assets, scanne den Code, belege "
         "jede plausible Schwachstelle mit einem Finding, korreliere die Findings "
-        "zu Angriffspfaden und erstelle abschliessend den Bericht."
+        "zu Angriffspfaden und erstelle abschließend den Bericht."
     )
     print(f"\n[KI-Lauf mit Modell: {config.model}]")
     summary = agent.run(objective)
@@ -93,22 +93,22 @@ def ai_audit(config: Config, audit: AuditLog) -> EngagementState:
 
 def main() -> int:
     print("=" * 70)
-    print(" Specter - Self-Audit (das Werkzeug prueft sich selbst)")
+    print(" Specter - Self-Audit (das Werkzeug prüft sich selbst)")
     print("=" * 70)
 
     config = Config.load(SCOPE)
     audit = AuditLog(REPO_ROOT / "audit")
-    print(f" Datei-Scope: specter/   ·   Modell fuer den KI-Lauf: {config.model}")
+    print(f" Datei-Scope: specter/   ·   Modell für den KI-Lauf: {config.model}")
 
     deterministic_audit(config, audit)
 
     if os.environ.get("ANTHROPIC_API_KEY"):
-        print(f"\n[i] ANTHROPIC_API_KEY erkannt - starte zusaetzlich den autonomen "
+        print(f"\n[i] ANTHROPIC_API_KEY erkannt - starte zusätzlich den autonomen "
               f"KI-Lauf mit {config.model} ...")
         ai_audit(config, audit)
     else:
         print(f"\n[i] Kein ANTHROPIC_API_KEY gesetzt - der autonome KI-Lauf mit "
-              f"{config.model} wird uebersprungen.")
+              f"{config.model} wird übersprungen.")
         print("    Zum Aktivieren des vollen KI-Audits:")
         print("      export ANTHROPIC_API_KEY=sk-ant-...")
         print("      python examples/self_audit.py")

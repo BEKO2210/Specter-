@@ -39,6 +39,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 SENSITIVE_PORTS = {22, 3389, 1433, 3306, 5432, 27017, 6379, 5985, 5986}
 WEAK_TLS = {"tls1.0", "tlsv1.0", "tls1.1", "tlsv1.1", "ssl3", "sslv3"}
@@ -187,19 +188,19 @@ def analyze_azure(data: dict[str, Any]) -> list[Finding]:
         return []
     sub = str(data.get("subscription_id", "Azure-Subscription"))
     findings: list[Finding] = []
-    for sa in (data.get("storage_accounts") or []):
+    for sa in as_list(data.get("storage_accounts")):
         if isinstance(sa, dict):
             findings += _analyze_storage(sa, sub)
-    for nsg in (data.get("network_security_groups") or []):
+    for nsg in as_list(data.get("network_security_groups")):
         if isinstance(nsg, dict):
             findings += _analyze_nsg(nsg, sub)
-    for vm in (data.get("virtual_machines") or []):
+    for vm in as_list(data.get("virtual_machines")):
         if isinstance(vm, dict):
             findings += _analyze_vm(vm, sub)
-    for kv in (data.get("key_vaults") or []):
+    for kv in as_list(data.get("key_vaults")):
         if isinstance(kv, dict):
             findings += _analyze_key_vault(kv, sub)
-    for sql in (data.get("sql_servers") or []):
+    for sql in as_list(data.get("sql_servers")):
         if isinstance(sql, dict):
             findings += _analyze_sql(sql, sub)
     findings += _analyze_rbac(data.get("role_assignments"), sub)

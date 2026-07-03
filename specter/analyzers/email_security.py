@@ -28,6 +28,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # SPF-Qualifier für "alles andere": -all (streng), ~all (soft), ?all/+all (schwach).
 _SPF_SOFT = "~all"
@@ -103,7 +104,7 @@ def _analyze_dmarc(dmarc: Any, domain: str) -> list[Finding]:
 def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
     out: list[Finding] = []
     loc = f"{domain}/DKIM"
-    selectors = [d for d in (dkim or []) if isinstance(d, dict)]
+    selectors = [d for d in as_list(dkim) if isinstance(d, dict)]
     present = [d for d in selectors if d.get("present", True)]
     if not present:
         out.append(_mk(

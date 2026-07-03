@@ -1,6 +1,6 @@
-# Demo-Scope fuer den lokalen Beispiel-Lauf (examples/run_demo.py).
+# Demo-Scope für den lokalen Beispiel-Lauf (examples/run_demo.py).
 # Alles zeigt auf localhost bzw. das mitgelieferte Beispielverzeichnis -
-# es werden keine fremden Systeme beruehrt.
+# es werden keine fremden Systeme berührt.
 
 engagement:
   name: "Specter Demo-Engagement (localhost)"

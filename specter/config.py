@@ -100,6 +100,11 @@ class Config:
             data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError as exc:
             raise ScopeError(f"Scope-Datei ist kein gültiges YAML: {exc}") from exc
+        if not isinstance(data, dict):
+            raise ScopeError(
+                "Scope-Datei muss ein YAML-Mapping sein (Schlüssel/Wert-Paare), "
+                "kein einzelner Wert oder eine Liste."
+            )
 
         eng_raw = data.get("engagement") or {}
         for required in ("name", "authorized_by", "authorization_ref"):

@@ -23,6 +23,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_dict, as_list
 
 # Heuristische Richtwerte für die dritte Build-Zahl je (major, minor).
 # Unterhalb dieser Werte gilt der Server als ungepatcht (ProxyLogon/ProxyShell-Ära).
@@ -88,7 +89,7 @@ def _analyze_version(product: Any, build: Any, host: str) -> list[Finding]:
 
 def _analyze_services(services: Any, host: str) -> list[Finding]:
     out: list[Finding] = []
-    svc = {str(s).strip().lower() for s in (services or [])}
+    svc = {str(s).strip().lower() for s in as_list(services)}
     if "ecp" in svc:
         out.append(_mk(
             "Exchange-ECP (Admin-Oberfläche) extern erreichbar", "misconfiguration",
@@ -112,7 +113,7 @@ def _analyze_services(services: Any, host: str) -> list[Finding]:
 
 
 def _analyze_tls(tls: Any, host: str) -> list[Finding]:
-    protocols = {str(p).strip().lower() for p in ((tls or {}).get("protocols") or [])}
+    protocols = {str(p).strip().lower() for p in as_list(as_dict(tls).get("protocols"))}
     weak = sorted(protocols & WEAK_TLS)
     if weak:
         return [_mk(

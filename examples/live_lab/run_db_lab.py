@@ -3,8 +3,8 @@
 
 Kein Test-Projekt, sondern echte Software: Dieses Skript startet einen echten
 Redis-Dienst OHNE Authentifizierung, verbindet sich real per TCP-Socket, sendet
-ein echtes `PING`, liest die echte Antwort und laesst den echten Specter-Analyzer
-`analyze_database` darueber laufen - er MUSS die reale Schwachstelle (offener,
+ein echtes `PING`, liest die echte Antwort und lässt den echten Specter-Analyzer
+`analyze_database` darüber laufen - er MUSS die reale Schwachstelle (offener,
 nicht authentifizierter Datenbank-Port) erkennen.
 
 Zwei echte Betriebsarten (automatische Auswahl):
@@ -54,7 +54,7 @@ def _docker_available() -> bool:
 
 
 def _start_redis_container(port: int = 6379) -> str | None:
-    """Startet einen echten redis:alpine-Container ohne Auth. Gibt die ID zurueck."""
+    """Startet einen echten redis:alpine-Container ohne Auth. Gibt die ID zurück."""
     try:
         res = subprocess.run(
             ["docker", "run", "-d", "--rm", "-p", f"127.0.0.1:{port}:6379",
@@ -154,7 +154,7 @@ def main() -> int:
 
     titles = " ".join(f.title for f in findings)
     erwartet = {
-        "Datenbank oeffentlich erreichbar": "oeffentlich erreichbar" in titles,
+        "Datenbank öffentlich erreichbar": "öffentlich erreichbar" in titles,
         "Datenbank ohne Authentifizierung": "ohne Authentifizierung" in titles,
     }
     print("\n Erwartete reale Befunde:")

@@ -29,6 +29,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_list
 
 # Capabilities, die praktisch einen Host-Ausbruch ermöglichen.
 DANGEROUS_CAPS = {
@@ -64,7 +65,7 @@ def _analyze_container(c: dict[str, Any]) -> list[Finding]:
             "/var/run/docker.sock im Container = vollständige Kontrolle über den "
             "Docker-Daemon und damit den Host", cwe="CWE-250"))
 
-    caps = [str(x).upper().replace("CAP_", "") for x in (c.get("cap_add") or [])
+    caps = [str(x).upper().replace("CAP_", "") for x in as_list(c.get("cap_add"))
             if str(x).strip()]
     dangerous = sorted({x for x in caps if x in DANGEROUS_CAPS})
     if dangerous:
@@ -93,7 +94,7 @@ def _analyze_container(c: dict[str, Any]) -> list[Finding]:
             f"image={image} - kein fester Tag/Digest; Builds sind nicht "
             "reproduzierbar und können ungeprüft wechseln", cwe="CWE-1104"))
 
-    for p in (c.get("ports") or []):
+    for p in as_list(c.get("ports")):
         if "0.0.0.0" in str(p) or "[::]:" in str(p):
             out.append(_mk(
                 f"Container-Port auf allen Interfaces veröffentlicht: {name} ({p})",

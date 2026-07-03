@@ -321,6 +321,17 @@ def test_aws_old_and_unused_access_key():
     assert "Ungenutzter Access-Key" in titles
 
 
+def test_aws_two_unused_keys_not_deduped():
+    # Zwei ungenutzte Keys desselben Users muessen zwei Findings ergeben,
+    # nicht durch die Dedup (Kategorie/Asset/Location/Titel) verschmelzen.
+    findings = analyze_aws({"account_id": "123", "users": [{
+        "name": "svc", "access_keys": [
+            {"id": "AKIA1", "last_used_days": None},
+            {"id": "AKIA2", "last_used_days": None}]}]})
+    unused = [f for f in findings if "Ungenutzter Access-Key" in f.title]
+    assert len(unused) == 2
+
+
 def test_aws_role_wildcard_trust():
     findings = analyze_aws({"account_id": "123", "roles": [
         {"name": "open", "trust": "*"},
@@ -1408,3 +1419,72 @@ def test_dmarc_sp_none_not_flagged_as_monitoring():
         "dmarc": "v=DMARC1; p=reject; sp=none; rua=mailto:a@x.de",
         "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
     assert not any("Monitoring-Modus" in f.title for f in out)
+
+
+# ================ Robustheit: wahre, aber nicht-iterierbare Felder ================
+# Reale Exporte liefern manchmal einen Skalar (z. B. eine Zahl) statt einer Liste.
+# Keiner dieser Fälle darf einen Stacktrace werfen (regressionssicher zu M2/M3).
+
+def test_exchange_scalar_fields_no_crash():
+    assert isinstance(analyze_exchange({"external_services": 123}), list)
+    assert isinstance(analyze_exchange({"tls": {"protocols": 123}}), list)
+    assert isinstance(analyze_exchange({"tls": ["x"]}), list)
+
+
+def test_tls_scalar_protocols_and_ciphers_no_crash():
+    assert isinstance(analyze_tls({"protocols": 123, "ciphers": 456}), list)
+
+
+def test_email_dkim_scalar_no_crash():
+    assert isinstance(analyze_email_security({"domain": "x.de", "dkim": 123}), list)
+
+
+def test_container_scalar_caps_and_ports_no_crash():
+    out = analyze_container({"containers": [
+        {"name": "c", "image": "app:1", "cap_add": 123, "ports": 8080}]})
+    assert isinstance(out, list)
+
+
+def test_http_headers_scalar_cookies_no_crash():
+    out = analyze_http_headers({"endpoints": [
+        {"url": "https://x.de", "headers": {}, "cookies": 123}]})
+    assert isinstance(out, list)
+
+
+def test_dependency_scalar_lists_no_crash():
+    assert isinstance(analyze_dependencies({"advisories": 123, "dependencies": 456}), list)
+
+
+def test_firewall_scalar_fields_no_crash():
+    assert isinstance(analyze_firewall({"rules": 123, "vpn": 456}), list)
+    assert isinstance(analyze_firewall(
+        {"management": {"exposed_interfaces": 123}}), list)
+
+
+def test_entra_scalar_users_no_crash():
+    assert isinstance(analyze_entra({"users": 123}), list)
+
+
+def test_backup_scalar_backups_no_crash():
+    assert isinstance(analyze_backup({"backups": 123}), list)
+
+
+def test_azure_scalar_collections_no_crash():
+    for key in ("storage_accounts", "network_security_groups",
+                "virtual_machines", "key_vaults", "sql_servers"):
+        assert isinstance(analyze_azure({key: 123}), list)
+
+
+def test_aws_scalar_and_nested_wrong_type_no_crash():
+    assert isinstance(analyze_aws({"users": 123, "roles": 456,
+                                   "s3_buckets": 789, "security_groups": 1}), list)
+    # Nested Nicht-Dict (M2): root_account / password_policy als Liste/String.
+    assert analyze_aws({"root_account": ["x"]}) == []
+    assert analyze_aws({"password_policy": "x"}) == []
+    assert isinstance(analyze_aws({"users": [{"name": "u", "access_keys": 5}]}), list)
+
+
+def test_ad_password_policy_wrong_type_no_crash():
+    # password_policy als Liste/String (M2) darf nicht crashen.
+    assert isinstance(analyze_ad({"password_policy": ["x"]}), list)
+    assert isinstance(analyze_ad({"password_policy": "x"}), list)

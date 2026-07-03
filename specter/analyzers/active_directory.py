@@ -51,7 +51,7 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
 
 def _analyze_password_policy(pol: dict[str, Any], domain: str) -> list[Finding]:
     out: list[Finding] = []
-    if not pol:
+    if not isinstance(pol, dict) or not pol:
         return out
     min_len = pol.get("min_length")
     if isinstance(min_len, int) and min_len < MIN_PASSWORD_LENGTH:

@@ -5,7 +5,7 @@ Aufruf (aus dem Repo-Wurzelverzeichnis):
     python examples/build_acquisition_plan.py
     python examples/build_acquisition_plan.py "Ludwigsburg/Stuttgart"
 
-Danach die Datei im Browser oeffnen und ueber "Drucken -> Als PDF speichern"
+Danach die Datei im Browser öffnen und über "Drucken -> Als PDF speichern"
 ein sauberes Handout erstellen.
 """
 
@@ -28,7 +28,7 @@ def main() -> int:
     print("=" * 70)
     print(f"[i] Datei: {out}")
     print(f"[i] Region: {region}")
-    print("[i] Im Browser oeffnen und 'Drucken -> Als PDF speichern' waehlen.")
+    print("[i] Im Browser öffnen und 'Drucken -> Als PDF speichern' wählen.")
     return 0
 
 

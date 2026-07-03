@@ -1,10 +1,16 @@
 """Angriffspfad-Korrelation ("toxische Kombinationen").
 
-Kernidee von Esprit/Trident: Einzelne Findings sind nur so gefährlich wie ihre
-Verkettung. Dieses Modul korreliert Findings über den Asset-Graph zu
-Angriffspfaden - erreichbarer Einstieg + ausnutzbare Schwachstelle + Weg zu
-sensiblen Daten. Rein regelbasiert und deterministisch (nachvollziehbar,
-keine Halluzination).
+Kernidee: Einzelne Findings sind nur so gefährlich wie ihre Verkettung. Dieses
+Modul verdichtet die Findings eines Auftrags regelbasiert zu Angriffspfaden -
+erreichbarer Einstieg + ausnutzbare Schwachstelle + Weg zu sensiblen Daten.
+
+Die Regeln arbeiten bewusst konservativ auf Kategorie-Ebene: treten die
+Bausteine eines bekannten Musters gemeinsam im Auftrag auf (z. B. exponierter
+Fernzugang *und* schwache Zugangsdaten), wird der Pfad ausgewiesen. Das ist eine
+Heuristik für *plausible* Ketten, kein Nachweis einer technisch verifizierten
+Route zwischen den beteiligten Systemen - der Bericht formuliert Pfade daher als
+Kombinations-Risiko, das manuell zu bestätigen ist. Rein regelbasiert und
+deterministisch (nachvollziehbar, keine Halluzination).
 """
 
 from __future__ import annotations
