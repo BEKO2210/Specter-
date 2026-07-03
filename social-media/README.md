@@ -27,6 +27,22 @@ pixelgenau einkomponiert (das Logo stammt aus `../docs/brand/`, nicht aus der KI
 | [`reel-9x16.mp4`](reel-9x16.mp4) | 9:16 · 1080p · 5 s | **Reel / Story** | Schild pulsiert, Angriffslinien zerstäuben |
 | [`reel-attack-9x16.mp4`](reel-attack-9x16.mp4) | 9:16 · 720p · 5 s | **Reel / Story** | Rote Angriffe prallen am Teal-Kuppelschild ab (Logo eingebrannt) |
 
+## Profilbild (hohe Auflösung)
+
+Quadratische Logo-Marke für Profilbilder (Instagram, LinkedIn, Facebook & Co.),
+kreis-sicher zentriert. Das Logo ist die vektorisierte Original-Marke.
+
+| Datei | Auflösung | Untergrund |
+|---|---|---|
+| [`profile-navy-2048.png`](profile-navy-2048.png) | 2048×2048 | **Navy** (empfohlen, dunkel) |
+| [`profile-navy-1024.png`](profile-navy-1024.png) | 1024×1024 | Navy (kleinere Variante) |
+| [`profile-white-2048.png`](profile-white-2048.png) | 2048×2048 | **Weiß** (hell) |
+| [`profile-mark-transparent-2048.png`](profile-mark-transparent-2048.png) | 2048×2048 | **Transparent** (eigener Hintergrund) |
+| [`profile-mark.svg`](profile-mark.svg) | vektor | beliebig skalierbar |
+
+Tipp: Die meisten Netzwerke beschneiden das Profilbild rund — die Marke ist mit
+Sicherheitsabstand mittig platziert, sodass nichts abgeschnitten wird.
+
 ## Karussell „So läuft ein Angriff" (in Reihenfolge posten)
 
 1. `carousel-1-aufklaerung.png` — Schritt 1: Aufklärung
