@@ -36,19 +36,27 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_int, as_list
 
 # Ablauf-Schwellen (Tage).
 EXPIRY_WARN_DAYS = 30
-# Veraltete Protokolle -> Schweregrad.
+# Veraltete Protokolle -> Schweregrad. Enthält bewusst auch die Aliasse, die
+# reale Werkzeuge ausgeben: OpenSSL nennt TLS 1.0 schlicht "TLSv1", ältere
+# Scanner schreiben "SSL2"/"SSL3" - ohne diese Aliasse würde der eigene
+# Live-Kollektor (openssl s_client) ein verwundbares Protokoll übersehen.
 _WEAK_PROTOCOLS = {
-    "sslv2": Severity.HOCH, "sslv3": Severity.HOCH,
+    "sslv2": Severity.HOCH, "ssl2": Severity.HOCH, "ssl2.0": Severity.HOCH,
+    "sslv3": Severity.HOCH, "ssl3": Severity.HOCH, "ssl3.0": Severity.HOCH,
+    "tlsv1": Severity.MITTEL, "tls1": Severity.MITTEL,
     "tlsv1.0": Severity.MITTEL, "tls1.0": Severity.MITTEL,
     "tlsv1.1": Severity.MITTEL, "tls1.1": Severity.MITTEL,
 }
 # Teilstrings, die eine schwache Cipher-Suite kennzeichnen.
 _WEAK_CIPHER_MARKERS = ("rc4", "3des", "des-", "des_", "null", "export", "md5", "anon")
 MIN_RSA_BITS = 2048
+# Elliptische Kurven unter 224 Bit (< ~112 Bit Sicherheitsniveau) gelten als
+# zu schwach (BSI TR-02102 / NIST SP 800-57).
+MIN_EC_BITS = 224
 
 
 def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
@@ -63,13 +71,10 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
 def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
     out: list[Finding] = []
     loc = f"{host}/certificate"
-    try:
-        days = int(cert.get("days_until_expiry"))
-        has_days = True
-    except (TypeError, ValueError):
-        days, has_days = 0, False
+    days = as_int(cert.get("days_until_expiry"))
+    has_days = days is not None
 
-    if cert.get("expired") or (has_days and days < 0):
+    if as_bool(cert.get("expired"), False) or (has_days and days < 0):
         out.append(_mk(
             f"TLS-Zertifikat abgelaufen: {host}", "transport_security",
             Severity.HOCH, loc,
@@ -92,19 +97,24 @@ def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
         ))
 
     key_type = str(cert.get("key_type", "")).strip().lower()
-    try:
-        bits = int(cert.get("key_bits", 0))
-    except (TypeError, ValueError):
-        bits = 0
-    if key_type in ("rsa", "dsa") and 0 < bits < MIN_RSA_BITS:
+    bits = as_int(cert.get("key_bits"), 0) or 0
+    # Schwellen je Schlüsselart: RSA/DSA brauchen 2048 Bit, elliptische Kurven
+    # (EC/ECDSA) mindestens 224 - ein 256-Bit-EC-Schlüssel ist stark und darf
+    # nicht mit einem kurzen RSA-Schlüssel verwechselt werden.
+    min_bits = None
+    if key_type in ("rsa", "dsa"):
+        min_bits = MIN_RSA_BITS
+    elif key_type in ("ec", "ecdsa"):
+        min_bits = MIN_EC_BITS
+    if min_bits is not None and 0 < bits < min_bits:
         out.append(_mk(
             f"TLS-Zertifikat mit zu kurzem Schlüssel ({bits} Bit): {host}",
             "crypto_weakness", Severity.HOCH, loc,
-            f"key_type={cert.get('key_type')}, key_bits={bits} - mindestens {MIN_RSA_BITS}",
+            f"key_type={cert.get('key_type')}, key_bits={bits} - mindestens {min_bits}",
             location=loc, cwe="CWE-326",
         ))
 
-    if cert.get("self_signed"):
+    if as_bool(cert.get("self_signed"), False):
         out.append(_mk(
             f"Selbstsigniertes TLS-Zertifikat: {host}", "misconfiguration",
             Severity.MITTEL, loc, "self_signed=true - kein vertrauenswürdiger "

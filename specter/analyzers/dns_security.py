@@ -27,6 +27,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_bool
 
 
 def _mk(title, severity, asset, evidence, *, cwe="", owner="IT-/DNS-Team") -> Finding:
@@ -44,7 +45,7 @@ def analyze_dns(data: dict[str, Any]) -> list[Finding]:
     domain = str(data.get("domain", "Domain"))
     out: list[Finding] = []
 
-    if not data.get("dnssec"):
+    if not as_bool(data.get("dnssec"), False):
         out.append(_mk(
             f"DNSSEC nicht aktiv: {domain}", Severity.MITTEL, f"{domain}/DNSSEC",
             "Kein DNSSEC (ad-Flag) - DNS-Antworten sind nicht signiert, "
@@ -58,14 +59,14 @@ def analyze_dns(data: dict[str, Any]) -> list[Finding]:
             "Ohne CAA darf jede Zertifizierungsstelle Zertifikate ausstellen "
             "(Mis-Issuance-Risiko)", cwe="CWE-295"))
 
-    if data.get("zone_transfer"):
+    if as_bool(data.get("zone_transfer"), False):
         out.append(_mk(
             f"Offener Zonentransfer (AXFR): {domain}", Severity.HOCH,
             f"{domain}/AXFR",
             "AXFR erlaubt - die komplette Zone (alle Hosts/Subdomains) ist "
             "abziehbar", cwe="CWE-200"))
 
-    if data.get("wildcard"):
+    if as_bool(data.get("wildcard"), False):
         out.append(_mk(
             f"Wildcard-DNS-Eintrag (*): {domain}", Severity.NIEDRIG,
             f"{domain}/Wildcard",

@@ -1080,4 +1080,194 @@ SCENARIOS: list[Scenario] = [
         (),
         "2507 ist nicht < 2507 — der Build gilt als gepatcht.",
     ),
+
+    # ========== SCHMUTZIGE EXPORTE (Strings statt Bools/Ints) ==========
+    # Reale Exporte aus CSV/YAML/PowerShell liefern "false" statt false und
+    # "8" statt 8. Die Funde müssen trotzdem feuern — und ein String "false"
+    # darf niemals als "wahr" fehlgedeutet werden (Fehlalarm).
+    Scenario(
+        "dns-dirty", "dns", "confuser",
+        "DNS-Flags als Strings: \"false\" heißt aus, nicht an",
+        {
+            "domain": "kmu-dirty.de", "dnssec": "false",
+            "caa": ["0 issue \"letsencrypt.org\""],
+            "zone_transfer": "false", "wildcard": "0",
+        },
+        (Expect("dns_security", "DNSSEC nicht aktiv", M),),
+        "dnssec=\"false\" muss als AUS gewertet werden (Fund); zone_transfer/"
+        "wildcard=\"false\"/\"0\" sind truthy Strings und dürfen KEINE Fehlalarme werfen.",
+    ),
+    Scenario(
+        "ad-dirty", "ad", "confuser",
+        "AD-Policy als Zahl-Strings (PowerShell-Export)",
+        {
+            "domain": "corp.kmu.de",
+            "password_policy": {"min_length": "8", "lockout_threshold": "0",
+                                "max_age_days": "0", "history_length": "3",
+                                "complexity": "false"},
+            "krbtgt_password_age_days": "1450",
+        },
+        (
+            Expect("auth_weakness", "Passwort-Mindestlänge zu gering (8 < 12)", H),
+            Expect("auth_weakness", "Passwort-Komplexität nicht erzwungen", H),
+            Expect("auth_weakness", "Keine Account-Lockout-Policy", H),
+            Expect("auth_weakness", "Passwörter laufen nie ab", M),
+            Expect("auth_weakness", "Passwort-Historie zu kurz (3)", N),
+            Expect("auth_weakness", "krbtgt-Passwort veraltet (1450 Tage)", H),
+        ),
+        "\"8\" ist kein int — die schwache Policy muss trotzdem erkannt werden.",
+    ),
+    Scenario(
+        "db-dirty", "database", "confuser",
+        "DB-Flags als Wort-Strings (\"true\"/\"false\"/\"nein\")",
+        {"databases": [{"engine": "redis", "port": "6379", "public": "true",
+                        "auth_required": "false", "tls": "no",
+                        "default_creds": "nein"}]},
+        (
+            Expect("exposed_service", "Datenbank öffentlich erreichbar", H),
+            Expect("auth_weakness", "Datenbank ohne Authentifizierung", H),
+            Expect("transport_security", "Unverschlüsselter Datenbank-Transport", M),
+        ),
+        "default_creds=\"nein\" darf NICHT als kritischer Default-Creds-Fund erscheinen.",
+    ),
+    Scenario(
+        "backup-dirty", "backup", "confuser",
+        "Backup-Fragebogen mit Wort-Antworten",
+        {
+            "organization": "Muster AG",
+            "backups": [{"name": "nas", "copies": "1", "offsite": "nein",
+                         "offline_or_immutable": "no", "encrypted": "false",
+                         "restore_tested": "ja", "last_restore_test_days": "400",
+                         "mfa_on_console": "off", "retention_days": "7"}],
+        },
+        (
+            Expect("backup_resilience", "Höchstens eine Backup-Kopie", H),
+            Expect("backup_resilience", "Keine Offsite-Kopie", H),
+            Expect("backup_resilience", "Kein offline-/unveränderbares", H),
+            Expect("backup_resilience", "Backup nicht verschlüsselt", M),
+            Expect("backup_resilience", "Restore-Test überfällig (400 Tage)", H),
+            Expect("backup_resilience", "Backup-Konsole ohne MFA", M),
+            Expect("backup_resilience", "Zu kurze Backup-Aufbewahrung (7 Tage)", M),
+        ),
+        "restore_tested=\"ja\" heißt getestet — 'nie getestet' darf nicht feuern; "
+        "der 400-Tage-Restore-Test ist trotzdem überfällig.",
+    ),
+    Scenario(
+        "aws-dirty", "aws", "confuser",
+        "AWS-Export mit String-Werten",
+        {
+            "account_id": "999", "root_account": {"mfa_enabled": "false",
+                                                  "access_keys": "1"},
+            "password_policy": {"minimum_length": "8"},
+        },
+        (
+            Expect("auth_weakness", "Root-Konto ohne MFA", K),
+            Expect("access_control", "Root-Konto besitzt Access-Keys", K),
+            Expect("auth_weakness", "Schwache IAM-Passwort-Policy (Mindestlänge 8)", M),
+        ),
+        "mfa_enabled=\"false\" ist ein kritischer Fund — kein stiller Skip.",
+    ),
+    Scenario(
+        "entra-dirty", "entra", "confuser",
+        "M365-Export mit String-Bools",
+        {
+            "tenant": "kmu.onmicrosoft.com",
+            "security_defaults_enabled": "false", "legacy_auth_allowed": "true",
+            "conditional_access_policies": [],
+            "users": [{"upn": "admin@kmu.de", "enabled": "true",
+                       "privileged": "true", "mfa_registered": "false"}],
+        },
+        (
+            Expect("misconfiguration", "Weder Security Defaults noch Conditional Access aktiv", H),
+            Expect("auth_weakness", "Keine MFA-Erzwingung", H),
+            Expect("auth_weakness", "Legacy-Authentifizierung nicht blockiert", H),
+            Expect("auth_weakness", "Privilegiertes Konto ohne MFA: admin@kmu.de", K),
+        ),
+        "privileged=\"true\" + mfa_registered=\"false\" muss KRITISCH ergeben.",
+    ),
+    Scenario(
+        "fw-dirty", "firewall", "confuser",
+        "VPN-Flags als Strings, Management \"false\"",
+        {
+            "device": "fw",
+            "vpn": [{"name": "v1", "encryption": "aes256", "ike_version": 2,
+                     "mfa": "false", "eol": "true"}],
+            "management": {"public": "false", "exposed_interfaces": ["ssh"]},
+        },
+        (
+            Expect("remote_access", "VPN-Zugang ohne MFA", H),
+            Expect("outdated_component", "Veraltetes/abgekündigtes VPN-Gateway", H),
+        ),
+        "public=\"false\" ist ein truthy String — die Management-Funde dürfen "
+        "trotzdem NICHT feuern.",
+    ),
+    Scenario(
+        "http-dirty", "http", "confuser",
+        "Cookie-Flags als Strings",
+        {
+            "url": "https://dirty.kmu-web.de",
+            "headers": {
+                "Strict-Transport-Security": "max-age=31536000",
+                "Content-Security-Policy": "default-src 'self'",
+                "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff",
+                "Referrer-Policy": "no-referrer", "Permissions-Policy": "x=()",
+            },
+            "cookies": [{"name": "sid", "secure": "false",
+                         "httponly": "false", "samesite": "Lax"}],
+        },
+        (
+            Expect("web_security", "Cookie ohne Secure-Flag", M),
+            Expect("web_security", "Cookie ohne HttpOnly-Flag", M),
+        ),
+        "secure=\"false\" (String) muss wie false wirken — sonst blinde Flecken.",
+    ),
+
+    # ========== TLS: Werkzeug-Aliasse und EC-Schlüssel ==========
+    Scenario(
+        "tls-openssl-alias", "tls", "confuser",
+        "OpenSSL-Schreibweisen: TLSv1, SSL3",
+        {"endpoints": [{
+            "host": "legacy.kmu-tls.de:443",
+            "certificate": {"days_until_expiry": 200,
+                            "signature_algorithm": "sha256WithRSAEncryption",
+                            "key_type": "RSA", "key_bits": 2048},
+            "protocols": ["TLSv1", "SSL3", "TLSv1.2"],
+            "ciphers": ["ECDHE-RSA-AES256-GCM-SHA384"],
+        }]},
+        (
+            Expect("transport_security", "(TLSv1)", M),
+            Expect("transport_security", "(SSL3)", H),
+        ),
+        "OpenSSL nennt TLS 1.0 schlicht 'TLSv1' — genau das liefert der eigene "
+        "Live-Kollektor; die Aliasse müssen erkannt werden.",
+    ),
+    Scenario(
+        "tls-ec-bits", "tls", "boundary",
+        "EC-Schlüssel: 224 Bit sauber, 192 Bit zu kurz",
+        {"endpoints": [
+            {"host": "ok.kmu-tls.de:443",
+             "certificate": {"days_until_expiry": 200,
+                             "signature_algorithm": "ecdsa-with-SHA256",
+                             "key_type": "EC", "key_bits": 224},
+             "protocols": ["TLSv1.3"], "ciphers": []},
+            {"host": "weak.kmu-tls.de:443",
+             "certificate": {"days_until_expiry": 200,
+                             "signature_algorithm": "ecdsa-with-SHA256",
+                             "key_type": "EC", "key_bits": 192},
+             "protocols": ["TLSv1.3"], "ciphers": []},
+        ]},
+        (Expect("crypto_weakness", "zu kurzem Schlüssel (192 Bit)", H),),
+        "EC hat eine eigene Schwelle (224): 192 ist zu kurz, 224 exakt sauber.",
+    ),
+    Scenario(
+        "container-dirty", "container", "confuser",
+        "Container-Flags als Strings",
+        {"containers": [{"name": "web", "image": "nginx:1.25",
+                         "privileged": "true", "host_network": "false",
+                         "docker_socket_mounted": "no", "user": "1000",
+                         "ports": []}]},
+        (Expect("container_security", "Privilegierter Container", K),),
+        "privileged=\"true\" ist kritisch; host_network/docker_socket=\"false\"/"
+        "\"no\" dürfen keine Fehlalarme werfen.",
+    ),
 ]
