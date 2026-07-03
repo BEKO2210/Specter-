@@ -33,8 +33,10 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
 
 /* ---- Terminal ---- */
 .term-wrap{max-width:920px;width:100%;margin:0 auto}
-.term{background:linear-gradient(180deg,#0b1a28,#091521);border:1px solid var(--line);
-  border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.term{position:relative;background:linear-gradient(180deg,#0b1a28,#091521);border:1px solid var(--line);
+  border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55);
+  transition:box-shadow .8s ease,border-color .8s ease}
+.term.glow{border-color:rgba(45,212,191,.28);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(20,184,166,.10)}
 .term .bar{display:flex;align-items:center;gap:10px;padding:12px 16px;
   background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
 .term .dots{display:flex;gap:7px}
@@ -43,18 +45,18 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
   letter-spacing:.01em}
 .term .live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;
   color:var(--teal-2);text-transform:uppercase;letter-spacing:.12em}
-.term .live i{width:7px;height:7px;border-radius:50%;background:var(--teal-2);
-  box-shadow:0 0 0 0 rgba(45,212,191,.7);animation:pulse 2s infinite}
+.term .live i{width:7px;height:7px;border-radius:50%;background:var(--teal-2);box-shadow:0 0 0 0 rgba(45,212,191,.7);
+  animation:pulse 2s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(45,212,191,.6)}70%{box-shadow:0 0 0 7px rgba(45,212,191,0)}100%{box-shadow:0 0 0 0 rgba(45,212,191,0)}}
 .term .screen{font-family:'Space Grotesk',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   font-size:clamp(11.5px,2.5vw,13.5px);line-height:1.7;padding:18px clamp(14px,3vw,22px);
   height:min(58vh,460px);overflow-y:auto;scroll-behavior:smooth;white-space:pre-wrap;word-break:break-word}
 .term .screen::-webkit-scrollbar{width:8px}
 .term .screen::-webkit-scrollbar-thumb{background:#1c3346;border-radius:8px}
-.row{opacity:0;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease}
+.row{opacity:0;transform:translateY(7px);transition:opacity .42s ease,transform .42s cubic-bezier(.22,.8,.36,1)}
 .row.in{opacity:1;transform:none}
 .row.banner{color:var(--teal-2)}
-.row.phase{color:var(--teal-2);font-weight:700;margin-top:6px}
+.row.phase{color:var(--teal-2);font-weight:700;margin-top:8px;text-shadow:0 0 24px rgba(45,212,191,.35)}
 .row.info{color:var(--muted)}
 .row.count{color:var(--text-2)}
 .row.result{color:var(--teal-2);font-weight:700}
@@ -68,6 +70,26 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
   background:var(--teal-2);margin-left:2px;animation:blink 1.05s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 
+/* ---- Erklär-Popup (Phasen-Karte) ---- */
+.pop{position:absolute;right:18px;bottom:18px;z-index:5;max-width:340px;
+  background:linear-gradient(180deg,rgba(18,40,59,.92),rgba(10,22,35,.94));
+  border:1px solid rgba(45,212,191,.28);border-radius:14px;padding:15px 17px 14px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 22px 55px rgba(0,0,0,.55),0 0 40px rgba(20,184,166,.08);
+  opacity:0;transform:translateY(14px) scale(.97);pointer-events:none;
+  transition:opacity .5s cubic-bezier(.22,.8,.36,1),transform .5s cubic-bezier(.22,.8,.36,1)}
+.pop.show{opacity:1;transform:none}
+.pop .kicker{display:flex;align-items:center;gap:9px;font-size:10.5px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--teal-2);margin-bottom:7px}
+.pop .kicker .pic{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:8px;
+  background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.3)}
+.pop .kicker svg{width:14px;height:14px;stroke:var(--teal-2);fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.pop h3{font-family:'Space Grotesk','Inter',sans-serif;font-size:15.5px;font-weight:700;
+  letter-spacing:-.01em;margin:0 0 5px;color:var(--text)}
+.pop p{margin:0;font-size:12.8px;line-height:1.6;color:var(--text-2)}
+@media(max-width:640px){.pop{left:12px;right:12px;bottom:12px;max-width:none}}
+
 /* ---- Controls + progress ---- */
 .ctl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:600;
@@ -78,15 +100,16 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
 .btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(20,184,166,.44)}
 .btn.ghost{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.02)}
 .btn.ghost:hover{border-color:var(--teal);color:var(--teal-2)}
+.btn[hidden]{display:none}
 .progress{flex:1 1 200px;min-width:180px;height:6px;border-radius:999px;background:rgba(255,255,255,.06);
-  overflow:hidden}
+  overflow:hidden;position:relative}
 .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--teal-2));
-  transition:width .25s ease}
+  transition:width .5s cubic-bezier(.22,.8,.36,1)}
 .phase-label{font-size:12.5px;color:var(--muted);min-width:150px}
 
 /* ---- Result card ---- */
 .result-card{max-width:920px;width:100%;margin:18px auto 0;opacity:0;transform:translateY(10px);
-  transition:opacity .4s ease,transform .4s ease}
+  transition:opacity .6s ease,transform .6s cubic-bezier(.22,.8,.36,1)}
 .result-card.in{opacity:1;transform:none}
 .result-card .box{background:linear-gradient(180deg,rgba(18,40,59,.86),rgba(12,26,40,.92));
   border:1px solid rgba(45,212,191,.22);border-radius:16px;padding:20px 22px}
@@ -109,7 +132,7 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
   .result-card .grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(prefers-reduced-motion:reduce){
-  .row,.result-card{transition:none}
+  .row,.result-card,.pop,.progress i{transition:none}
   .cursor{animation:none}
   .term .live i{animation:none}
 }
@@ -127,17 +150,23 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
 </div>
 
 <div class="term-wrap">
-  <div class="term">
+  <div class="term" id="term">
     <div class="bar">
       <div class="dots"><i></i><i></i><i></i></div>
       <div class="title">specter — examples/run_demo.py</div>
       <div class="live"><i></i> Live</div>
     </div>
     <div class="screen" id="screen" role="log" aria-live="polite" aria-label="Specter-Demo-Ausgabe"></div>
+    <div class="pop" id="pop" aria-hidden="true">
+      <div class="kicker"><span class="pic" id="popIcon"></span><span id="popKicker"></span></div>
+      <h3 id="popTitle"></h3>
+      <p id="popText"></p>
+    </div>
   </div>
 
   <div class="ctl">
     <button class="btn primary" id="play" type="button">▶ Demo abspielen</button>
+    <button class="btn ghost" id="skip" type="button" hidden>⏭ Zum Ergebnis</button>
     <span class="phase-label" id="phaseLabel">Bereit</span>
     <div class="progress"><i id="bar"></i></div>
   </div>
@@ -163,31 +192,50 @@ h1,.mono-hd{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em
 <p class="backlink">← <a href="index.html">Zurück zur Startseite</a> &nbsp;·&nbsp; <a href="Specter-Beispielbericht.pdf" target="_blank" rel="noopener">Beispielbericht als PDF</a></p>
 
 <script>
+// Icons für die Phasen-Karten (Website-Stil: stroke, 24er-ViewBox).
+const ICONS = {
+  radar:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-6"/></svg>',
+  code:'<svg viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg>',
+  zap:'<svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>',
+  grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  route:'<svg viewBox="0 0 24 24"><circle cx="5" cy="19" r="2.2"/><circle cx="19" cy="5" r="2.2"/><path d="M7 19h7a4 4 0 004-4v-2a4 4 0 00-4-4h-3"/></svg>',
+  doc:'<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg>',
+};
+
 // Authentische Ausgabe des Demo-Laufs (kuratiert, mit ehrlich markierten Kürzungen).
+// Zeilen mit `e` starten eine Phase: Popup + cinematische Pause.
 const LINES = [
   {c:'banner', t:'══════════════════════════════════════════════════════════'},
   {c:'banner', t:' Specter — End-to-End-Demo (localhost, ohne API-Key)'},
   {c:'banner', t:'══════════════════════════════════════════════════════════'},
   {c:'info',   t:'[i] Lokaler Test-Webserver läuft: http://127.0.0.1:44281/'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 1: RECON (Asset-Graph) ---', p:'Phase 1 · Aufklärung'},
+  {c:'phase',  t:'--- Phase 1: RECON (Asset-Graph) ---', p:'Phase 1 · Aufklärung',
+   e:{i:'radar', k:'Phase 1 · Aufklärung', h:'Was gehört alles dazu?',
+      d:'Bevor geprüft wird, erfasst Specter die Angriffsfläche: Code, Host und Web-Endpunkt werden zu einem zusammenhängenden Asset-Graphen verknüpft.'}},
   {c:'info',   t:'Asset erfasst: code:examples/vulnerable_app   · gesamt 1'},
   {c:'info',   t:'Asset erfasst: host:127.0.0.1  (betreibt → Code)  · gesamt 2'},
   {c:'info',   t:'Asset erfasst: endpoint:http://127.0.0.1:44281/  · gesamt 3'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 2: SCAN (White-Box) ---', p:'Phase 2 · Code-Scan'},
+  {c:'phase',  t:'--- Phase 2: SCAN (White-Box) ---', p:'Phase 2 · Code-Scan',
+   e:{i:'code', k:'Phase 2 · Code-Scan', h:'Der Quellcode unter der Lupe',
+      d:'Specter liest den Code wie ein Prüfer: fest kodierte Secrets, SQL- und Shell-Injection, schwache Kryptographie — jeder Fund mit Datei, Zeile und Beleg.'}},
   {c:'count',  t:'6 Fundstellen in 1 Datei, 6 neu als Finding erfasst:'},
   {c:'sev', s:'h', t:'app.py:11 — Möglicherweise fest kodiertes Secret/Passwort'},
   {c:'sev', s:'h', t:'app.py:20 — Mögliche SQL-Injection (String-Verkettung)'},
   {c:'sev', s:'h', t:'app.py:26 — Shell-Injection-Risiko (shell=True)'},
   {c:'sev', s:'m', t:'app.py:31 — Schwacher Hash-Algorithmus (MD5/SHA1)'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 3: AKTIVER CHECK (echtes curl) ---', p:'Phase 3 · Aktiver Check'},
+  {c:'phase',  t:'--- Phase 3: AKTIVER CHECK (echtes curl) ---', p:'Phase 3 · Aktiver Check',
+   e:{i:'zap', k:'Phase 3 · Aktiver Check', h:'Ein einziger echter Handgriff',
+      d:'Mehr als ein echter curl-Aufruf gegen den Testserver ist nicht nötig — und schon stehen Zugangsdaten aus einem HTML-Kommentar im Protokoll.'}},
   {c:'info',   t:'HTTP/1.0 200 OK   ·   Server: DemoServer/0.1 (Test)'},
   {c:'sev', s:'h', t:'Zugangsdaten im HTML-Kommentar sichtbar'},
   {c:'sev', s:'h', t:'HTTP-Dienst ohne Authentifizierung exponiert'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 3c: OFFLINE-ANALYSE (14 Analyzer) ---', p:'Phase 3c · 14 Analyzer'},
+  {c:'phase',  t:'--- Phase 3c: OFFLINE-ANALYSE (14 Analyzer) ---', p:'Phase 3c · 14 Analyzer',
+   e:{i:'grid', k:'Phase 3c · Breitenprüfung', h:'Vierzehn Analyzer, null Eingriff',
+      d:'Die Offline-Analyzer werten die Kunden-Exporte aus — AD, M365, AWS, Azure, E-Mail, TLS, Firewall, Backups … ohne jeden Zugriff auf laufende Systeme.'}},
   {c:'count',  t:'Active Directory: 13 Funde'},
   {c:'sev', s:'h', t:'krbtgt-Passwort veraltet (1450 Tage) — Golden-Ticket-Risiko'},
   {c:'count',  t:'Entra-ID / M365: 9 Funde'},
@@ -202,29 +250,43 @@ const LINES = [
   {c:'sev', s:'h', t:'Kein offline-/unveränderbares (Immutable) Backup'},
   {c:'info',   t:'… außerdem Exchange, Azure, Firewall/VPN, DNS, Datenbanken, Container, SCA'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 4: ANGRIFFSPFAD-KORRELATION ---', p:'Phase 4 · Angriffspfade'},
+  {c:'phase',  t:'--- Phase 4: ANGRIFFSPFAD-KORRELATION ---', p:'Phase 4 · Angriffspfade',
+   e:{i:'route', k:'Phase 4 · Korrelation', h:'Vom Einzelfund zum Risiko',
+      d:'Einzelfunde werden zu Angriffspfaden verknüpft. So sieht die Geschäftsführung nicht 135 Details, sondern die 7 Wege, über die echter Schaden entsteht.'}},
   {c:'count',  t:'7 Angriffspfade korreliert:'},
   {c:'sev', s:'k', t:'AP-1  Kontoübernahme über offengelegtes Secret  (20 Funde)'},
   {c:'sev', s:'k', t:'AP-3  Domänenübernahme über exponierten Fernzugang'},
   {c:'sev', s:'k', t:'AP-4  DSGVO-meldepflichtiger Datenabfluss (Art. 33/34)'},
   {c:'sev', s:'h', t:'AP-6  Rechteausweitung über schwache Auth/Zugriffskontrolle'},
   {c:'blank'},
-  {c:'phase',  t:'--- Phase 5: BERICHT + FIX-VORSCHLÄGE ---', p:'Phase 5 · Bericht'},
+  {c:'phase',  t:'--- Phase 5: BERICHT + FIX-VORSCHLÄGE ---', p:'Phase 5 · Bericht',
+   e:{i:'doc', k:'Phase 5 · Das Ergebnis', h:'Ein Bericht, der überzeugt',
+      d:'Markdown, JSON und ein vorzeigbares HTML → PDF: priorisiert, mit CVSS-Score und BSI-Grundschutz-Zuordnung — fertig für Geschäftsführung und Versicherer.'}},
   {c:'info',   t:'Bericht geschrieben: Markdown · JSON · HTML (Druck → PDF)'},
   {c:'count',  t:'Findings: 135   ·   Angriffspfade: 7'},
   {c:'blank'},
   {c:'result', t:'══════════════════════════════════════════════════════════'},
   {c:'result', t:' Ergebnis: 3 Assets · 135 Funde (K 9, H 59, M 40) · 7 Pfade'},
-  {c:'result', t:'══════════════════════════════════════════════════════════', last:true},
+  {c:'result', t:'══════════════════════════════════════════════════════════'},
 ];
 
+// Cinematisches Tempo: ruhige Zeilen, Atempausen an den Phasen.
+const D = {banner:300, info:520, count:600, sev:680, blank:260, result:480, line:520, phasePause:3400};
+
 const screen = document.getElementById('screen');
+const term = document.getElementById('term');
 const bar = document.getElementById('bar');
 const phaseLabel = document.getElementById('phaseLabel');
 const playBtn = document.getElementById('play');
+const skipBtn = document.getElementById('skip');
 const resultCard = document.getElementById('resultCard');
+const pop = document.getElementById('pop');
+const popIcon = document.getElementById('popIcon');
+const popKicker = document.getElementById('popKicker');
+const popTitle = document.getElementById('popTitle');
+const popText = document.getElementById('popText');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let timer = null, cursorEl = null;
+let timer = null, cursorEl = null, playing = false;
 
 function makeRow(item){
   const row = document.createElement('div');
@@ -242,35 +304,59 @@ function makeRow(item){
   return row;
 }
 
+function showPop(e){
+  pop.classList.remove('show');
+  setTimeout(() => {
+    popIcon.innerHTML = ICONS[e.i] || '';
+    popKicker.textContent = e.k;
+    popTitle.textContent = e.h;
+    popText.textContent = e.d;
+    pop.classList.add('show');
+  }, 260);
+}
+
+function hidePop(){ pop.classList.remove('show'); }
+
+function finishUI(){
+  playing = false;
+  if(cursorEl) cursorEl.remove();
+  phaseLabel.textContent = 'Abgeschlossen';
+  playBtn.textContent = '⟳ Wiederholen';
+  playBtn.disabled = false;
+  skipBtn.hidden = true;
+  term.classList.remove('glow');
+  hidePop();
+  resultCard.classList.add('in');
+}
+
 function renderAll(){
+  clearTimeout(timer);
   screen.innerHTML = '';
   LINES.forEach(item => { const r = makeRow(item); r.classList.add('in'); screen.appendChild(r); });
   bar.style.width = '100%';
-  phaseLabel.textContent = 'Abgeschlossen';
-  resultCard.classList.add('in');
+  screen.scrollTop = screen.scrollHeight;
+  finishUI();
 }
 
 function play(){
   clearTimeout(timer);
   screen.innerHTML = '';
   resultCard.classList.remove('in');
+  hidePop();
   bar.style.width = '0%';
   playBtn.textContent = '⟳ Läuft …';
   playBtn.disabled = true;
+  skipBtn.hidden = false;
+  term.classList.add('glow');
+  playing = true;
   cursorEl = document.createElement('span');
   cursorEl.className = 'cursor';
   screen.appendChild(cursorEl);
 
   let i = 0;
   const step = () => {
-    if(i >= LINES.length){
-      if(cursorEl) cursorEl.remove();
-      phaseLabel.textContent = 'Abgeschlossen';
-      playBtn.textContent = '⟳ Wiederholen';
-      playBtn.disabled = false;
-      resultCard.classList.add('in');
-      return;
-    }
+    if(!playing) return;
+    if(i >= LINES.length){ finishUI(); return; }
     const item = LINES[i];
     const row = makeRow(item);
     screen.insertBefore(row, cursorEl);
@@ -279,12 +365,14 @@ function play(){
     bar.style.width = Math.round(((i + 1) / LINES.length) * 100) + '%';
     screen.scrollTop = screen.scrollHeight;
     i++;
-    let delay = item.c === 'phase' ? 360 : item.c === 'blank' ? 90 :
-                item.c === 'sev' ? 150 : item.c === 'banner' || item.c === 'result' ? 120 : 120;
+    let delay = D[item.c] ?? D.line;
+    if(item.e){ showPop(item.e); delay = D.phasePause; }
     timer = setTimeout(step, delay);
   };
   step();
 }
+
+skipBtn.addEventListener('click', () => { playing = false; renderAll(); });
 
 if(reduce){
   renderAll();
@@ -292,7 +380,7 @@ if(reduce){
   playBtn.addEventListener('click', renderAll);
 } else {
   playBtn.addEventListener('click', play);
-  // Autostart beim Laden (Nutzer kann jederzeit wiederholen).
+  // Autostart, sobald das Terminal sichtbar wird (Wiederholen jederzeit möglich).
   const io = new IntersectionObserver((es) => es.forEach(e => {
     if(e.isIntersecting){ play(); io.disconnect(); }
   }), {threshold:.35});
