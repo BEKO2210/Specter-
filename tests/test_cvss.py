@@ -1,4 +1,4 @@
-"""Tests fuer das CVSS-Lite-Scoring."""
+"""Tests für das CVSS-Lite-Scoring."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def test_severity_bands_ordered():
 
 
 def test_category_adjustment():
-    # Injection (+0.5) hoeher als Fehlkonfiguration (-0.3) bei gleichem Schweregrad.
+    # Injection (+0.5) höher als Fehlkonfiguration (-0.3) bei gleichem Schweregrad.
     assert cvss_score("injection", Severity.HOCH) > cvss_score("misconfiguration", Severity.HOCH)
 
 

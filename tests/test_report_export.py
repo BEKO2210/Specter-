@@ -1,4 +1,4 @@
-"""Tests fuer den markengerechten HTML-Report-Export."""
+"""Tests für den markengerechten HTML-Report-Export."""
 
 from __future__ import annotations
 

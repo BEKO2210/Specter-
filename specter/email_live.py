@@ -1,14 +1,14 @@
-"""Reine Hilfsfunktionen fuer den Live-E-Mail-Check (DNS-over-HTTPS -> Export).
+"""Reine Hilfsfunktionen für den Live-E-Mail-Check (DNS-over-HTTPS -> Export).
 
 Der eigentliche Netzwerkabruf lebt bewusst im Beispiel-Runner
 (`examples/live_email_check.py`); hier stehen nur die deterministischen,
-testbaren Bausteine: DoH-Antwort auswerten, RSA-Schluessellaenge schaetzen,
-Eintraege auswaehlen und daraus die Export-Struktur bauen, die der bestehende
+testbaren Bausteine: DoH-Antwort auswerten, RSA-Schlüssellänge schätzen,
+Einträge auswählen und daraus die Export-Struktur bauen, die der bestehende
 Offline-Analyzer `analyze_email_security` erwartet.
 
 So bleibt die Kernlogik testbar (offline, 100 % Coverage) und identisch zur
-Kunden-Analyse - der Live-Check fuettert nur echte, oeffentliche DNS-Daten ein.
-Reine Leseabfragen oeffentlicher DNS-Eintraege, kein Eingriff.
+Kunden-Analyse - der Live-Check fuettert nur echte, öffentliche DNS-Daten ein.
+Reine Leseabfragen öffentlicher DNS-Einträge, kein Eingriff.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ COMMON_DKIM_SELECTORS = (
     "google", "selector1", "selector2", "default", "k1", "k2", "s1", "s2",
     "dkim", "mail", "smtp", "s1024", "key1", "mandrill", "everlytickey1",
 )
-# Uebliche RSA-Schluessellaengen zum Runden der Schaetzung.
+# Uebliche RSA-Schlüssellängen zum Runden der Schätzung.
 _STD_KEY_BITS = (512, 768, 1024, 2048, 3072, 4096)
 
 
@@ -46,7 +46,7 @@ def select_record(prefix: str, txts: list[str]) -> str:
 
 
 def rsa_bits_from_der(p_b64: str) -> int:
-    """Schaetzt die RSA-Schluessellaenge aus dem DKIM-p=-Feld (DER)."""
+    """Schätzt die RSA-Schlüssellänge aus dem DKIM-p=-Feld (DER)."""
     raw = "".join(str(p_b64).split())
     try:
         der = base64.b64decode(raw + "=" * (-len(raw) % 4), validate=True)
@@ -65,13 +65,13 @@ def rsa_bits_from_der(p_b64: str) -> int:
             num = length & 0x7F
             length = int.from_bytes(der[i:i + num], "big")
             i += num
-        if tag == 0x02:  # INTEGER -> Kandidat fuer den Modulus
+        if tag == 0x02:  # INTEGER -> Kandidat für den Modulus
             stripped = der[i:i + length].lstrip(b"\x00")
             best = max(best, len(stripped) * 8)
             i += length
         elif tag == 0x30:  # SEQUENCE -> hineingehen
             continue
-        elif tag == 0x03:  # BIT STRING -> unused-bits-Byte ueberspringen, hineingehen
+        elif tag == 0x03:  # BIT STRING -> unused-bits-Byte überspringen, hineingehen
             i += 1
         else:
             i += length
@@ -99,7 +99,7 @@ def dkim_entry(selector: str, txts: list[str]) -> dict[str, Any] | None:
 
 def build_email_export(domain: str, apex_txts: list[str], dmarc_txts: list[str],
                        dkim_by_selector: dict[str, list[str]]) -> dict[str, Any]:
-    """Setzt die Export-Struktur fuer `analyze_email_security` zusammen."""
+    """Setzt die Export-Struktur für `analyze_email_security` zusammen."""
     dkim: list[dict[str, Any]] = []
     for selector, txts in dkim_by_selector.items():
         entry = dkim_entry(selector, txts)

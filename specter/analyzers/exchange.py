@@ -3,7 +3,7 @@
 Wertet passiv erhobene Angaben zu einem Exchange-Server aus (Version/Build,
 extern erreichbare Dienste, TLS-Konfiguration, HTTP-Header) und leitet
 typische Risiken ab. Keine Live-Ausnutzung; aktive HTTP-Checks laufen ggf.
-separat ueber den freigegebenen Scanner-/Kommandopfad.
+separat über den freigegebenen Scanner-/Kommandopfad.
 
 Erwartete Struktur (alle Felder optional):
 
@@ -24,8 +24,8 @@ from typing import Any
 
 from ..findings import Finding, Severity
 
-# Heuristische Richtwerte fuer die dritte Build-Zahl je (major, minor).
-# Unterhalb dieser Werte gilt der Server als ungepatcht (ProxyLogon/ProxyShell-Aera).
+# Heuristische Richtwerte für die dritte Build-Zahl je (major, minor).
+# Unterhalb dieser Werte gilt der Server als ungepatcht (ProxyLogon/ProxyShell-Ära).
 SAFE_BUILD_MIN = {
     (15, 2): 1544,   # Exchange 2019
     (15, 1): 2507,   # Exchange 2016
@@ -79,7 +79,7 @@ def _analyze_version(product: Any, build: Any, host: str) -> list[Finding]:
             f"Veraltete Exchange-Version (Build {build})", "outdated_component",
             Severity.KRITISCH, host,
             f"{product or 'Exchange'} Build {build} < Richtwert {major}.{minor}.{threshold} "
-            "- moeglicherweise anfaellig fuer ProxyLogon (CVE-2021-26855) / "
+            "- möglicherweise anfällig für ProxyLogon (CVE-2021-26855) / "
             "ProxyShell (CVE-2021-34473)",
             cwe="CWE-1104",
         )]
@@ -91,21 +91,21 @@ def _analyze_services(services: Any, host: str) -> list[Finding]:
     svc = {str(s).strip().lower() for s in (services or [])}
     if "ecp" in svc:
         out.append(_mk(
-            "Exchange-ECP (Admin-Oberflaeche) extern erreichbar", "misconfiguration",
+            "Exchange-ECP (Admin-Oberfläche) extern erreichbar", "misconfiguration",
             Severity.HOCH, host,
-            "external_services enthaelt 'ECP' - Admin-Panel sollte nicht im Internet stehen",
+            "external_services enthält 'ECP' - Admin-Panel sollte nicht im Internet stehen",
             cwe="CWE-284", location=f"{host}/ecp",
         ))
     if "owa" in svc:
         out.append(_mk(
-            "OWA extern erreichbar (Angriffsflaeche/Password-Spraying)",
+            "OWA extern erreichbar (Angriffsfläche/Password-Spraying)",
             "exposed_service", Severity.MITTEL, host,
-            "external_services enthaelt 'OWA'", location=f"{host}/owa",
+            "external_services enthält 'OWA'", location=f"{host}/owa",
         ))
     if "autodiscover" in svc:
         out.append(_mk(
             "Autodiscover extern erreichbar", "misconfiguration", Severity.NIEDRIG,
-            host, "external_services enthaelt 'Autodiscover'",
+            host, "external_services enthält 'Autodiscover'",
             location=f"{host}/autodiscover",
         ))
     return out
@@ -117,7 +117,7 @@ def _analyze_tls(tls: Any, host: str) -> list[Finding]:
     if weak:
         return [_mk(
             f"Schwache TLS-Protokolle aktiv: {', '.join(weak)}", "transport_security",
-            Severity.HOCH, host, f"tls.protocols enthaelt {weak}", cwe="CWE-327",
+            Severity.HOCH, host, f"tls.protocols enthält {weak}", cwe="CWE-327",
         )]
     return []
 
@@ -142,7 +142,7 @@ def _analyze_headers(headers: Any, server_header: Any, host: str) -> list[Findin
 
 
 def analyze_exchange(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Exchange-Pruefungen aus und liefert die Findings."""
+    """Führt alle Exchange-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     host = str(data.get("host", "exchange-server"))

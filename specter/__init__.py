@@ -1,4 +1,4 @@
-"""Specter - Autonomer Sicherheits-Agent fuer autorisiertes Pentesting.
+"""Specter - Autonomer Sicherheits-Agent für autorisiertes Pentesting.
 
 Verbindet ein Sprachmodell (Anthropic) mit realen Analyse-Werkzeugen
 (Dateizugriff, Code-Scan, Netzwerk-Befehle) innerhalb eines strikt

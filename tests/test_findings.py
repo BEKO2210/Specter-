@@ -1,4 +1,4 @@
-"""Tests fuer das Findings-Modell und den Store."""
+"""Tests für das Findings-Modell und den Store."""
 
 from __future__ import annotations
 

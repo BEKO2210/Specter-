@@ -1,4 +1,4 @@
-"""Gezielte Tests fuer Randfaelle, damit alle Zweige abgedeckt sind."""
+"""Gezielte Tests für Randfälle, damit alle Zweige abgedeckt sind."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ def test_cloud_storage_path():
 
 def test_attack_path_dedup():
     # Dieselbe Regel zweimal angewandt erzeugt identische Pfade; die Dedup-Logik
-    # in correlate() behaelt jeden Pfad nur einmal.
+    # in correlate() behält jeden Pfad nur einmal.
     from specter.attack_paths import _rule_secret_to_service
 
     store = FindingsStore()
@@ -146,13 +146,13 @@ def test_host_port_normalization(tmp_path):
 
 def test_command_with_nontarget_argument(tmp_path):
     pol = _policy(tmp_path, allowed_binaries=["echo"])
-    # 'plainword' ist kein Ziel (kein . : oder ://) und wird uebersprungen;
-    # 127.0.0.1 ist das gueltige Ziel.
+    # 'plainword' ist kein Ziel (kein . : oder ://) und wird übersprungen;
+    # 127.0.0.1 ist das gültige Ziel.
     argv = pol.check_command("echo plainword 127.0.0.1")
     assert argv == ["echo", "plainword", "127.0.0.1"]
 
 
-# -- code_scan: max_results-Grenze + zu grosse Datei + Lesefehler ----------
+# -- code_scan: max_results-Grenze + zu große Datei + Lesefehler ----------
 
 def _scan_kit(tmp_path):
     cfg = _cfg(tmp_path)
@@ -175,7 +175,7 @@ def test_scan_skips_too_large(tmp_path):
     cfg.max_file_bytes = 10
     (tmp_path / "big.py").write_text('password = "' + "x" * 100 + '"')
     r = tool.run({"path": str(tmp_path)})
-    assert "Keine verdaechtigen Muster" in r.content
+    assert "Keine verdächtigen Muster" in r.content
 
 
 def test_scan_handles_read_error(tmp_path, monkeypatch):
@@ -187,7 +187,7 @@ def test_scan_handles_read_error(tmp_path, monkeypatch):
 
     monkeypatch.setattr(Path, "read_text", boom)
     r = tool.run({"path": str(tmp_path)})
-    assert "Keine verdaechtigen Muster" in r.content   # Datei uebersprungen
+    assert "Keine verdächtigen Muster" in r.content   # Datei übersprungen
 
 
 # -- read_file: Lesefehler -------------------------------------------------

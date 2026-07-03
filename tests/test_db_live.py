@@ -1,4 +1,4 @@
-"""Tests fuer die reinen Live-Datenbank-Parser (offline, deterministisch)."""
+"""Tests für die reinen Live-Datenbank-Parser (offline, deterministisch)."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def test_redis_requires_auth_error_means_auth():
 
 
 def test_redis_requires_auth_unknown_defaults_to_auth():
-    # Leere/unbekannte Antwort -> vorsichtshalber "Auth noetig" (kein Fehlalarm).
+    # Leere/unbekannte Antwort -> vorsichtshalber "Auth nötig" (kein Fehlalarm).
     assert redis_requires_auth("") is True
     assert redis_requires_auth("irgendwas") is True
 

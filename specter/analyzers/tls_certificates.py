@@ -1,7 +1,7 @@
 """Defensive TLS-/Zertifikatsanalyse aus bereitgestelltem Export.
 
 Wertet einen lokalen JSON-Export der TLS-Konfiguration eines oder mehrerer
-Endpunkte aus (Zertifikat, unterstuetzte Protokolle, Cipher-Suites) und leitet
+Endpunkte aus (Zertifikat, unterstützte Protokolle, Cipher-Suites) und leitet
 typische Transport-/Krypto-Risiken ab - ohne jede Live-Verbindung (kein
 Handshake, keine Abfrage), ohne Ausnutzung.
 
@@ -27,7 +27,7 @@ Erwartete Struktur (alle Felder optional):
       ]
     }
 
-Ein einzelner Endpunkt darf auch direkt (ohne `endpoints`-Liste) uebergeben
+Ein einzelner Endpunkt darf auch direkt (ohne `endpoints`-Liste) übergeben
 werden.
 """
 
@@ -77,7 +77,7 @@ def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
         ))
     elif has_days and 0 <= days <= EXPIRY_WARN_DAYS:
         out.append(_mk(
-            f"TLS-Zertifikat laeuft in {days} Tagen ab: {host}",
+            f"TLS-Zertifikat läuft in {days} Tagen ab: {host}",
             "transport_security", Severity.MITTEL, loc,
             f"days_until_expiry={days} - rechtzeitig erneuern", location=loc, cwe="CWE-298",
         ))
@@ -97,7 +97,7 @@ def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
         bits = 0
     if key_type in ("rsa", "dsa") and 0 < bits < MIN_RSA_BITS:
         out.append(_mk(
-            f"TLS-Zertifikat mit zu kurzem Schluessel ({bits} Bit): {host}",
+            f"TLS-Zertifikat mit zu kurzem Schlüssel ({bits} Bit): {host}",
             "crypto_weakness", Severity.HOCH, loc,
             f"key_type={cert.get('key_type')}, key_bits={bits} - mindestens {MIN_RSA_BITS}",
             location=loc, cwe="CWE-326",
@@ -106,8 +106,8 @@ def _analyze_certificate(cert: dict[str, Any], host: str) -> list[Finding]:
     if cert.get("self_signed"):
         out.append(_mk(
             f"Selbstsigniertes TLS-Zertifikat: {host}", "misconfiguration",
-            Severity.MITTEL, loc, "self_signed=true - kein vertrauenswuerdiger "
-            "Aussteller, Nutzer werden an Warnungen gewoehnt", location=loc, cwe="CWE-295",
+            Severity.MITTEL, loc, "self_signed=true - kein vertrauenswürdiger "
+            "Aussteller, Nutzer werden an Warnungen gewöhnt", location=loc, cwe="CWE-295",
         ))
     return out
 
@@ -122,7 +122,7 @@ def _analyze_protocols(protocols: Any, host: str) -> list[Finding]:
             out.append(_mk(
                 f"Veraltetes TLS-/SSL-Protokoll aktiv ({proto}): {host}",
                 "transport_security", sev, loc,
-                f"{proto} unterstuetzt - deaktivieren, nur TLS 1.2/1.3 zulassen",
+                f"{proto} unterstützt - deaktivieren, nur TLS 1.2/1.3 zulassen",
                 location=loc, cwe="CWE-327",
             ))
     return out
@@ -155,7 +155,7 @@ def _analyze_endpoint(ep: dict[str, Any]) -> list[Finding]:
 
 
 def analyze_tls(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle TLS-/Zertifikatspruefungen aus und liefert die Findings."""
+    """Führt alle TLS-/Zertifikatsprüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     endpoints = data.get("endpoints")

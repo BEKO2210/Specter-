@@ -2,8 +2,8 @@
 
 Wertet einen lokalen JSON-Export einer Entra-ID-(Azure-AD-)/M365-Umgebung aus
 und leitet typische KMU-Risiken ab - ohne jede Live-Verbindung zum Tenant.
-Fast jeder deutsche Mittelstaendler nutzt M365; diese Pruefungen decken die
-haeufigsten Fehlkonfigurationen ab.
+Fast jeder deutsche Mittelständler nutzt M365; diese Prüfungen decken die
+häufigsten Fehlkonfigurationen ab.
 
 Erwartete Struktur (alle Felder optional):
 
@@ -55,8 +55,10 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
 def _analyze_baseline(data: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
     sec_defaults = bool(data.get("security_defaults_enabled", False))
-    policies = data.get("conditional_access_policies") or []
-    enabled = [p for p in policies if str((p or {}).get("state", "")).lower() == "enabled"]
+    policies = data.get("conditional_access_policies")
+    policies = policies if isinstance(policies, list) else []
+    enabled = [p for p in policies
+               if isinstance(p, dict) and str(p.get("state", "")).lower() == "enabled"]
     requires_mfa = any((p or {}).get("requires_mfa") for p in enabled)
     blocks_legacy = any((p or {}).get("blocks_legacy_auth") for p in enabled)
     legacy_allowed = bool(data.get("legacy_auth_allowed", False))
@@ -85,7 +87,9 @@ def _analyze_baseline(data: dict[str, Any], tenant: str) -> list[Finding]:
 
 def _analyze_roles(roles: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
-    for name, members in (roles or {}).items():
+    if not isinstance(roles, dict):
+        return out
+    for name, members in roles.items():
         if not isinstance(members, list):
             continue
         if name.strip().lower() in HIGH_PRIV_ROLES and len(members) > MAX_GLOBAL_ADMINS:
@@ -137,7 +141,7 @@ def _analyze_apps(apps: Any, tenant: str) -> list[Finding]:
         perms = app.get("high_privilege_permissions") or []
         if app.get("admin_consent") and perms:
             out.append(_mk(
-                f"Ueberprivilegierte App-Registrierung: {name}", "access_control",
+                f"Überprivilegierte App-Registrierung: {name}", "access_control",
                 Severity.HOCH, tenant,
                 f"admin_consent=true, Berechtigungen={list(perms)[:3]}",
                 location=f"{tenant}/app/{name}", cwe="CWE-250",
@@ -156,7 +160,7 @@ def _analyze_sharing(sharing: Any, tenant: str) -> list[Finding]:
 
 
 def analyze_entra(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Entra-ID-/M365-Pruefungen aus und liefert die Findings."""
+    """Führt alle Entra-ID-/M365-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     tenant = str(data.get("tenant", "M365-Tenant"))

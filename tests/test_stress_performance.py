@@ -1,6 +1,6 @@
 """Stress- und Performance-Tests: Verhalten unter Last und gegen ReDoS.
 
-Grosszuegige Zeitgrenzen, damit die Tests nicht flaky sind - sie fangen aber
+Großzuegige Zeitgrenzen, damit die Tests nicht flaky sind - sie fangen aber
 pathologische Blow-ups (z. B. katastrophales Regex-Backtracking) sicher ab.
 """
 
@@ -63,10 +63,10 @@ def test_scan_respects_max_results_under_load(tmp_path):
 
 
 def test_regex_no_catastrophic_backtracking(tmp_path):
-    """Eine sehr lange, gemein konstruierte Zeile darf den Scanner nicht haengen."""
+    """Eine sehr lange, gemein konstruierte Zeile darf den Scanner nicht hängen."""
     cfg = _cfg(tmp_path)
     root = tmp_path / "targets"
-    # Lange Zeile, die die SQL-/Secret-Muster reizt (viele +, Anfuehrungszeichen).
+    # Lange Zeile, die die SQL-/Secret-Muster reizt (viele +, Anführungszeichen).
     payload = "SELECT " + ("a+" * 20_000) + "'" + ("x" * 20_000)
     (root / "evil.py").write_text(payload + "\n")
     (root / "evil2.py").write_text("password = " + ("A" * 50_000) + "\n")
@@ -76,7 +76,7 @@ def test_regex_no_catastrophic_backtracking(tmp_path):
     start = time.monotonic()
     tool.run({"path": str(root)})
     elapsed = time.monotonic() - start
-    assert elapsed < 5.0, f"Moegliches ReDoS: {elapsed:.1f}s"
+    assert elapsed < 5.0, f"Mögliches ReDoS: {elapsed:.1f}s"
 
 
 def test_correlate_scales(tmp_path):
@@ -123,7 +123,7 @@ def test_report_with_many_findings(tmp_path):
 
 
 def test_many_assets_and_edges(tmp_path):
-    """Grosser Asset-Graph mit vielen Kanten bleibt konsistent."""
+    """Großer Asset-Graph mit vielen Kanten bleibt konsistent."""
     graph = AssetGraph()
     for i in range(500):
         graph.add_asset("host", f"10.0.{i // 256}.{i % 256}")

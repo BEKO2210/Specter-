@@ -15,7 +15,7 @@ class AnthropicLLM:
             import anthropic
         except ImportError as exc:
             raise LLMError(
-                "Das Paket 'anthropic' fehlt. Installiere die Abhaengigkeiten mit "
+                "Das Paket 'anthropic' fehlt. Installiere die Abhängigkeiten mit "
                 "`pip install -r requirements.txt`."
             ) from exc
         self._anthropic = anthropic
@@ -44,5 +44,5 @@ class AnthropicLLM:
                 messages=messages,
                 tools=tools,
             )
-        except self._anthropic.APIError as exc:  # pragma: no cover - Netzabhaengig
+        except self._anthropic.APIError as exc:  # pragma: no cover - Netzabhängig
             raise LLMError(f"Anthropic-API-Fehler: {exc}") from exc

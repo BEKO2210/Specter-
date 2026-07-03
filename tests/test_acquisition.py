@@ -1,4 +1,4 @@
-"""Tests fuer den Zielkunden-/Akquiseplan."""
+"""Tests für den Zielkunden-/Akquiseplan."""
 
 from __future__ import annotations
 

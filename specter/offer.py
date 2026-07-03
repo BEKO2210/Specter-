@@ -1,8 +1,8 @@
-"""Angebots-/Preis-One-Pager fuer Kunden (HTML -> PDF).
+"""Angebots-/Preis-One-Pager für Kunden (HTML -> PDF).
 
 Erzeugt ein markengerechtes, druckoptimiertes Angebotsblatt im Specter-Branding:
 die drei Pakete mit Preisen und Leistungen, optionale Zusatzleistungen, der
-Ablauf und die Vertrauens-/DSGVO-Zusagen. Im Browser ueber "Drucken -> Als PDF
+Ablauf und die Vertrauens-/DSGVO-Zusagen. Im Browser über "Drucken -> Als PDF
 speichern" zu einem sauberen Kunden-PDF.
 """
 
@@ -174,7 +174,7 @@ def build_offer_html(customer_name: str = "Ihr Unternehmen",
 def write_offer(directory: str | Path = "reports",
                 customer_name: str = "Ihr Unternehmen",
                 contact_email: str = "belkis.aslani@gmail.com") -> Path:
-    """Schreibt den Angebots-One-Pager als HTML-Datei und gibt den Pfad zurueck."""
+    """Schreibt den Angebots-One-Pager als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-angebot.html"

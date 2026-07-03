@@ -1,10 +1,10 @@
-"""Markengerechtes Lern-/Bedien-Handbuch fuer Specter (HTML -> PDF).
+"""Markengerechtes Lern-/Bedien-Handbuch für Specter (HTML -> PDF).
 
-Erzeugt ein eigenstaendiges, druckoptimiertes HTML-Handbuch im Specter-Branding,
-das die Bedienerin/den Bediener Schritt fuer Schritt durch die Software fuehrt -
-in einfacher Sprache, ohne Vorwissen. Im Browser laesst es sich ueber
-"Drucken -> Als PDF speichern" in ein schoenes PDF ueberfuehren, ganz ohne
-zusaetzliche Abhaengigkeit.
+Erzeugt ein eigenständiges, druckoptimiertes HTML-Handbuch im Specter-Branding,
+das die Bedienerin/den Bediener Schritt für Schritt durch die Software führt -
+in einfacher Sprache, ohne Vorwissen. Im Browser lässt es sich über
+"Drucken -> Als PDF speichern" in ein schönes PDF überführen, ganz ohne
+zusätzliche Abhängigkeit.
 
 Bewusst getrennt vom Kundenbericht (`report_export.py`): dieses Dokument richtet
 sich an das eigene Team, nicht an den Kunden.
@@ -28,47 +28,47 @@ _MARK_IMG = (
 ANALYZERS: list[tuple[str, str, str]] = [
     ("analyze_ad", "Active Directory: schwache Passwort-Regeln, zu viele Admins, "
      "veraltete Konten, Kerberoasting/Golden-Ticket-Risiken.",
-     "Das Windows-Herz fast jeder Firma - hier haengt alles dran."),
+     "Das Windows-Herz fast jeder Firma - hier hängt alles dran."),
     ("analyze_exchange", "Exchange/Outlook: veraltete Server-Version, extern "
      "erreichbares ECP, schwache TLS-Einstellungen.",
      "Mail-Server sind ein beliebtes Einfallstor (ProxyShell & Co.)."),
     ("analyze_entra", "Microsoft 365 / Entra ID: fehlende MFA, Legacy-Anmeldung, "
      "zu viele globale Admins, offene Freigaben.",
-     "Cloud-Identitaeten sind das neue Passwort zur ganzen Firma."),
+     "Cloud-Identitäten sind das neue Passwort zur ganzen Firma."),
     ("analyze_aws", "AWS: Root ohne MFA, offene S3-Buckets, zu weite Rechte, "
      "offene Security-Groups.",
      "Ein offener Bucket = Datenleck in Sekunden."),
-    ("analyze_azure", "Azure: oeffentliche Speicher, offene Ports, VMs mit alter "
+    ("analyze_azure", "Azure: öffentliche Speicher, offene Ports, VMs mit alter "
      "Software, Key Vaults ohne Schutz.",
-     "Cloud-Fehlkonfiguration ist die haeufigste Cloud-Luecke."),
+     "Cloud-Fehlkonfiguration ist die häufigste Cloud-Lücke."),
     ("analyze_email_security", "E-Mail-Schutz (SPF/DKIM/DMARC): kann jemand in "
-     "eurem Namen Mails faelschen?",
-     "Schuetzt vor CEO-Fraud - der teuerste Betrug im Mittelstand."),
+     "eurem Namen Mails fälschen?",
+     "Schützt vor CEO-Fraud - der teuerste Betrug im Mittelstand."),
     ("analyze_dns", "DNS-Sicherheit: fehlendes DNSSEC, fehlende CAA-Records, "
      "offener Zonentransfer (AXFR), Wildcard, dangling CNAME.",
      "DNS ist das Adressbuch der Firma - manipuliert es jemand, landet Verkehr "
      "beim Angreifer."),
-    ("analyze_dependencies", "Software-Bibliotheken: bekannte Luecken (Log4Shell-"
+    ("analyze_dependencies", "Software-Bibliotheken: bekannte Lücken (Log4Shell-"
      "Klasse), veraltete oder ungepinnte Pakete.",
-     "Fremd-Code steckt ueberall - und altert schnell."),
+     "Fremd-Code steckt überall - und altert schnell."),
     ("analyze_firewall", "Firewall/VPN: Any-Any-Regeln, offenes RDP/SSH aus dem "
      "Internet, VPN ohne MFA.",
-     "Offenes RDP ist die Ransomware-Tuer Nummer eins."),
-    ("analyze_tls", "TLS/Zertifikate: abgelaufen, schwache Verschluesselung, "
+     "Offenes RDP ist die Ransomware-Tür Nummer eins."),
+    ("analyze_tls", "TLS/Zertifikate: abgelaufen, schwache Verschlüsselung, "
      "alte Protokolle.",
-     "Fuer jeden von aussen sichtbar - ein schneller Vertrauensverlust."),
+     "Für jeden von außen sichtbar - ein schneller Vertrauensverlust."),
     ("analyze_http_headers", "Web-Sicherheit: fehlende Schutz-Header (HSTS/CSP/"
-     "X-Frame-Options), unsichere Cookies, verraterische Server-Banner.",
-     "Websites sind das Schaufenster - hier faellt Nachlaessigkeit sofort auf."),
+     "X-Frame-Options), unsichere Cookies, verräterische Server-Banner.",
+     "Websites sind das Schaufenster - hier fällt Nachlässigkeit sofort auf."),
     ("analyze_backup", "Backup/Ransomware-Resilienz: 3-2-1-Regel, offline/"
-     "unveraenderbare Kopien, getestete Wiederherstellung.",
-     "Entscheidet, ob ihr eine Ransomware ueberlebt - Versicherer-Pruefpunkt Nr. 1."),
-    ("analyze_database", "Datenbanken: oeffentlich erreichbare Ports, fehlende "
+     "unveränderbare Kopien, getestete Wiederherstellung.",
+     "Entscheidet, ob ihr eine Ransomware überlebt - Versicherer-Prüfpunkt Nr. 1."),
+    ("analyze_database", "Datenbanken: öffentlich erreichbare Ports, fehlende "
      "Authentifizierung (Redis/Mongo), Default-Zugangsdaten, Transport ohne TLS.",
      "In Datenbanken liegen die Kronjuwelen - offen erreichbar sind sie ein "
      "Selbstbedienungsladen."),
     ("analyze_container", "Container/Docker: privilegierte Container, gemountetes "
-     "docker.sock, Host-Networking, gefaehrliche Capabilities, root, :latest.",
+     "docker.sock, Host-Networking, gefährliche Capabilities, root, :latest.",
      "Ein schlecht konfigurierter Container ist der direkte Weg vom Dienst zum Host."),
 ]
 
@@ -126,7 +126,7 @@ def _now_iso() -> str:
 
 def build_handbook_html(company_name: str = "Ihr Unternehmen",
                         generated_at: str | None = None) -> str:
-    """Erzeugt das vollstaendige HTML-Handbuch als String."""
+    """Erzeugt das vollständige HTML-Handbuch als String."""
     ts = generated_at or _now_iso()
     p: list[str] = []
 
@@ -137,70 +137,70 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
     p.append("<header class='brand'>" + _MARK_IMG +
              "<div><div class='name'>Specter</div>"
              "<div class='sub'>Defensive Security Intelligence</div></div></header>")
-    p.append(f"<div class='meta'>Handbuch fuer {_e(company_name)} &middot; "
+    p.append(f"<div class='meta'>Handbuch für {_e(company_name)} &middot; "
              f"Stand: {_e(ts)} &middot; internes Dokument</div>")
 
     p.append("<h1 class='title'>Dein Specter-Handbuch</h1>")
-    p.append("<p>So bedienst du deine Sicherheits-Software - Schritt fuer Schritt, "
+    p.append("<p>So bedienst du deine Sicherheits-Software - Schritt für Schritt, "
              "ohne Vorwissen.</p>")
 
     # Inhalt
     p.append("<h2>Inhalt</h2><div class='toc'><ol>"
              "<li>Was ist Specter?</li>"
              "<li>Die goldene Regel: defensiv &amp; im Rahmen</li>"
-             "<li>Was Specter alles prueft</li>"
+             "<li>Was Specter alles prüft</li>"
              "<li>Erste Einrichtung</li>"
              "<li>Welche Daten du beim Kunden brauchst</li>"
-             "<li>Ein Auftrag Schritt fuer Schritt</li>"
-             "<li>So fuehrst du ein Kundengespraech</li>"
+             "<li>Ein Auftrag Schritt für Schritt</li>"
+             "<li>So führst du ein Kundengespräch</li>"
              "<li>Was du sagen darfst - und was nicht</li>"
-             "<li>Haeufige Fragen</li>"
+             "<li>Häufige Fragen</li>"
              "<li>Spickzettel</li>"
              "</ol></div>")
 
     # 1
     p.append("<h2>1. Was ist Specter?</h2>")
     p.append("<p>Specter ist dein <strong>automatischer, defensiver "
-             "Sicherheits-Pruefer</strong>. Er schaut sich die IT einer Firma an, "
-             "findet Schwachstellen und schreibt einen verstaendlichen Bericht mit "
-             "konkreten Empfehlungen - so wie es grosse Sicherheitsfirmen tun, nur "
-             "guenstiger und schneller.</p>")
-    p.append("<div class='callout'>Merksatz: Specter ist wie ein <strong>TueV fuer "
+             "Sicherheits-Prüfer</strong>. Er schaut sich die IT einer Firma an, "
+             "findet Schwachstellen und schreibt einen verständlichen Bericht mit "
+             "konkreten Empfehlungen - so wie es große Sicherheitsfirmen tun, nur "
+             "günstiger und schneller.</p>")
+    p.append("<div class='callout'>Merksatz: Specter ist wie ein <strong>TÜV für "
              "die IT</strong>. Er repariert nichts selbst und bricht nirgends ein - "
-             "er prueft, dokumentiert und empfiehlt.</div>")
+             "er prüft, dokumentiert und empfiehlt.</div>")
     p.append("<p>Das Besondere: Specter arbeitet <strong>offline</strong>. Er wertet "
              "Export-Dateien aus, die der Kunde bereitstellt. Er verbindet sich nicht "
              "heimlich mit fremden Systemen. Das macht ihn sicher - und rechtlich sauber.</p>")
 
     # 2
     p.append("<h2>2. Die goldene Regel: defensiv &amp; im Rahmen</h2>")
-    p.append("<div class='warn'><strong>Wichtig fuers Vertrauen &amp; fuers Gesetz "
-             "(&sect;202a-c StGB, DSGVO):</strong> Specter fuehrt <strong>keine "
-             "Angriffe</strong> aus. Keine Passwoerter knacken, keine Daten stehlen, "
-             "nichts zerstoeren, keine Systeme lahmlegen. Nur pruefen, nur im "
+    p.append("<div class='warn'><strong>Wichtig fürs Vertrauen &amp; fürs Gesetz "
+             "(&sect;202a-c StGB, DSGVO):</strong> Specter führt <strong>keine "
+             "Angriffe</strong> aus. Keine Passwörter knacken, keine Daten stehlen, "
+             "nichts zerstören, keine Systeme lahmlegen. Nur prüfen, nur im "
              "vereinbarten Rahmen (Scope), nur mit schriftlicher Freigabe.</div>")
     p.append("<ul>"
-             "<li>Aktive Netzwerk-Scanner sind <strong>standardmaessig aus</strong> "
-             "und muessen pro Auftrag freigeschaltet werden.</li>"
-             "<li>Alles ausserhalb des Rahmens wird von der Software "
+             "<li>Aktive Netzwerk-Scanner sind <strong>standardmäßig aus</strong> "
+             "und müssen pro Auftrag freigeschaltet werden.</li>"
+             "<li>Alles außerhalb des Rahmens wird von der Software "
              "<strong>automatisch verweigert</strong> (fail-closed).</li>"
              "<li>Jede Aktion wird protokolliert - du kannst jederzeit belegen, was "
              "gemacht wurde.</li></ul>")
     p.append("<div class='ok'>Genau das ist dein Verkaufsargument: <strong>Firmen "
              "lassen dich an ihre Systeme, weil Specter nachweislich nichts kaputt "
-             "macht und nichts abfliesst.</strong></div>")
+             "macht und nichts abfließt.</strong></div>")
 
     # 3
-    p.append("<h2>3. Was Specter alles prueft</h2>")
-    p.append("<p>Zehn Pruef-Module (&bdquo;Analyzer&ldquo;) decken die Bereiche ab, "
-             "die im Mittelstand wirklich zu Schaeden fuehren:</p>")
-    p.append("<table><tr><th>Modul</th><th>Was es findet</th><th>Warum es zaehlt</th></tr>")
+    p.append("<h2>3. Was Specter alles prüft</h2>")
+    p.append("<p>Vierzehn Prüf-Module (&bdquo;Analyzer&ldquo;) decken die Bereiche ab, "
+             "die im Mittelstand wirklich zu Schäden führen:</p>")
+    p.append("<table><tr><th>Modul</th><th>Was es findet</th><th>Warum es zählt</th></tr>")
     for name, what, why in ANALYZERS:
         p.append(f"<tr><td><code>{_e(name)}</code></td><td>{_e(what)}</td>"
                  f"<td>{_e(why)}</td></tr>")
     p.append("</table>")
-    p.append("<p>Zusaetzlich: automatische <strong>Angriffspfad-Analyse</strong> "
-             "(welche kleinen Luecken zusammen gefaehrlich werden), ein "
+    p.append("<p>Zusätzlich: automatische <strong>Angriffspfad-Analyse</strong> "
+             "(welche kleinen Lücken zusammen gefährlich werden), ein "
              "<strong>CVSS-Score</strong> je Fund, <strong>BSI-IT-Grundschutz</strong>-"
              "Zuordnung und ein <strong>Nachtest</strong> (was wurde behoben?).</p>")
 
@@ -214,7 +214,7 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
     p.append("<pre class='cmd'>python examples/run_demo.py</pre>")
     p.append("<div class='callout'>Die Demo startet einen kleinen Test-Server auf "
              "deinem eigenen Rechner (127.0.0.1) und zeigt den kompletten Ablauf - "
-             "voellig gefahrlos.</div>")
+             "völlig gefahrlos.</div>")
 
     # 5
     p.append("<h2>5. Welche Daten du beim Kunden brauchst</h2>")
@@ -226,89 +226,89 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
              "BloodHound-Daten</td></tr>"
              "<tr><td>Microsoft 365 / Entra</td><td>MFA-/Conditional-Access-Report</td></tr>"
              "<tr><td>AWS / Azure</td><td>IAM-/Storage-/Netzwerk-Export</td></tr>"
-             "<tr><td>E-Mail / DNS</td><td>DNS-Eintraege (SPF/DKIM/DMARC, DNSSEC/CAA)</td></tr>"
+             "<tr><td>E-Mail / DNS</td><td>DNS-Einträge (SPF/DKIM/DMARC, DNSSEC/CAA)</td></tr>"
              "<tr><td>Software</td><td>requirements.txt / package.json / SBOM</td></tr>"
              "<tr><td>Firewall / VPN</td><td>Regelwerk-Export</td></tr>"
-             "<tr><td>TLS / Web</td><td>Zertifikats-/Protokoll-Uebersicht, HTTP-Header</td></tr>"
-             "<tr><td>Datenbanken</td><td>Port-/Auth-/TLS-Uebersicht der DB-Dienste</td></tr>"
+             "<tr><td>TLS / Web</td><td>Zertifikats-/Protokoll-Übersicht, HTTP-Header</td></tr>"
+             "<tr><td>Datenbanken</td><td>Port-/Auth-/TLS-Übersicht der DB-Dienste</td></tr>"
              "<tr><td>Container</td><td><code>docker inspect</code>-Ausgabe</td></tr>"
              "<tr><td>Backup</td><td>Kurzer Fragebogen zur Backup-Strategie</td></tr>"
              "</table>")
-    p.append("<div class='ok'>Tipp: In <code>examples/data/</code> liegt fuer jeden "
-             "Bereich eine Beispiel-Datei. Zeig sie dem Kunden - dann weiss die "
+    p.append("<div class='ok'>Tipp: In <code>examples/data/</code> liegt für jeden "
+             "Bereich eine Beispiel-Datei. Zeig sie dem Kunden - dann weiß die "
              "IT-Abteilung sofort, was du brauchst.</div>")
 
     # 6
-    p.append("<h2>6. Ein Auftrag Schritt fuer Schritt</h2>")
+    p.append("<h2>6. Ein Auftrag Schritt für Schritt</h2>")
     p.append("<ol>"
              "<li><span class='step'>Rahmen festlegen:</span> Trage die erlaubten "
              "Ziele und Pfade in eine <code>scope.yaml</code> ein "
              "(Vorlage: <code>scope.example.yaml</code>). Nur was hier steht, wird "
-             "geprueft.</li>"
+             "geprüft.</li>"
              "<li><span class='step'>Daten sammeln:</span> Lege die Export-Dateien "
              "des Kunden in einen Ordner im Rahmen.</li>"
-             "<li><span class='step'>Pruefen:</span> Starte Specter mit dem Ziel des "
-             "Auftrags. Ohne KI-Schluessel laufen die Analyzer direkt; mit "
-             "Schluessel steuert das KI-Modell den Ablauf.</li>"
+             "<li><span class='step'>Prüfen:</span> Starte Specter mit dem Ziel des "
+             "Auftrags. Ohne KI-Schlüssel laufen die Analyzer direkt; mit "
+             "Schlüssel steuert das KI-Modell den Ablauf.</li>"
              "<li><span class='step'>Bericht erzeugen:</span> Specter schreibt einen "
-             "Markdown- und einen schoenen HTML-Bericht.</li>"
-             "<li><span class='step'>PDF &amp; Uebergabe:</span> HTML im Browser "
-             "oeffnen &rarr; &bdquo;Drucken &rarr; Als PDF speichern&ldquo; &rarr; "
+             "Markdown- und einen schönen HTML-Bericht.</li>"
+             "<li><span class='step'>PDF &amp; Übergabe:</span> HTML im Browser "
+             "öffnen &rarr; &bdquo;Drucken &rarr; Als PDF speichern&ldquo; &rarr; "
              "fertiges Kunden-PDF.</li>"
              "<li><span class='step'>Nachtest:</span> Nach der Behebung erneut "
-             "pruefen - der Bericht zeigt, was jetzt behoben ist.</li></ol>")
+             "prüfen - der Bericht zeigt, was jetzt behoben ist.</li></ol>")
     p.append("<pre class='cmd'>python main.py --scope scope.yaml \\\n"
-             "    --objective \"Pruefe die bereitgestellten Exporte in ./kundendaten\"</pre>")
+             "    --objective \"Prüfe die bereitgestellten Exporte in ./kundendaten\"</pre>")
 
     # 7
-    p.append("<h2>7. So fuehrst du ein Kundengespraech</h2>")
-    p.append("<p>Ein einfacher Ablauf, den du auswendig koennen kannst:</p>")
+    p.append("<h2>7. So führst du ein Kundengespräch</h2>")
+    p.append("<p>Ein einfacher Ablauf, den du auswendig können kannst:</p>")
     p.append("<ol>"
-             "<li><strong>Sorge ansprechen:</strong> &bdquo;Die meisten Schaeden im "
-             "Mittelstand kommen ueber E-Mail-Betrug, offenes RDP und fehlende "
-             "Backups. Genau das pruefe ich.&ldquo;</li>"
+             "<li><strong>Sorge ansprechen:</strong> &bdquo;Die meisten Schäden im "
+             "Mittelstand kommen über E-Mail-Betrug, offenes RDP und fehlende "
+             "Backups. Genau das prüfe ich.&ldquo;</li>"
              "<li><strong>Sicherheit betonen:</strong> &bdquo;Ich greife nichts an "
              "und nehme nichts mit. Ich werte nur Export-Dateien aus, die Sie mir "
              "geben.&ldquo;</li>"
              "<li><strong>Nutzen zeigen:</strong> &bdquo;Sie bekommen einen "
-             "verstaendlichen Bericht mit Prioritaeten - und einen Nachweis fuer Ihre "
+             "verständlichen Bericht mit Prioritäten - und einen Nachweis für Ihre "
              "Cyber-Versicherung.&ldquo;</li>"
-             "<li><strong>Kleiner Einstieg:</strong> Biete einen guenstigen "
-             "Erst-Check (z. B. E-Mail-Schutz + Backup) als Tueroeffner an.</li></ol>")
+             "<li><strong>Kleiner Einstieg:</strong> Biete einen günstigen "
+             "Erst-Check (z. B. E-Mail-Schutz + Backup) als Türöffner an.</li></ol>")
     p.append("<div class='callout'>Versicherungs-Argument: Viele Cyber-Policen "
-             "verlangen MFA, getestete Backups und Patch-Management. Specter prueft "
+             "verlangen MFA, getestete Backups und Patch-Management. Specter prüft "
              "genau diese Punkte - dein Bericht hilft dem Kunden, versicherbar zu "
              "bleiben.</div>")
 
     # 8
     p.append("<h2>8. Was du sagen darfst - und was nicht</h2>")
     p.append("<table><tr><th>So sagst du es (ehrlich)</th><th>So bitte nicht</th></tr>"
-             "<tr><td>&bdquo;Ich pruefe defensiv und dokumentiere.&ldquo;</td>"
+             "<tr><td>&bdquo;Ich prüfe defensiv und dokumentiere.&ldquo;</td>"
              "<td>&bdquo;Ich hacke Ihre Firma.&ldquo;</td></tr>"
              "<tr><td>&bdquo;Ich werte Ihre Export-Daten aus.&ldquo;</td>"
              "<td>&bdquo;Ich brauche Admin-Zugang zu allem.&ldquo;</td></tr>"
              "<tr><td>&bdquo;Der Bericht ist eine fachkundige Orientierung.&ldquo;</td>"
              "<td>&bdquo;Das ist ein zertifiziertes Testat.&ldquo;</td></tr>"
              "<tr><td>&bdquo;Ich halte mich strikt an den vereinbarten Rahmen.&ldquo;</td>"
-             "<td>&bdquo;Ich schau mal ueberall rein.&ldquo;</td></tr>"
+             "<td>&bdquo;Ich schau mal überall rein.&ldquo;</td></tr>"
              "</table>")
     p.append("<div class='warn'>Immer schriftliche Freigabe einholen, bevor du "
-             "irgendetwas pruefst. Ohne Auftrag kein Zugriff - das schuetzt dich und "
+             "irgendetwas prüfst. Ohne Auftrag kein Zugriff - das schützt dich und "
              "den Kunden.</div>")
 
     # 9
-    p.append("<h2>9. Haeufige Fragen</h2>")
-    p.append("<h3>Brauche ich einen KI-Schluessel?</h3>"
-             "<p>Nein. Die Analyzer laufen auch ohne. Mit einem Schluessel "
+    p.append("<h2>9. Häufige Fragen</h2>")
+    p.append("<h3>Brauche ich einen KI-Schlüssel?</h3>"
+             "<p>Nein. Die Analyzer laufen auch ohne. Mit einem Schlüssel "
              "(z. B. Fable 5) steuert das KI-Modell den Ablauf und korreliert Funde "
-             "zusaetzlich.</p>")
+             "zusätzlich.</p>")
     p.append("<h3>Kann Specter etwas kaputt machen?</h3>"
-             "<p>Nein. Es fuehrt keine Angriffe aus und aendert keine Kundensysteme. "
+             "<p>Nein. Es führt keine Angriffe aus und ändert keine Kundensysteme. "
              "Aktive Scanner sind aus, bis du sie bewusst freischaltest.</p>")
     p.append("<h3>Was, wenn ich mich nicht sicher bin?</h3>"
-             "<p>Im Zweifel weniger pruefen, nicht mehr. Halte dich an die "
+             "<p>Im Zweifel weniger prüfen, nicht mehr. Halte dich an die "
              "<code>scope.yaml</code> und frage beim Kunden nach.</p>")
-    p.append("<h3>Wie ueberzeuge ich technische Ansprechpartner?</h3>"
+    p.append("<h3>Wie überzeuge ich technische Ansprechpartner?</h3>"
              "<p>Zeig die BSI-IT-Grundschutz-Zuordnung und den CVSS-Score im "
              "Bericht - das ist die Sprache, die IT-Abteilungen kennen.</p>")
 
@@ -326,16 +326,16 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
              "dich sicherer.</div>")
 
     p.append("<footer>Internes Lern-/Bedien-Handbuch, erstellt mit Specter "
-             "(defensive Sicherheitspruefung). Zur PDF-Ausgabe im Browser oeffnen und "
-             "&bdquo;Drucken &rarr; Als PDF speichern&ldquo; waehlen. Personenbezogene "
-             "Daten sind gemaess DSGVO zu schuetzen.</footer>")
+             "(defensive Sicherheitsprüfung). Zur PDF-Ausgabe im Browser öffnen und "
+             "&bdquo;Drucken &rarr; Als PDF speichern&ldquo; wählen. Personenbezogene "
+             "Daten sind gemäß DSGVO zu schützen.</footer>")
     p.append("</div></body></html>")
     return "".join(p)
 
 
 def write_handbook(directory: str | Path = "reports",
                    company_name: str = "Ihr Unternehmen") -> Path:
-    """Schreibt das Handbuch als HTML-Datei und gibt den Pfad zurueck."""
+    """Schreibt das Handbuch als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-handbuch.html"

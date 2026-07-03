@@ -1,10 +1,10 @@
 """Defensive DNS-Sicherheitsanalyse (DNSSEC, CAA, Zonentransfer) aus DNS-Export.
 
 Wertet einen lokalen JSON-Export der DNS-Konfiguration einer Domain aus und
-erkennt typische DNS-Schwaechen, ueber die Angreifer Verkehr umleiten, Zertifikate
-faelschen oder ganze Zonen abziehen koennen - rein offline, ohne Live-Abfrage,
+erkennt typische DNS-Schwächen, über die Angreifer Verkehr umleiten, Zertifikate
+fälschen oder ganze Zonen abziehen können - rein offline, ohne Live-Abfrage,
 ohne Ausnutzung. Der Live-Kollektor (`examples/live_email_check.py`) kann die
-tatsaechlichen DNSSEC-/CAA-Daten einer echten Domain per DNS-over-HTTPS abgreifen
+tatsächlichen DNSSEC-/CAA-Daten einer echten Domain per DNS-over-HTTPS abgreifen
 und in die hier erwartete Struktur bringen.
 
 Erwartete Struktur (alle Felder optional):
@@ -18,7 +18,7 @@ Erwartete Struktur (alle Felder optional):
       "dangling_cnames": ["alt.musterfirma.de -> bucket.s3.amazonaws.com"]
     }
 
-Fehlt `dnssec`/`caa`, gilt der Schutz als NICHT vorhanden - das ist der haeufigste
+Fehlt `dnssec`/`caa`, gilt der Schutz als NICHT vorhanden - das ist der häufigste
 Befund im Mittelstand.
 """
 
@@ -38,7 +38,7 @@ def _mk(title, severity, asset, evidence, *, cwe="", owner="IT-/DNS-Team") -> Fi
 
 
 def analyze_dns(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle DNS-Sicherheitspruefungen aus und liefert die Findings."""
+    """Führt alle DNS-Sicherheitsprüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     domain = str(data.get("domain", "Domain"))
@@ -48,7 +48,7 @@ def analyze_dns(data: dict[str, Any]) -> list[Finding]:
         out.append(_mk(
             f"DNSSEC nicht aktiv: {domain}", Severity.MITTEL, f"{domain}/DNSSEC",
             "Kein DNSSEC (ad-Flag) - DNS-Antworten sind nicht signiert, "
-            "Cache-Poisoning/Spoofing moeglich", cwe="CWE-345"))
+            "Cache-Poisoning/Spoofing möglich", cwe="CWE-345"))
 
     caa = data.get("caa")
     caa_list = [c for c in caa if str(c).strip()] if isinstance(caa, list) else []
@@ -69,7 +69,7 @@ def analyze_dns(data: dict[str, Any]) -> list[Finding]:
         out.append(_mk(
             f"Wildcard-DNS-Eintrag (*): {domain}", Severity.NIEDRIG,
             f"{domain}/Wildcard",
-            "Wildcard-A/AAAA faengt beliebige Subdomains ab - erschwert "
+            "Wildcard-A/AAAA fängt beliebige Subdomains ab - erschwert "
             "Missbrauchserkennung", cwe="CWE-183"))
 
     dangling = data.get("dangling_cnames")
@@ -81,6 +81,6 @@ def analyze_dns(data: dict[str, Any]) -> list[Finding]:
             out.append(_mk(
                 f"Dangling CNAME (Subdomain-Takeover-Risiko): {target}",
                 Severity.HOCH, f"{domain}/CNAME",
-                f"{target} - Ziel nicht mehr in Betrieb; uebernehmbar durch "
+                f"{target} - Ziel nicht mehr in Betrieb; übernehmbar durch "
                 "Angreifer", cwe="CWE-350"))
     return out

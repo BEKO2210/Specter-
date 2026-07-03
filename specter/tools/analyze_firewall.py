@@ -33,9 +33,9 @@ class AnalyzeFirewallTool:
                 "Export (JSON) rein defensiv und erfasst Perimeter-Risiken als "
                 "Findings: Any-Any-Regeln, offene RDP-/SSH-Ports und sensible "
                 "Dienste aus dem Internet, VPN ohne MFA oder mit schwacher "
-                "Kryptographie/IKEv1, veraltete VPN-Gateways sowie oeffentlich "
+                "Kryptographie/IKEv1, veraltete VPN-Gateways sowie öffentlich "
                 "erreichbare Management-Interfaces. Keine Live-Verbindung zum "
-                "Geraet, keine Ausnutzung - nur die lokale Datei im Scope."
+                "Gerät, keine Ausnutzung - nur die lokale Datei im Scope."
             ),
             "input_schema": {
                 "type": "object",
@@ -56,7 +56,7 @@ class AnalyzeFirewallTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

@@ -2,7 +2,7 @@
 
 Jede Aktion des Agenten (Tool-Aufruf, Entscheidung, verweigerte Aktion) wird
 als JSON-Zeile protokolliert. Das ist bei autorisierten Pentests Pflicht:
-Der Auftraggeber muss lueckenlos nachvollziehen koennen, was getestet wurde.
+Der Auftraggeber muss lückenlos nachvollziehen können, was getestet wurde.
 """
 
 from __future__ import annotations

@@ -33,7 +33,7 @@ class AnalyzeEntraTool:
                 "(JSON) rein defensiv und erfasst typische M365-Risiken als "
                 "Findings: fehlende MFA-Erzwingung/Conditional Access, aktive "
                 "Legacy-Authentifizierung, zu viele Global Admins, privilegierte "
-                "Konten ohne MFA, ueberprivilegierte App-Registrierungen, anonyme "
+                "Konten ohne MFA, überprivilegierte App-Registrierungen, anonyme "
                 "Freigabelinks. Keine Live-Verbindung - nur die lokale Datei im Scope."
             ),
             "input_schema": {
@@ -55,7 +55,7 @@ class AnalyzeEntraTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

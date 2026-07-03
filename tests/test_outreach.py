@@ -1,4 +1,4 @@
-"""Tests fuer die Erstkontakt-E-Mail-Vorlage."""
+"""Tests für die Erstkontakt-E-Mail-Vorlage."""
 
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ def _f(title: str, severity: Severity = Severity.MITTEL) -> Finding:
 
 def test_outreach_with_findings_lists_top_three():
     findings = [
-        _f("Kein DMARC-Eintrag fuer x.de", Severity.HOCH),
+        _f("Kein DMARC-Eintrag für x.de", Severity.HOCH),
         _f("DMARC nur im Monitoring-Modus (p=none): x.de", Severity.MITTEL),
-        _f("DKIM-Schluessel nicht mehr zeitgemaess (1024 Bit): x.de", Severity.NIEDRIG),
+        _f("DKIM-Schlüssel nicht mehr zeitgemäß (1024 Bit): x.de", Severity.NIEDRIG),
         _f("DMARC ohne Auswertungs-Reports (kein rua): x.de", Severity.NIEDRIG),
     ]
     mail = build_outreach_email("x.de", findings, sender_name="Belkis",
@@ -40,19 +40,19 @@ def test_outreach_without_findings_uses_soft_variant():
 
 def test_plain_covers_all_mappings():
     cases = {
-        "Kein SPF-Eintrag fuer x.de": "kein SPF-Eintrag",
+        "Kein SPF-Eintrag für x.de": "kein SPF-Eintrag",
         "SPF erlaubt beliebige Absender (+all/?all): x.de": "beliebige Absender",
-        "SPF ohne abschliessenden all-Mechanismus: x.de": "keinen klaren Abschluss",
-        "Kein DMARC-Eintrag fuer x.de": "kein DMARC-Eintrag hinterlegt",
+        "SPF ohne abschließenden all-Mechanismus: x.de": "keinen klaren Abschluss",
+        "Kein DMARC-Eintrag für x.de": "kein DMARC-Eintrag hinterlegt",
         "DMARC nur im Monitoring-Modus (p=none): x.de": "p=none",
         "DMARC ohne Auswertungs-Reports (kein rua): x.de": "Auswertungs-Reports",
-        "Kein DKIM-Schluessel fuer x.de": "keine DKIM-Signatur",
-        "DKIM-Schluessel zu schwach (512 Bit, Selector s): x.de": "zu kurz und gilt als unsicher",
-        "DKIM-Schluessel nicht mehr zeitgemaess (1024 Bit, Selector s): x.de": "zu kurz",
+        "Kein DKIM-Schlüssel für x.de": "keine DKIM-Signatur",
+        "DKIM-Schlüssel zu schwach (512 Bit, Selector s): x.de": "zu kurz und gilt als unsicher",
+        "DKIM-Schlüssel nicht mehr zeitgemäß (1024 Bit, Selector s): x.de": "zu kurz",
     }
     for title, needle in cases.items():
         assert needle in _plain(_f(title))
-    # Unbekannter Titel faellt auf den Originaltitel zurueck.
+    # Unbekannter Titel fällt auf den Originaltitel zurück.
     assert _plain(_f("Irgendein anderer Titel")) == "Irgendein anderer Titel"
 
 

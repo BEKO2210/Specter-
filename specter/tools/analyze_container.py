@@ -32,9 +32,9 @@ class AnalyzeContainerTool:
                 "Analysiert einen bereitgestellten (normalisierten) Docker-/"
                 "Container-Konfigurationsexport rein defensiv und erfasst "
                 "Fehlkonfigurationen als Findings: privilegierte Container, "
-                "gemountetes Docker-Socket, Host-Networking, gefaehrliche "
+                "gemountetes Docker-Socket, Host-Networking, gefährliche "
                 "Capabilities, Lauf als root, ungepinnte :latest-Images und auf "
-                "allen Interfaces veroeffentlichte Ports. Keine Live-Abfrage - nur "
+                "allen Interfaces veröffentlichte Ports. Keine Live-Abfrage - nur "
                 "die lokale Datei im Scope."
             ),
             "input_schema": {
@@ -56,7 +56,7 @@ class AnalyzeContainerTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

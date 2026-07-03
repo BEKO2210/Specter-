@@ -1,12 +1,12 @@
 """Choke-Point-Analyse: die engsten Behebungsstellen.
 
-Findet die kleinste Menge von Findings, deren Behebung moeglichst viele (idealer-
+Findet die kleinste Menge von Findings, deren Behebung möglichst viele (idealer-
 weise alle) Angriffspfade unterbricht. Ein Pfad gilt als unterbrochen, sobald
 mindestens eines seiner Findings behoben ist (Hitting-Set-Problem). Da das exakt
-NP-schwer ist, wird eine deterministische Greedy-Naeherung verwendet: wiederholt
-das Finding waehlen, das die meisten noch offenen Pfade bricht.
+NP-schwer ist, wird eine deterministische Greedy-Näherung verwendet: wiederholt
+das Finding wählen, das die meisten noch offenen Pfade bricht.
 
-Nutzen fuer den Kunden: "Behebe zuerst X - das schliesst N Angriffspfade auf
+Nutzen für den Kunden: "Behebe zuerst X - das schließt N Angriffspfade auf
 einmal", statt jede einzelne Schwachstelle gleich gewichtet abzuarbeiten.
 """
 
@@ -21,7 +21,7 @@ from .attack_paths import AttackPath
 @dataclass
 class ChokePoint:
     finding_id: str
-    paths_broken: int                 # Anzahl Pfade, die dieses Finding enthaelt
+    paths_broken: int                 # Anzahl Pfade, die dieses Finding enthält
     path_titles: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,8 +35,8 @@ class ChokePoint:
 def compute_choke_points(paths: list[AttackPath]) -> list[ChokePoint]:
     """Greedy-Hitting-Set: minimale Findings-Menge, die alle Pfade bricht.
 
-    Rueckgabe: geordnete Liste von Choke Points (wichtigster zuerst). Nur Pfade
-    mit mindestens einem Finding werden beruecksichtigt.
+    Rückgabe: geordnete Liste von Choke Points (wichtigster zuerst). Nur Pfade
+    mit mindestens einem Finding werden berücksichtigt.
     """
     # Pfade mit Findings indexieren.
     indexed = [(i, p) for i, p in enumerate(paths) if p.finding_ids]
@@ -52,8 +52,8 @@ def compute_choke_points(paths: list[AttackPath]) -> list[ChokePoint]:
 
     result: list[ChokePoint] = []
     while remaining:
-        # Waehle das Finding, das die meisten NOCH OFFENEN Pfade bricht.
-        # Deterministischer Tie-Break: mehr neue Pfade, dann groessere
+        # Wähle das Finding, das die meisten NOCH OFFENEN Pfade bricht.
+        # Deterministischer Tie-Break: mehr neue Pfade, dann größere
         # Gesamtabdeckung, dann alphabetisch nach finding_id.
         best_fid = min(
             coverage.keys(),

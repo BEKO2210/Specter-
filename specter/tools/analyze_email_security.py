@@ -32,7 +32,7 @@ class AnalyzeEmailSecurityTool:
                 "Analysiert einen bereitgestellten DNS-Export (JSON) zur "
                 "E-Mail-Sicherheit einer Domain rein defensiv und erfasst "
                 "Spoofing-/Phishing-Risiken als Findings: fehlendes oder weiches "
-                "SPF (+all/?all), fehlendes DKIM oder zu schwacher DKIM-Schluessel, "
+                "SPF (+all/?all), fehlendes DKIM oder zu schwacher DKIM-Schlüssel, "
                 "fehlendes DMARC oder nur p=none, fehlende rua-Reportadresse. "
                 "Keine Live-DNS-Abfrage, kein Mailversand - nur die lokale Datei "
                 "im Scope."
@@ -56,7 +56,7 @@ class AnalyzeEmailSecurityTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

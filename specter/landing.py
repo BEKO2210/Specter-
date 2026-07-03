@@ -1,9 +1,9 @@
-"""Markengerechte Landingpage fuer Specter (eigenstaendiges HTML).
+"""Markengerechte Landingpage für Specter (eigenständiges HTML).
 
 Erzeugt eine professionelle, responsive Ein-Seiten-Website im Specter-Branding,
-die den Nutzen fuer den Mittelstand erklaert, Vertrauen schafft und zum
-kostenlosen E-Mail-Sicherheits-Check (Tueroeffner) fuehrt. Voll eigenstaendig
-(inline CSS + eingebettetes Mark), laesst sich also ohne Build-Schritt hosten
+die den Nutzen für den Mittelstand erklärt, Vertrauen schafft und zum
+kostenlosen E-Mail-Sicherheits-Check (Türöffner) führt. Voll eigenständig
+(inline CSS + eingebettetes Mark), lässt sich also ohne Build-Schritt hosten
 oder per Datei weitergeben.
 """
 
@@ -21,56 +21,60 @@ _MARK_IMG = (
     'width="34" height="41" style="display:block">'
 )
 
-# Die drei groessten Mittelstands-Risiken (Aufhaenger im Problem-Abschnitt).
+# Die drei größten Mittelstands-Risiken (Aufhänger im Problem-Abschnitt).
 PROBLEMS: list[tuple[str, str]] = [
     ("E-Mail-Betrug (CEO-Fraud)",
-     "Ohne SPF/DKIM/DMARC koennen Kriminelle in Ihrem Namen mailen - der "
+     "Ohne SPF/DKIM/DMARC können Kriminelle in Ihrem Namen mailen - der "
      "teuerste Betrug im Mittelstand."),
-    ("Ransomware ueber offenes RDP",
-     "Ein aus dem Internet erreichbarer Fernzugang ist das haeufigste "
-     "Einfallstor fuer Verschluesselungstrojaner."),
+    ("Ransomware über offenes RDP",
+     "Ein aus dem Internet erreichbarer Fernzugang ist das häufigste "
+     "Einfallstor für Verschlüsselungstrojaner."),
     ("Backups, die im Ernstfall versagen",
-     "Ohne getestete, unveraenderbare Backups wird aus einem Vorfall schnell "
+     "Ohne getestete, unveränderbare Backups wird aus einem Vorfall schnell "
      "der Totalverlust."),
 ]
 
-# Die zehn Pruefbereiche (Loesungs-Grid).
+# Die vierzehn Prüfbereiche (Lösungs-Grid).
 COVERAGE: list[tuple[str, str]] = [
     ("E-Mail-Schutz", "SPF, DKIM, DMARC gegen Spoofing &amp; Phishing"),
+    ("DNS-Sicherheit", "DNSSEC, CAA, offener Zonentransfer (AXFR), dangling CNAME"),
+    ("Web-Sicherheit", "HSTS/CSP/X-Frame-Options, unsichere Cookies, Banner-Leaks"),
     ("Active Directory", "Schwache Policies, Kerberoasting, Golden-Ticket-Risiken"),
     ("Microsoft 365 / Entra", "MFA, Legacy-Auth, zu viele Admins, offene Freigaben"),
     ("AWS &amp; Azure", "Offene Speicher, zu weite Rechte, offene Ports"),
     ("Firewall &amp; VPN", "Any-Any-Regeln, offenes RDP/SSH, VPN ohne MFA"),
-    ("TLS &amp; Zertifikate", "Abgelaufen, schwache Verschluesselung, alte Protokolle"),
-    ("Software-Bibliotheken", "Bekannte Luecken (Log4Shell-Klasse), veraltete Pakete"),
+    ("TLS &amp; Zertifikate", "Abgelaufen, schwache Verschlüsselung, alte Protokolle"),
+    ("Datenbanken", "Offene Ports, fehlende Auth (Redis/Mongo), Default-Creds, ohne TLS"),
+    ("Container / Docker", "Privileged, gemountetes docker.sock, Host-Networking, root"),
+    ("Software-Bibliotheken", "Bekannte Lücken (Log4Shell-Klasse), veraltete Pakete"),
     ("Exchange", "Veraltete Versionen, exponierte Dienste"),
     ("Backup-Resilienz", "3-2-1-Regel, Immutable-Backups, getestete Restores"),
-    ("Angriffspfade", "Wie kleine Luecken zusammen gefaehrlich werden"),
+    ("Angriffspfade", "Wie kleine Lücken zusammen gefährlich werden"),
 ]
 
 # Angebots-Pakete (Preis-Abschnitt).
 PACKAGES: list[tuple[str, str, str]] = [
     ("Quick-Check", "kostenlos",
-     "E-Mail-Sicherheit (SPF/DKIM/DMARC) + TLS fuer eine Domain. In Minuten, "
+     "E-Mail-Sicherheit (SPF/DKIM/DMARC) + TLS für eine Domain. In Minuten, "
      "ganz ohne Zugriff auf Ihre Systeme."),
     ("Basis-Audit", "ab 900 &euro;",
-     "E-Mail, TLS, Firewall und Backup-Check mit verstaendlichem Bericht und "
-     "Prioritaeten."),
+     "E-Mail, TLS, Firewall und Backup-Check mit verständlichem Bericht und "
+     "Prioritäten."),
     ("Voll-Audit", "ab 2.500 &euro;",
-     "Alle zehn Pruefbereiche, BSI-IT-Grundschutz-Bericht, Angriffspfade und "
+     "Alle vierzehn Prüfbereiche, BSI-IT-Grundschutz-Bericht, Angriffspfade und "
      "ein Nachtest nach der Behebung."),
 ]
 
 # Ablauf in drei Schritten.
 STEPS: list[tuple[str, str]] = [
     ("Kostenloser Erst-Check",
-     "Wir pruefen oeffentlich sichtbare Punkte Ihrer Domain - unverbindlich."),
+     "Wir prüfen öffentlich sichtbare Punkte Ihrer Domain - unverbindlich."),
     ("Audit im vereinbarten Rahmen",
      "Sie stellen Export-Dateien bereit, wir werten sie offline aus. Kein "
      "Eingriff in Ihre Systeme."),
     ("Bericht &amp; Nachweis",
-     "Sie erhalten einen klaren Bericht mit Prioritaeten - auch als Nachweis "
-     "fuer Ihre Cyber-Versicherung."),
+     "Sie erhalten einen klaren Bericht mit Prioritäten - auch als Nachweis "
+     "für Ihre Cyber-Versicherung."),
 ]
 
 _CSS = """
@@ -151,9 +155,9 @@ def _now_iso() -> str:
 
 
 def build_landing_html(brand: str = "Specter",
-                       contact_email: str = "kontakt@specter-security.de",
+                       contact_email: str = "belkis.aslani@gmail.com",
                        generated_at: str | None = None) -> str:
-    """Erzeugt die vollstaendige Landingpage als HTML-String."""
+    """Erzeugt die vollständige Landingpage als HTML-String."""
     ts = generated_at or _now_iso()
     mail = _e(contact_email)
     subject = "Kostenloser%20E-Mail-Sicherheits-Check"
@@ -161,8 +165,8 @@ def build_landing_html(brand: str = "Specter",
 
     p.append("<!doctype html><html lang='de'><head><meta charset='utf-8'>")
     p.append("<meta name='viewport' content='width=device-width, initial-scale=1'>")
-    p.append(f"<title>{_e(brand)} - Defensive IT-Sicherheit fuer den Mittelstand</title>")
-    p.append("<meta name='description' content='Specter prueft die IT-Sicherheit "
+    p.append(f"<title>{_e(brand)} - Defensive IT-Sicherheit für den Mittelstand</title>")
+    p.append("<meta name='description' content='Specter prüft die IT-Sicherheit "
              "kleiner und mittlerer Unternehmen - defensiv, offline und "
              "nachvollziehbar. Kostenloser E-Mail-Sicherheits-Check.'>")
     p.append(f"<style>{_CSS}</style></head><body>")
@@ -180,13 +184,13 @@ def build_landing_html(brand: str = "Specter",
     # Hero
     p.append("<header class='hero'><div class='wrap'>")
     p.append("<div class='eyebrow'>Defensive Security Intelligence</div>")
-    p.append("<h1>IT-Sicherheit, die Ihr Unternehmen versteht &ndash; und schuetzt.</h1>")
-    p.append("<p class='lead'>Specter deckt die Schwachstellen auf, ueber die im "
-             "Mittelstand wirklich Schaeden entstehen &ndash; verstaendlich "
-             "erklaert, ohne Fachchinesisch und ohne Ihre Systeme zu gefaehrden.</p>")
+    p.append("<h1>IT-Sicherheit, die Ihr Unternehmen versteht &ndash; und schützt.</h1>")
+    p.append("<p class='lead'>Specter deckt die Schwachstellen auf, über die im "
+             "Mittelstand wirklich Schäden entstehen &ndash; verständlich "
+             "erklärt, ohne Fachchinesisch und ohne Ihre Systeme zu gefährden.</p>")
     p.append(f"<a class='btn primary' href='mailto:{mail}?subject={subject}'>"
              "Kostenlosen E-Mail-Check anfordern</a>"
-             "<a class='btn ghost' href='#leistungen'>Was wird geprueft?</a>")
+             "<a class='btn ghost' href='#leistungen'>Was wird geprüft?</a>")
     p.append("<div class='trustbar'><span>Offline &amp; lesend</span>"
              "<span>Keine Angriffe</span><span>DSGVO-konform</span>"
              "<span>Nur im vereinbarten Rahmen</span></div>")
@@ -194,8 +198,8 @@ def build_landing_html(brand: str = "Specter",
 
     # Problem
     p.append("<section id='problem'><div class='wrap'>")
-    p.append("<h2 class='sec'>Die drei teuersten Luecken im Mittelstand</h2>")
-    p.append("<p class='sub'>Die meisten Schaeden entstehen nicht durch exotische "
+    p.append("<h2 class='sec'>Die drei teuersten Lücken im Mittelstand</h2>")
+    p.append("<p class='sub'>Die meisten Schäden entstehen nicht durch exotische "
              "Angriffe, sondern durch drei bekannte Schwachstellen:</p>")
     p.append("<div class='grid g3'>")
     for title, detail in PROBLEMS:
@@ -204,9 +208,9 @@ def build_landing_html(brand: str = "Specter",
 
     # Leistungen / Coverage
     p.append("<section id='leistungen' class='alt'><div class='wrap'>")
-    p.append("<h2 class='sec'>Was Specter prueft</h2>")
-    p.append("<p class='sub'>Zehn Pruefbereiche decken die Systeme ab, die im "
-             "Mittelstand wirklich zaehlen &ndash; von E-Mail bis Backup.</p>")
+    p.append("<h2 class='sec'>Was Specter prüft</h2>")
+    p.append("<p class='sub'>Vierzehn Prüfbereiche decken die Systeme ab, die im "
+             "Mittelstand wirklich zählen &ndash; von E-Mail bis Backup.</p>")
     p.append("<div class='cover'>")
     for title, detail in COVERAGE:
         p.append(f"<div class='item'><strong>{title}</strong><span>{detail}</span></div>")
@@ -215,41 +219,41 @@ def build_landing_html(brand: str = "Specter",
     # Vertrauen
     p.append("<section id='vertrauen'><div class='wrap'>")
     p.append("<h2 class='sec'>Warum Firmen uns an ihre Systeme lassen</h2>")
-    p.append("<p class='sub'>Eine Pruefung darf nie selbst zum Risiko werden. "
+    p.append("<p class='sub'>Eine Prüfung darf nie selbst zum Risiko werden. "
              "Deshalb ist Specter von Grund auf defensiv gebaut.</p>")
     p.append("<div class='grid g2'>"
              "<div class='card'><h3>Offline &amp; ohne Eingriff</h3><p>Wir werten nur "
              "bereitgestellte Export-Dateien aus. Keine Live-Verbindung, keine "
-             "Angriffe, keine Veraenderung Ihrer Systeme.</p></div>"
-             "<div class='card'><h3>Im festen Rahmen</h3><p>Geprueft wird nur, was "
+             "Angriffe, keine Veränderung Ihrer Systeme.</p></div>"
+             "<div class='card'><h3>Im festen Rahmen</h3><p>Geprüft wird nur, was "
              "schriftlich freigegeben ist (&sect;202 StGB). Alles andere wird "
              "technisch verweigert.</p></div>"
              "<div class='card'><h3>DSGVO-konform</h3><p>Datenminimierung, lokale "
-             "Verarbeitung, Loeschkonzept und auf Wunsch ein "
+             "Verarbeitung, Löschkonzept und auf Wunsch ein "
              "Auftragsverarbeitungsvertrag.</p></div>"
-             "<div class='card'><h3>Nachvollziehbar</h3><p>Lueckenloses Audit-Log, "
+             "<div class='card'><h3>Nachvollziehbar</h3><p>Lückenloses Audit-Log, "
              "CVSS-Bewertung und BSI-IT-Grundschutz-Bezug &ndash; die Sprache, die "
              "Ihre IT und Ihre Versicherung verstehen.</p></div>"
              "</div></div></section>")
 
     # Preise
     p.append("<section id='preise' class='alt'><div class='wrap'>")
-    p.append("<h2 class='sec'>Angebote fuer jeden Einstieg</h2>")
+    p.append("<h2 class='sec'>Angebote für jeden Einstieg</h2>")
     p.append("<p class='sub'>Starten Sie unverbindlich mit dem Gratis-Check und "
-             "steigen Sie bei Bedarf auf ein vollstaendiges Audit um.</p>")
+             "steigen Sie bei Bedarf auf ein vollständiges Audit um.</p>")
     p.append("<div class='grid g3'>")
     for name, amount, detail in PACKAGES:
         p.append(f"<div class='card price'><div class='name'>{_e(name)}</div>"
                  f"<div class='amt'>{amount}</div><p>{_e(detail)}</p></div>")
     p.append("</div>")
-    p.append("<p class='sub' style='margin-top:18px'>Fuer Versicherungsnehmer: Das "
-             "Audit liefert den Nachweis ueber MFA, getestete Backups und "
+    p.append("<p class='sub' style='margin-top:18px'>Für Versicherungsnehmer: Das "
+             "Audit liefert den Nachweis über MFA, getestete Backups und "
              "Patch-Management, den viele Cyber-Policen verlangen.</p>")
     p.append("</div></section>")
 
     # Ablauf
     p.append("<section id='ablauf'><div class='wrap'>")
-    p.append("<h2 class='sec'>So einfach laeuft es ab</h2>")
+    p.append("<h2 class='sec'>So einfach läuft es ab</h2>")
     p.append("<div class='steps' style='margin-top:22px'>")
     for title, detail in STEPS:
         p.append(f"<div class='step'><h3>{title}</h3><p>{_e(detail)}</p></div>")
@@ -266,7 +270,7 @@ def build_landing_html(brand: str = "Specter",
     # Footer
     p.append("<footer><div class='wrap'>" + _MARK_IMG +
              f"<span class='name'>{_e(brand)}</span>"
-             "<span>Defensive IT-Sicherheit fuer den Mittelstand</span>"
+             "<span>Defensive IT-Sicherheit für den Mittelstand</span>"
              f"<span class='sp'>Kontakt: <a href='mailto:{mail}'>{mail}</a> "
              f"&middot; Stand {_e(ts)}</span></div></footer>")
 
@@ -276,8 +280,8 @@ def build_landing_html(brand: str = "Specter",
 
 def write_landing(directory: str | Path = "reports",
                   brand: str = "Specter",
-                  contact_email: str = "kontakt@specter-security.de") -> Path:
-    """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurueck."""
+                  contact_email: str = "belkis.aslani@gmail.com") -> Path:
+    """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-landingpage.html"

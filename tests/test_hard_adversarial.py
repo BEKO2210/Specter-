@@ -1,8 +1,8 @@
-"""Harte, adversariale Tests: Versuche, den Scope zu umgehen, und fiese Randfaelle.
+"""Harte, adversariale Tests: Versuche, den Scope zu umgehen, und fiese Randfälle.
 
 Der Anspruch: Ein Angreifer (oder ein fehlgeleitetes LLM) darf die
 Scope-Durchsetzung mit keinem der hier durchgespielten Tricks aushebeln.
-Alles, was nicht ausdruecklich erlaubt ist, muss verweigert werden (fail-closed).
+Alles, was nicht ausdrücklich erlaubt ist, muss verweigert werden (fail-closed).
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ def _policy(tmp_path, **ov) -> SafetyPolicy:
 # ========================= Datei-Scope-Ausbruch ===========================
 
 def test_symlink_out_of_scope_denied(tmp_path):
-    """Ein Symlink im Scope, der nach draussen zeigt, darf NICHT gelesen werden."""
+    """Ein Symlink im Scope, der nach draußen zeigt, darf NICHT gelesen werden."""
     pol = _policy(tmp_path)
     outside = tmp_path / "geheim.txt"
     outside.write_text("TOP SECRET")
@@ -53,7 +53,7 @@ def test_symlink_out_of_scope_denied(tmp_path):
     try:
         os.symlink(outside, link)
     except (OSError, NotImplementedError):
-        pytest.skip("Symlinks nicht unterstuetzt")
+        pytest.skip("Symlinks nicht unterstützt")
     with pytest.raises(ScopeViolation):
         pol.check_path(str(link))
 
@@ -111,14 +111,14 @@ def test_all_zeros_denied(tmp_path):
 
 
 def test_homoglyph_host_denied(tmp_path):
-    """Kyrillisches Homoglyph darf nicht als erlaubter Host zaehlen."""
+    """Kyrillisches Homoglyph darf nicht als erlaubter Host zählen."""
     pol = _policy(tmp_path, allowed_targets=["intern.example.de"])
     with pytest.raises(ScopeViolation):
         pol.check_target("intern.еxample.de")   # 'e' -> kyrillisch
 
 
 def test_metadata_endpoint_forbidden_even_if_allowed(tmp_path):
-    """Cloud-Metadata-Endpoint bleibt gesperrt, selbst wenn faelschlich erlaubt."""
+    """Cloud-Metadata-Endpoint bleibt gesperrt, selbst wenn fälschlich erlaubt."""
     pol = _policy(tmp_path, allowed_targets=["169.254.169.254"],
                   forbidden_targets=["169.254.169.254"])
     with pytest.raises(ScopeViolation):
@@ -148,7 +148,7 @@ def test_cidr_boundary(tmp_path):
     pol = _policy(tmp_path, allowed_targets=["10.10.0.0/16"])
     assert pol.check_target("10.10.255.254") == "10.10.255.254"
     with pytest.raises(ScopeViolation):
-        pol.check_target("10.11.0.1")           # eine Stelle ausserhalb
+        pol.check_target("10.11.0.1")           # eine Stelle außerhalb
 
 
 # ========================= Befehls-Injection ==============================
@@ -169,7 +169,7 @@ def test_command_chaining_variants_denied(tmp_path):
 
 
 def test_flag_with_embedded_out_of_scope_target_has_no_valid_target(tmp_path):
-    """--url=http://8.8.8.8 ist ein Flag -> kein gueltiges Ziel -> verweigert."""
+    """--url=http://8.8.8.8 ist ein Flag -> kein gültiges Ziel -> verweigert."""
     pol = _policy(tmp_path)
     with pytest.raises(ScopeViolation):
         pol.check_command("curl --url=http://8.8.8.8/")
@@ -183,7 +183,7 @@ def test_second_target_out_of_scope_denied(tmp_path):
 
 
 def test_binary_via_absolute_path_still_checked(tmp_path):
-    """Auch /usr/bin/curl wird gegen die Allowlist geprueft (Basename)."""
+    """Auch /usr/bin/curl wird gegen die Allowlist geprüft (Basename)."""
     pol = _policy(tmp_path, allowed_binaries=["curl"])
     argv = pol.check_command("/usr/bin/curl 127.0.0.1")
     assert argv[0] == "/usr/bin/curl"

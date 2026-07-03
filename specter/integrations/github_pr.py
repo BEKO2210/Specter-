@@ -2,12 +2,12 @@
 
 Zwei Betriebsarten:
 
-  * OFFLINE (Standard, immer verfuegbar): fuer jedes Finding wird ein fertiger
-    Pull-Request-Text als Markdown-Datei geschrieben. Nichts verlaesst das Haus.
+  * OFFLINE (Standard, immer verfügbar): für jedes Finding wird ein fertiger
+    Pull-Request-Text als Markdown-Datei geschrieben. Nichts verlässt das Haus.
   * ONLINE (opt-in): sofern integrations.github in scope.yaml aktiviert und ein
-    Token gesetzt ist, wird pro Finding ein echter Draft-PR eroeffnet - ein
+    Token gesetzt ist, wird pro Finding ein echter Draft-PR eröffnet - ein
     neuer Branch mit einem Remediation-Trackingdokument plus PR (kein Auto-Merge,
-    kein Auto-Apply; ein Mensch prueft und setzt um).
+    kein Auto-Apply; ein Mensch prüft und setzt um).
 
 Der Netzwerkzugriff ist hinter einem Client gekapselt (HttpGitHubClient), damit
 die Logik ohne echten API-Zugriff testbar bleibt.
@@ -46,7 +46,7 @@ class PullRequestDraft:
 
 
 def build_drafts(findings: list[Finding]) -> list[PullRequestDraft]:
-    """Erzeugt fuer jedes Finding einen PR-Entwurf (Titel + Body)."""
+    """Erzeugt für jedes Finding einen PR-Entwurf (Titel + Body)."""
     drafts: list[PullRequestDraft] = []
     for f in findings:
         pr = draft_pr(f)
@@ -67,7 +67,7 @@ def write_drafts(drafts: list[PullRequestDraft], directory: str | Path) -> list[
 
 
 class HttpGitHubClient:
-    """Duenner GitHub-REST-Client (urllib). Nur die benoetigten Endpunkte."""
+    """Duenner GitHub-REST-Client (urllib). Nur die benötigten Endpunkte."""
 
     def __init__(self, repo: str, token: str) -> None:
         self.repo = repo
@@ -120,7 +120,7 @@ def open_draft_prs(
     drafts: list[PullRequestDraft],
     client: HttpGitHubClient,
 ) -> list[dict[str, Any]]:
-    """ONLINE: eroeffnet fuer jeden Entwurf einen echten Draft-PR.
+    """ONLINE: eröffnet für jeden Entwurf einen echten Draft-PR.
 
     Fehler je PR werden erfasst (nicht abgebrochen), damit ein einzelner
     Fehlschlag die restlichen PRs nicht verhindert.
@@ -136,7 +136,7 @@ def open_draft_prs(
             client.put_file(
                 branch, d.doc_path,
                 f"# Remediation-Tracking: {d.title}\n\n{d.body}\n",
-                f"security(specter): Trackingdokument fuer {d.finding_id}",
+                f"security(specter): Trackingdokument für {d.finding_id}",
             )
             result["url"] = client.create_draft_pr(
                 branch, github.base_branch, d.title, d.body)

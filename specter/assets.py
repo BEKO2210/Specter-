@@ -1,8 +1,8 @@
 """Einheitlicher Asset-Graph (Recon).
 
-Entspricht dem "Unified Asset Graph" von Esprit/Trident: waehrend der Aufklaerung
+Entspricht dem "Unified Asset Graph" von Esprit/Trident: waehrend der Aufklärung
 (Recon) entdeckte Bausteine - Code-Repositories, Hosts, Dienste, Endpunkte,
-Datenspeicher, Secrets - werden als Knoten erfasst und ueber Kanten verbunden
+Datenspeicher, Secrets - werden als Knoten erfasst und über Kanten verbunden
 (z. B. "Host betreibt Dienst", "Dienst liest Datenspeicher"). Findings und
 Angriffspfade referenzieren diese Assets.
 """
@@ -19,14 +19,14 @@ ASSET_TYPES: dict[str, str] = {
     "service": "Netzwerkdienst/Port",
     "endpoint": "Web-/API-Endpunkt",
     "datastore": "Datenspeicher (DB/Bucket)",
-    "identity": "Identitaet/Konto",
+    "identity": "Identität/Konto",
     "secret": "Geheimnis (Credential/Token)",
 }
 
 
 @dataclass
 class Asset:
-    key: str                       # eindeutiger Schluessel, z. B. "host:127.0.0.1"
+    key: str                       # eindeutiger Schlüssel, z. B. "host:127.0.0.1"
     type: str
     name: str
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -67,12 +67,12 @@ class AssetGraph:
     def add_asset(
         self, asset_type: str, name: str, **metadata: Any
     ) -> tuple[Asset, bool]:
-        """Registriert ein Asset. Rueckgabe: (Asset, is_new)."""
+        """Registriert ein Asset. Rückgabe: (Asset, is_new)."""
         if asset_type not in ASSET_TYPES:
             asset_type = "host"
         key = self.make_key(asset_type, name)
         if key in self._assets:
-            # Metadaten zusammenfuehren.
+            # Metadaten zusammenführen.
             self._assets[key].metadata.update(metadata)
             return self._assets[key], False
         asset = Asset(key=key, type=asset_type, name=name, metadata=dict(metadata))

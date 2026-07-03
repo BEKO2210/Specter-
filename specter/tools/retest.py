@@ -1,4 +1,4 @@
-"""Tool: Re-Test gegen einen frueheren Bericht (behoben/neu/weiterhin offen)."""
+"""Tool: Re-Test gegen einen früheren Bericht (behoben/neu/weiterhin offen)."""
 
 from __future__ import annotations
 
@@ -30,9 +30,9 @@ class RetestTool:
         return {
             "name": self.name,
             "description": (
-                "Vergleicht die aktuell erfassten Findings mit einem frueheren "
+                "Vergleicht die aktuell erfassten Findings mit einem früheren "
                 "JSON-Bericht (Re-Test): was wurde behoben, was ist neu, was ist "
-                "weiterhin offen (inkl. Alter in Tagen). Der fruehere Bericht muss "
+                "weiterhin offen (inkl. Alter in Tagen). Der frühere Bericht muss "
                 "eine von Specter erzeugte JSON-Datei im Datei-Scope sein. Sinnvoll "
                 "nach der Erfassung der aktuellen Findings, vor dem Bericht."
             ),
@@ -41,7 +41,7 @@ class RetestTool:
                 "properties": {
                     "previous_report": {
                         "type": "string",
-                        "description": "Pfad zum frueheren JSON-Bericht (im Scope).",
+                        "description": "Pfad zum früheren JSON-Bericht (im Scope).",
                     },
                 },
                 "required": ["previous_report"],
@@ -58,7 +58,7 @@ class RetestTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             previous = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

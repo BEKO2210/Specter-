@@ -1,7 +1,7 @@
 """Angriffspfad-Korrelation ("toxische Kombinationen").
 
-Kernidee von Esprit/Trident: Einzelne Findings sind nur so gefaehrlich wie ihre
-Verkettung. Dieses Modul korreliert Findings ueber den Asset-Graph zu
+Kernidee von Esprit/Trident: Einzelne Findings sind nur so gefährlich wie ihre
+Verkettung. Dieses Modul korreliert Findings über den Asset-Graph zu
 Angriffspfaden - erreichbarer Einstieg + ausnutzbare Schwachstelle + Weg zu
 sensiblen Daten. Rein regelbasiert und deterministisch (nachvollziehbar,
 keine Halluzination).
@@ -38,7 +38,7 @@ class AttackPath:
         }
 
 
-# Eine Korrelationsregel prueft die Findings-Menge und liefert 0..n Pfade.
+# Eine Korrelationsregel prüft die Findings-Menge und liefert 0..n Pfade.
 Rule = Callable[[list[Finding], AssetGraph], list[AttackPath]]
 
 
@@ -49,7 +49,7 @@ def _has(findings: list[Finding], category: str) -> list[Finding]:
 def _rule_secret_to_service(
     findings: list[Finding], graph: AssetGraph
 ) -> list[AttackPath]:
-    """Offengelegtes Secret + exponierter Dienst -> Uebernahme."""
+    """Offengelegtes Secret + exponierter Dienst -> Übernahme."""
     secrets = _has(findings, "secret_exposure")
     services = _has(findings, "exposed_service")
     if not secrets or not services:
@@ -68,8 +68,8 @@ def _rule_secret_to_service(
                     ],
                     finding_ids=[sec.id, svc.id],
                     rationale=(
-                        "Ein im Klartext auffindbares Secret laesst sich direkt "
-                        "gegen einen von aussen erreichbaren Dienst verwenden."
+                        "Ein im Klartext auffindbares Secret lässt sich direkt "
+                        "gegen einen von außen erreichbaren Dienst verwenden."
                     ),
                 )
             )
@@ -136,7 +136,7 @@ def _rule_auth_to_access(
 def _rule_cloud_public_data(
     findings: list[Finding], graph: AssetGraph
 ) -> list[AttackPath]:
-    """Oeffentlicher Cloud-Speicher -> direkter Datenzugriff (Einzelbefund als Pfad)."""
+    """Öffentlicher Cloud-Speicher -> direkter Datenzugriff (Einzelbefund als Pfad)."""
     paths: list[AttackPath] = []
     for f in _has(findings, "cloud_storage"):
         paths.append(
@@ -157,10 +157,10 @@ def _rule_cloud_public_data(
 def _rule_remote_access_domain(
     findings: list[Finding], graph: AssetGraph
 ) -> list[AttackPath]:
-    """Exponierter Fernzugang (RDP/VPN) + Credential -> interner Zugriff / Domaene.
+    """Exponierter Fernzugang (RDP/VPN) + Credential -> interner Zugriff / Domäne.
 
     Der klassische Ransomware-Einstieg im Mittelstand: ein offener RDP-/VPN-Zugang
-    plus ein geleaktes oder Default-Credential fuehrt zur Domaenenuebernahme.
+    plus ein geleaktes oder Default-Credential führt zur Domänenübernahme.
     """
     remote = _has(findings, "remote_access")
     creds = (
@@ -231,7 +231,7 @@ def _rule_dsgvo_breach(
 def _rule_outdated_exploit(
     findings: list[Finding], graph: AssetGraph
 ) -> list[AttackPath]:
-    """Veraltete Komponente + erreichbar von aussen -> Ausnutzung bekannter CVE."""
+    """Veraltete Komponente + erreichbar von außen -> Ausnutzung bekannter CVE."""
     outdated = _has(findings, "outdated_component")
     reachable = _has(findings, "exposed_service") + _has(findings, "remote_access")
     if not outdated:
@@ -280,7 +280,7 @@ def aggregate_paths(paths: list[AttackPath]) -> list[AttackPath]:
     """Verdichtet gleichartige Pfade (gleicher Titel) zu je einem Sammelpfad.
 
     Reduziert Rauschen im Bericht: statt N nahezu identischer Pfade (z. B. je
-    ein offengelegtes Secret) entsteht ein Sammelpfad mit hoechstem Schweregrad,
+    ein offengelegtes Secret) entsteht ein Sammelpfad mit höchstem Schweregrad,
     vereinigten Findings und der Anzahl betroffener Kombinationen. Die Schritte
     des schwersten Vertreters bleiben als Beispiel erhalten.
     """
@@ -331,14 +331,14 @@ def correlate(
 
     Mit ``aggregate=True`` (Standard) werden gleichartige Pfade zu Sammelpfaden
     verdichtet - kompakter und kundentauglicher. ``aggregate=False`` liefert die
-    einzelnen Pfade (z. B. fuer eine detaillierte technische Analyse).
+    einzelnen Pfade (z. B. für eine detaillierte technische Analyse).
     """
     active = rules if rules is not None else DEFAULT_RULES
     relevant = findings_store.by_severity(min_severity)
     paths: list[AttackPath] = []
     for rule in active:
         paths.extend(rule(relevant, graph))
-    # Deduplizieren ueber (title, finding_ids) und nach Schwere sortieren.
+    # Deduplizieren über (title, finding_ids) und nach Schwere sortieren.
     seen: set[tuple[str, tuple[str, ...]]] = set()
     unique: list[AttackPath] = []
     for p in sorted(paths, key=lambda x: -int(x.severity)):

@@ -1,6 +1,6 @@
 :root{
   --bg:#0A1420; --surface:#0E1C2B; --line:rgba(255,255,255,.09);
-  --text:#E7EEF4; --muted:#93A5B5; --teal:#14B8A6; --teal-2:#2DD4BF; --maxw:760px;
+  --text:#E7EEF4; --text-2:#C9D5DF; --muted:#93A5B5; --teal:#14B8A6; --teal-2:#2DD4BF; --maxw:760px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -12,7 +12,7 @@ h1,h2,.brandmark{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(18px,5vw,24px)}
 header.nav{position:sticky;top:0;z-index:20;background:rgba(10,20,32,.85);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:12px;min-height:62px;max-width:1140px}
+.nav .wrap{display:flex;align-items:center;gap:12px;min-height:62px}
 .logo{display:flex;align-items:center;gap:10px}
 .logo img{height:26px;width:auto;display:block}
 .logo .brandmark{font-weight:700;font-size:18px;color:var(--text)}
@@ -23,7 +23,7 @@ h1{font-size:clamp(28px,6vw,40px);margin:0 0 6px;line-height:1.1}
 .updated{color:var(--muted);font-size:13.5px;margin:0 0 30px}
 h2{font-size:clamp(18px,4vw,22px);color:var(--text);margin:34px 0 10px;
   border-left:3px solid var(--teal);padding-left:11px}
-p,li{color:#C9D5DF;font-size:15.5px}
+p,li{color:var(--text-2);font-size:15.5px}
 strong{color:var(--text)}
 .muted{color:var(--muted)}
 .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
@@ -32,6 +32,6 @@ strong{color:var(--text)}
 .note{border-left:4px solid #B45309;background:rgba(180,83,9,.12);border-radius:0 8px 8px 0;
   padding:12px 16px;margin:18px 0;font-size:14px;color:#F5D9A8}
 footer{border-top:1px solid var(--line);margin-top:40px;padding:30px 0 46px;color:var(--muted);font-size:13.5px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;max-width:1140px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
 footer .fr{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}
 @media(max-width:560px){footer .fr{margin-left:0;width:100%}}

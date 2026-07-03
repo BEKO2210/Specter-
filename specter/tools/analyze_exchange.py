@@ -32,7 +32,7 @@ class AnalyzeExchangeTool:
                 "Analysiert bereitgestellte Exchange-Daten (JSON: Version/Build, "
                 "extern erreichbare Dienste, TLS, HTTP-Header) rein defensiv und "
                 "erfasst Risiken als Findings: veraltete Version (ProxyLogon/"
-                "ProxyShell-Aera), extern erreichbares ECP, schwache TLS-Protokolle, "
+                "ProxyShell-Ära), extern erreichbares ECP, schwache TLS-Protokolle, "
                 "fehlende Sicherheits-Header. Keine Live-Ausnutzung - nur die "
                 "lokale Datei im Scope."
             ),
@@ -55,7 +55,7 @@ class AnalyzeExchangeTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

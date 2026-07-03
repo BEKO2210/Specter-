@@ -31,7 +31,7 @@ class AnalyzeHttpHeadersTool:
             "description": (
                 "Analysiert einen bereitgestellten Export der HTTP-Antwort-Header "
                 "(und optional Cookies) rein defensiv und erfasst Web-Sicherheits-"
-                "luecken als Findings: fehlendes/kurzes HSTS, fehlende CSP, fehlendes "
+                "lücken als Findings: fehlendes/kurzes HSTS, fehlende CSP, fehlendes "
                 "X-Frame-Options, X-Content-Type-Options, Referrer-/Permissions-"
                 "Policy, verraterische Server-/X-Powered-By-Banner sowie Cookies ohne "
                 "Secure/HttpOnly/SameSite. Keine Live-Abfrage - nur die lokale Datei "
@@ -56,7 +56,7 @@ class AnalyzeHttpHeadersTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

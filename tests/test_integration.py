@@ -1,6 +1,6 @@
 """Integrationstest: echtes run_command (curl) gegen einen lokalen Testserver.
 
-Beweist, dass die aktive Pruefung mit realem Subprozess und echtem Netzzugriff
+Beweist, dass die aktive Prüfung mit realem Subprozess und echtem Netzzugriff
 (auf 127.0.0.1) funktioniert - nicht nur gemockt.
 """
 

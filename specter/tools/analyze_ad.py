@@ -32,7 +32,7 @@ class AnalyzeAdTool:
                 "Analysiert einen bereitgestellten Active-Directory-Export (JSON, "
                 "eigene Struktur oder BloodHound-users-Export) rein defensiv und "
                 "erfasst typische AD-Risiken als Findings: schwache Passwort-/"
-                "Lockout-Policy, gefaehrliche Gruppenmitgliedschaften, veraltete/"
+                "Lockout-Policy, gefährliche Gruppenmitgliedschaften, veraltete/"
                 "deaktivierte Konten, SPN/Kerberos-Risiken, krbtgt-Alter. "
                 "Keine Live-Verbindung - nur die lokale Datei im Scope."
             ),
@@ -55,7 +55,7 @@ class AnalyzeAdTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

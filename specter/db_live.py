@@ -1,4 +1,4 @@
-"""Reine Hilfsfunktionen fuer den Live-Datenbank-Check (Socket-Probe -> Export).
+"""Reine Hilfsfunktionen für den Live-Datenbank-Check (Socket-Probe -> Export).
 
 Der eigentliche Socket-Zugriff auf einen echten, selbst gestarteten Datenbank-
 Container lebt bewusst im Labor-Runner (`examples/live_lab/run_db_lab.py`); hier
@@ -19,7 +19,7 @@ from typing import Any
 def redis_requires_auth(ping_response: str) -> bool:
     """Interpretiert die Antwort auf ein Redis-`PING` ohne vorherige Anmeldung.
 
-    - `+PONG`  -> Server antwortet ohne Auth -> KEINE Authentifizierung noetig.
+    - `+PONG`  -> Server antwortet ohne Auth -> KEINE Authentifizierung nötig.
     - `-NOAUTH ...` / `-ERR ... auth ...` -> Auth wird verlangt.
     Bei leerer/unbekannter Antwort nehmen wir vorsichtshalber an, dass Auth greift
     (kein Fehlalarm).
@@ -36,7 +36,7 @@ def redis_requires_auth(ping_response: str) -> bool:
 def build_database_export(engine: str, host: str, port: int, *,
                           public: bool, ping_response: str,
                           tls: bool = False) -> dict[str, Any]:
-    """Baut den Export fuer `analyze_database` aus einer echten Redis-Probe."""
+    """Baut den Export für `analyze_database` aus einer echten Redis-Probe."""
     return {"databases": [{
         "engine": engine,
         "host": host,

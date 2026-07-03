@@ -1,4 +1,4 @@
-"""Tests fuer das BSI-IT-Grundschutz-Mapping."""
+"""Tests für das BSI-IT-Grundschutz-Mapping."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def test_limitation_per_source():
     assert "Netzwerk-Scans" in limitation_for(
         Finding("x", "exposed_service", "hoch", "a", source="nmap"))
     # Unbekannte Quelle -> generischer Hinweis.
-    assert "Pruefzeitpunkt" in limitation_for(
+    assert "Prüfzeitpunkt" in limitation_for(
         Finding("x", "other", "info", "a", source="irgendwas"))
 
 
@@ -58,11 +58,11 @@ def test_map_finding_complete_structure():
                 location="app:1", evidence="admin=admin", cwe="CWE-1392")
     m = map_finding(f)
     d = m.to_dict()
-    for key in ("finding_id", "risiko", "bereich", "massnahme", "bsi_bezug",
-                "prioritaet", "evidenz", "einschraenkungen"):
+    for key in ("finding_id", "risiko", "bereich", "maßnahme", "bsi_bezug",
+                "priorität", "evidenz", "einschränkungen"):
         assert d[key]
     assert d["finding_id"] == f.id
-    assert d["prioritaet"] == "Hoch"
+    assert d["priorität"] == "Hoch"
     assert d["evidenz"] == "admin=admin"
 
 

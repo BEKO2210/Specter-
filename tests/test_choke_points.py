@@ -1,4 +1,4 @@
-"""Tests fuer die Choke-Point-Analyse (Greedy-Hitting-Set)."""
+"""Tests für die Choke-Point-Analyse (Greedy-Hitting-Set)."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def test_greedy_minimal_set():
         _p("P3", Severity.HOCH, ["F2"]),
     ]
     cps = compute_choke_points(paths)
-    # F1 bricht 2 Pfade -> zuerst; danach F2 fuer den Rest. F3 unnoetig.
+    # F1 bricht 2 Pfade -> zuerst; danach F2 für den Rest. F3 unnötig.
     assert [c.finding_id for c in cps] == ["F1", "F2"]
     assert cps[0].paths_broken == 2
     assert cps[1].paths_broken == 1
@@ -59,7 +59,7 @@ def test_all_paths_covered():
     covered = set()
     for c in cps:
         covered.add(c.finding_id)
-    # Jeder Pfad muss von mindestens einem gewaehlten Finding getroffen werden.
+    # Jeder Pfad muss von mindestens einem gewählten Finding getroffen werden.
     for p in paths:
         assert covered & set(p.finding_ids)
 

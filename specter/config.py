@@ -1,4 +1,4 @@
-"""Laedt und validiert die Scope-/Autorisierungsdatei (scope.yaml)."""
+"""Lädt und validiert die Scope-/Autorisierungsdatei (scope.yaml)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import yaml
 
 
 class ScopeError(Exception):
-    """Wird ausgeloest, wenn die Scope-Datei fehlt oder ungueltig ist."""
+    """Wird ausgelöst, wenn die Scope-Datei fehlt oder ungültig ist."""
 
 
 @dataclass
@@ -24,7 +24,7 @@ class Engagement:
 
 @dataclass
 class ScannerPolicy:
-    """Freigabe- und Sicherheitsregeln fuer einen aktiven Scanner (z. B. nmap)."""
+    """Freigabe- und Sicherheitsregeln für einen aktiven Scanner (z. B. nmap)."""
 
     enabled: bool = False
     allow_aggressive: bool = False
@@ -85,7 +85,7 @@ class Config:
     raw: dict[str, Any] = field(default_factory=dict)
 
     def scanner_policy(self, name: str) -> ScannerPolicy:
-        """Policy fuer einen Scanner; Default = deaktiviert (fail-closed)."""
+        """Policy für einen Scanner; Default = deaktiviert (fail-closed)."""
         return self.scanners.get(name, ScannerPolicy())
 
     @classmethod
@@ -99,7 +99,7 @@ class Config:
         try:
             data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError as exc:
-            raise ScopeError(f"Scope-Datei ist kein gueltiges YAML: {exc}") from exc
+            raise ScopeError(f"Scope-Datei ist kein gültiges YAML: {exc}") from exc
 
         eng_raw = data.get("engagement") or {}
         for required in ("name", "authorized_by", "authorization_ref"):
@@ -158,10 +158,10 @@ class Config:
             deadline = _dt.date.fromisoformat(str(valid_until))
         except ValueError as exc:
             raise ScopeError(
-                f"engagement.valid_until ist kein gueltiges Datum (YYYY-MM-DD): {valid_until}"
+                f"engagement.valid_until ist kein gültiges Datum (YYYY-MM-DD): {valid_until}"
             ) from exc
         if _dt.date.today() > deadline:
             raise ScopeError(
                 f"Autorisierung ist am {deadline.isoformat()} abgelaufen. "
-                "Erneuere die Beauftragung, bevor du fortfaehrst."
+                "Erneuere die Beauftragung, bevor du fortfährst."
             )

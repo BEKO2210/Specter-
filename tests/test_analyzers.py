@@ -1,4 +1,4 @@
-"""Tests fuer die Offline-Analyzer (Active Directory, Exchange)."""
+"""Tests für die Offline-Analyzer (Active Directory, Exchange)."""
 
 from __future__ import annotations
 
@@ -37,8 +37,8 @@ def test_ad_weak_password_policy():
         "max_age_days": 0, "history_length": 2}}
     findings = analyze_ad(data)
     titles = " ".join(f.title for f in findings)
-    assert "Mindestlaenge" in titles
-    assert "Komplexitaet" in titles
+    assert "Mindestlänge" in titles
+    assert "Komplexität" in titles
     assert "Lockout" in titles
     assert all(f.category == "auth_weakness" for f in findings)
 
@@ -64,7 +64,7 @@ def test_ad_too_many_domain_admins():
 
 
 def test_ad_privileged_group_non_list_ignored():
-    # Fehlerhafte Struktur (kein Listenwert) wird robust uebersprungen.
+    # Fehlerhafte Struktur (kein Listenwert) wird robust übersprungen.
     data = {"domain": "corp.de", "privileged_groups": {"Domain Admins": "kaputt"}}
     assert analyze_ad(data) == []
 
@@ -122,7 +122,7 @@ def test_bloodhound_normalizer():
     assert len(users) == 1
     assert users[0]["name"] == "SVC@CORP"
     assert users[0]["kerberos_preauth"] is False    # dontreqpreauth invertiert
-    # Ueber analyze_ad direkt verwendbar (Auto-Erkennung).
+    # Über analyze_ad direkt verwendbar (Auto-Erkennung).
     findings = analyze_ad(bh)
     assert any("AS-REP" in f.title or "SPN" in f.title for f in findings)
 
@@ -260,7 +260,7 @@ def test_entra_overprivileged_app():
                 {"name": "Legacy Sync", "admin_consent": True,
                  "high_privilege_permissions": ["Directory.ReadWrite.All"]}]}
     findings = analyze_entra(data)
-    assert any("Ueberprivilegierte App" in f.title for f in findings)
+    assert any("Überprivilegierte App" in f.title for f in findings)
 
 
 def test_entra_anonymous_sharing():
@@ -280,7 +280,7 @@ def test_entra_invalid_input_and_non_list_role():
 
 
 def test_entra_non_dict_app_ignored():
-    # Fehlerhafte App-Struktur (kein Dict) wird robust uebersprungen.
+    # Fehlerhafte App-Struktur (kein Dict) wird robust übersprungen.
     data = {"tenant": "contoso.de", "security_defaults_enabled": True,
             "conditional_access_policies": [{"state": "enabled", "requires_mfa": True}],
             "app_registrations": ["kaputt", None]}
@@ -301,7 +301,7 @@ def test_aws_root_without_mfa_and_keys():
 def test_aws_weak_password_policy():
     findings = analyze_aws({"account_id": "123", "password_policy": {
         "minimum_length": 8, "require_symbols": False, "max_age_days": 0}})
-    assert any("Passwort-Policy" in f.title or "Passwoerter" in f.title for f in findings)
+    assert any("Passwort-Policy" in f.title or "Passwörter" in f.title for f in findings)
 
 
 def test_aws_overprivileged_user_and_no_mfa():
@@ -310,7 +310,7 @@ def test_aws_overprivileged_user_and_no_mfa():
         "attached_policies": ["AdministratorAccess"]}]})
     titles = " ".join(f.title for f in findings)
     assert "Konsolenzugriff ohne MFA" in titles
-    assert "Ueberprivilegierter IAM-User" in titles
+    assert "Überprivilegierter IAM-User" in titles
 
 
 def test_aws_old_and_unused_access_key():
@@ -361,7 +361,7 @@ def test_aws_role_normal_trust_no_finding():
 def test_aws_invalid_input_and_empty():
     assert analyze_aws("x") == []
     assert analyze_aws({}) == []
-    # Nicht-Dict-Elemente werden robust uebersprungen.
+    # Nicht-Dict-Elemente werden robust übersprungen.
     assert analyze_aws({"users": ["kaputt"], "roles": [None],
                         "s3_buckets": [1], "security_groups": ["x"]}) == []
 
@@ -374,7 +374,7 @@ def test_azure_storage_all_issues():
          "encryption": False, "min_tls": "TLS1.0"}]})
     cats = {f.category for f in findings}
     assert cats == {"cloud_storage", "transport_security", "misconfiguration"}
-    assert any("Oeffentlicher Blob-Zugriff" in f.title for f in findings)
+    assert any("Öffentlicher Blob-Zugriff" in f.title for f in findings)
     assert any(f.severity is Severity.HOCH for f in findings)
 
 
@@ -414,7 +414,7 @@ def test_azure_key_vault_issues():
     findings = analyze_azure({"key_vaults": [
         {"name": "kv1", "public_network_access": True, "purge_protection": False}]})
     titles = " ".join(f.title for f in findings)
-    assert "Key Vault oeffentlich erreichbar" in titles
+    assert "Key Vault öffentlich erreichbar" in titles
     assert "Purge-Protection" in titles
     assert any(f.severity is Severity.HOCH for f in findings)
 
@@ -457,7 +457,7 @@ def test_azure_rbac_within_limit_no_finding():
 def test_azure_invalid_input_and_robust_skips():
     assert analyze_azure("x") == []
     assert analyze_azure({}) == []
-    # Nicht-Dict-Elemente in allen Listen werden robust uebersprungen.
+    # Nicht-Dict-Elemente in allen Listen werden robust übersprungen.
     assert analyze_azure({
         "storage_accounts": ["kaputt"], "network_security_groups": [None],
         "virtual_machines": [1], "key_vaults": ["x"], "sql_servers": [2],
@@ -471,7 +471,7 @@ def test_email_all_missing():
     titles = " ".join(f.title for f in findings)
     assert "Kein SPF-Eintrag" in titles
     assert "Kein DMARC-Eintrag" in titles
-    assert "Kein DKIM-Schluessel" in titles
+    assert "Kein DKIM-Schlüssel" in titles
 
 
 def test_email_spf_weak_allall():
@@ -483,12 +483,12 @@ def test_email_spf_weak_allall():
 def test_email_spf_no_all_mechanism():
     findings = analyze_email_security(
         {"domain": "x.de", "spf": "v=spf1 include:_spf.google.com"})
-    assert any("ohne abschliessenden all-Mechanismus" in f.title
+    assert any("ohne abschließenden all-Mechanismus" in f.title
                and f.severity is Severity.MITTEL for f in findings)
 
 
 def test_email_spf_strict_ok():
-    # -all + gueltiges DMARC + starkes DKIM -> keine SPF/DMARC/DKIM-Befunde
+    # -all + gültiges DMARC + starkes DKIM -> keine SPF/DMARC/DKIM-Befunde
     findings = analyze_email_security({
         "domain": "x.de",
         "spf": "v=spf1 include:_spf.google.com -all",
@@ -512,14 +512,14 @@ def test_email_dkim_weak_and_dated_keys():
     assert any("zu schwach" in f.title and f.severity is Severity.HOCH for f in weak)
     dated = analyze_email_security(
         {"domain": "x.de", "dkim": [{"selector": "s", "key_bits": 1024}]})
-    assert any("nicht mehr zeitgemaess" in f.title and f.severity is Severity.NIEDRIG
+    assert any("nicht mehr zeitgemäß" in f.title and f.severity is Severity.NIEDRIG
                for f in dated)
 
 
 def test_email_dkim_present_false_counts_as_missing():
     findings = analyze_email_security(
         {"domain": "x.de", "dkim": [{"selector": "old", "present": False}]})
-    assert any("Kein DKIM-Schluessel" in f.title for f in findings)
+    assert any("Kein DKIM-Schlüssel" in f.title for f in findings)
 
 
 def test_email_dkim_invalid_bits_ignored():
@@ -535,14 +535,14 @@ def test_email_invalid_input():
     assert analyze_email_security("x") == []
     # Leeres Dict = alles fehlt -> SPF/DMARC/DKIM je ein Befund.
     assert len(analyze_email_security({})) == 3
-    # Nicht-Dict-DKIM-Elemente werden robust uebersprungen (gilt als kein DKIM).
-    assert any("Kein DKIM-Schluessel" in f.title
+    # Nicht-Dict-DKIM-Elemente werden robust übersprungen (gilt als kein DKIM).
+    assert any("Kein DKIM-Schlüssel" in f.title
                for f in analyze_email_security({"domain": "x.de", "spf": "v=spf1 -all",
                                                 "dmarc": "v=DMARC1; p=reject; rua=mailto:d@x.de",
                                                 "dkim": ["kaputt", None]}))
 
 
-# ====================== SCA / Abhaengigkeiten (CVE) ========================
+# ====================== SCA / Abhängigkeiten (CVE) ========================
 
 _LOG4J_ADV = {"name": "log4j-core", "ecosystem": "maven", "vulnerable": "<2.15.0",
               "fixed": "2.17.1", "cve": "CVE-2021-44228", "severity": "kritisch",
@@ -556,14 +556,14 @@ def test_sca_known_cve_match():
         "advisories": [_LOG4J_ADV]})
     assert len(findings) == 1
     f = findings[0]
-    assert "Verwundbare Abhaengigkeit: log4j-core 2.14.1 (CVE-2021-44228)" in f.title
+    assert "Verwundbare Abhängigkeit: log4j-core 2.14.1 (CVE-2021-44228)" in f.title
     assert f.severity is Severity.KRITISCH
     assert f.category == "outdated_component" and f.cwe == "CWE-1395"
     assert "behoben in 2.17.1" in f.evidence and "Log4Shell RCE" in f.evidence
 
 
 def test_sca_no_match_when_version_is_fixed():
-    # 2.17.1 erfuellt '<2.15.0' NICHT -> kein CVE-Finding (nur gepinnt, kein Befund).
+    # 2.17.1 erfüllt '<2.15.0' NICHT -> kein CVE-Finding (nur gepinnt, kein Befund).
     findings = analyze_dependencies({
         "dependencies": [{"name": "log4j-core", "version": "2.17.1", "ecosystem": "maven"}],
         "advisories": [_LOG4J_ADV]})
@@ -589,7 +589,7 @@ def test_sca_deprecated_component():
         "dependencies": [{"name": "lodash", "version": "4.17.11", "ecosystem": "npm",
                           "deprecated": True}]})
     assert len(findings) == 1
-    assert "Nicht mehr gepflegte Abhaengigkeit: lodash" in findings[0].title
+    assert "Nicht mehr gepflegte Abhängigkeit: lodash" in findings[0].title
     assert findings[0].severity is Severity.MITTEL and findings[0].cwe == "CWE-1104"
 
 
@@ -597,7 +597,7 @@ def test_sca_unpinned_versions():
     for pin in ("*", "", "latest", "any", "x"):
         findings = analyze_dependencies({
             "dependencies": [{"name": "requests", "version": pin, "ecosystem": "pypi"}]})
-        assert any("Ungepinnte Abhaengigkeit" in f.title
+        assert any("Ungepinnte Abhängigkeit" in f.title
                    and f.severity is Severity.NIEDRIG for f in findings)
 
 
@@ -609,7 +609,7 @@ def test_sca_deprecated_and_unpinned_combined():
 
 
 def test_sca_match_suppresses_deprecated_and_unpinned():
-    # Trifft ein Advisory zu, zaehlt nur der konkrete CVE-Befund.
+    # Trifft ein Advisory zu, zählt nur der konkrete CVE-Befund.
     findings = analyze_dependencies({
         "dependencies": [{"name": "log4j-core", "version": "2.14.1", "ecosystem": "maven",
                           "deprecated": True}],
@@ -640,7 +640,7 @@ def test_sca_advisory_without_fixed_or_title_or_cve():
 def test_sca_invalid_input_and_robustness():
     assert analyze_dependencies("nope") == []
     assert analyze_dependencies({}) == []
-    # Nicht-Dict-Eintraege in dependencies/advisories werden robust uebersprungen.
+    # Nicht-Dict-Einträge in dependencies/advisories werden robust übersprungen.
     findings = analyze_dependencies({
         "dependencies": ["kaputt", None, {"name": "a", "version": "1.0.0"}],
         "advisories": ["kaputt", {"name": "a", "vulnerable": "<2.0.0", "cve": "CVE-X"}]})
@@ -664,11 +664,11 @@ def test_sca_version_constraint_operators():
     # Bereich (kommagetrennt), Default-Operator (bare = ==) und Rand.
     assert _satisfies("2.1.0", ">=2.0.0,<3.0.0") is True
     assert _satisfies("1.0.0", "1.0.0") is True
-    # Leere / unvollstaendige Constraints matchen nicht.
+    # Leere / unvollständige Constraints matchen nicht.
     assert _satisfies("1.0.0", "") is False
     assert _satisfies("1.0.0", ",") is False
     assert _satisfies("1.0.0", ">=") is False
-    # Trailing-Komma wird ignoriert, restlicher Constraint zaehlt.
+    # Trailing-Komma wird ignoriert, restlicher Constraint zählt.
     assert _satisfies("1.5.0", ">=1.0.0,") is True
     # Nicht-numerische Versionsbestandteile werden robust auf 0 gesetzt.
     assert _satisfies("1.0.0-beta", "<2.0.0") is True
@@ -715,7 +715,7 @@ def test_fw_rdp_from_internet_via_port():
 
 
 def test_fw_ssh_from_internet_via_service_name():
-    # Kein numerisches Port-Feld -> Auswertung ueber den Servicenamen.
+    # Kein numerisches Port-Feld -> Auswertung über den Servicenamen.
     findings = analyze_firewall({"rules": [
         {"name": "ssh", "action": "allow", "source": "any",
          "destination": "10.0.0.5", "service": "ssh"}]})
@@ -749,7 +749,7 @@ def test_fw_internet_source_unknown_port_no_finding():
 
 
 def test_fw_rule_port_invalid_value():
-    # Ungueltiges Port-Feld -> Fallback auf Servicenamen (hier unbekannt -> 0).
+    # Ungültiges Port-Feld -> Fallback auf Servicenamen (hier unbekannt -> 0).
     findings = analyze_firewall({"rules": [
         {"name": "x", "action": "allow", "source": "any",
          "destination": "10.0.0.1", "service": "https", "port": "kaputt"}]})
@@ -765,7 +765,7 @@ def test_fw_vpn_weak_crypto_ikev1_no_mfa_eol():
     assert "schwacher Kryptographie" in titles
     assert "veraltetes IKEv1" in titles
     assert "ohne MFA" in titles
-    assert "abgekuendigtes VPN-Gateway" in titles
+    assert "abgekündigtes VPN-Gateway" in titles
     assert cats == {"crypto_weakness", "misconfiguration", "remote_access", "outdated_component"}
 
 
@@ -803,7 +803,7 @@ def test_fw_management_not_public_ignored():
 def test_fw_invalid_input_and_robustness():
     assert analyze_firewall("nope") == []
     assert analyze_firewall({}) == []
-    # Nicht-Dict-Eintraege in rules/vpn und Nicht-Dict-management robust behandeln.
+    # Nicht-Dict-Einträge in rules/vpn und Nicht-Dict-management robust behandeln.
     findings = analyze_firewall({
         "rules": ["kaputt", None, {"name": "r", "action": "allow", "source": "any",
                                    "destination": "any", "service": "any"}],
@@ -828,7 +828,7 @@ def test_tls_expired_via_flag():
 
 def test_tls_expiring_soon():
     findings = analyze_tls({"host": "a.de", "certificate": {"days_until_expiry": 10}})
-    assert any("laeuft in 10 Tagen ab" in f.title and f.severity is Severity.MITTEL
+    assert any("läuft in 10 Tagen ab" in f.title and f.severity is Severity.MITTEL
                for f in findings)
 
 
@@ -856,12 +856,12 @@ def test_tls_weak_signature():
 def test_tls_short_rsa_key():
     findings = analyze_tls({"host": "a.de", "certificate": {
         "days_until_expiry": 100, "key_type": "RSA", "key_bits": 1024}})
-    assert any("zu kurzem Schluessel" in f.title and f.severity is Severity.HOCH
+    assert any("zu kurzem Schlüssel" in f.title and f.severity is Severity.HOCH
                for f in findings)
 
 
 def test_tls_ec_key_not_flagged():
-    # EC-Schluessel mit wenig Bits sind gleichwertig -> kein Krypto-Befund.
+    # EC-Schlüssel mit wenig Bits sind gleichwertig -> kein Krypto-Befund.
     findings = analyze_tls({"host": "a.de", "certificate": {
         "days_until_expiry": 100, "key_type": "EC", "key_bits": 256}})
     assert findings == []
@@ -909,7 +909,7 @@ def test_tls_endpoints_list_and_multiple():
 def test_tls_invalid_input_and_robustness():
     assert analyze_tls("nope") == []
     assert analyze_tls({}) == []
-    # certificate kein Dict -> uebersprungen; Nicht-Dict-Endpunkte robust.
+    # certificate kein Dict -> übersprungen; Nicht-Dict-Endpunkte robust.
     findings = analyze_tls({"endpoints": ["kaputt", None,
                                           {"host": "a.de", "certificate": "x",
                                            "protocols": ["SSLv3"]}]})
@@ -954,7 +954,7 @@ def test_backup_restore_never_tested():
 def test_backup_restore_test_overdue():
     findings = analyze_backup({"backups": [
         {"name": "fs", "restore_tested": True, "last_restore_test_days": 400}]})
-    assert any("ueberfaellig" in f.title and f.severity is Severity.HOCH
+    assert any("überfällig" in f.title and f.severity is Severity.HOCH
                for f in findings)
 
 
@@ -979,7 +979,7 @@ def test_backup_console_without_mfa():
 
 def test_backup_not_encrypted():
     findings = analyze_backup({"backups": [{"name": "fs", "encrypted": False}]})
-    assert any("nicht verschluesselt" in f.title and f.severity is Severity.MITTEL
+    assert any("nicht verschlüsselt" in f.title and f.severity is Severity.MITTEL
                for f in findings)
 
 
@@ -1159,7 +1159,7 @@ def test_dns_missing_caa():
     findings = analyze_dns({"domain": "a.de", "dnssec": True, "caa": []})
     titles = " ".join(f.title for f in findings)
     assert "Keine CAA-Records" in titles
-    # Leere Strings zaehlen nicht als CAA.
+    # Leere Strings zählen nicht als CAA.
     only_blank = analyze_dns({"domain": "a.de", "dnssec": True, "caa": ["", "  "]})
     assert any("Keine CAA-Records" in f.title for f in only_blank)
 
@@ -1187,7 +1187,7 @@ def test_dns_dangling_cnames():
         "domain": "a.de", "dnssec": True, "caa": ["0 issue \"x\""],
         "dangling_cnames": ["old.a.de -> bucket.s3.amazonaws.com", "", "  "]})
     dangling = [f for f in findings if "Dangling CNAME" in f.title]
-    assert len(dangling) == 1  # leere Eintraege uebersprungen
+    assert len(dangling) == 1  # leere Einträge übersprungen
     assert dangling[0].severity is Severity.HOCH
 
 
@@ -1247,7 +1247,7 @@ def test_db_engine_derived_from_port():
 
 
 def test_db_invalid_port_and_no_engine():
-    # Kaputter Port -> keine Beschriftung ueber Port, Fallback-Name.
+    # Kaputter Port -> keine Beschriftung über Port, Fallback-Name.
     findings = analyze_database({"databases": [
         {"port": "abc", "public": True, "auth_required": True, "tls": True}]})
     assert any(f.location == "Datenbank" for f in findings)
@@ -1298,10 +1298,10 @@ def test_container_docker_socket():
 
 
 def test_container_dangerous_caps_dedup_and_prefix():
-    # CAP_-Praefix wird entfernt, harmlose Caps ignoriert, gefaehrliche gemeldet.
+    # CAP_-Praefix wird entfernt, harmlose Caps ignoriert, gefährliche gemeldet.
     findings = analyze_container(_clean_container(
         cap_add=["CAP_SYS_ADMIN", "SYS_ADMIN", "CHOWN", ""]))
-    caps = [f for f in findings if "Gefaehrliche Capabilities" in f.title]
+    caps = [f for f in findings if "Gefährliche Capabilities" in f.title]
     assert len(caps) == 1 and "SYS_ADMIN" in caps[0].title
     assert caps[0].severity is Severity.HOCH
 
@@ -1320,9 +1320,9 @@ def test_container_host_network():
 def test_container_runs_as_root_variants():
     for user in ["root", "", "0", "0:0"]:
         findings = analyze_container(_clean_container(user=user))
-        assert any("laeuft als root" in f.title for f in findings), user
+        assert any("läuft als root" in f.title for f in findings), user
     # Nicht-root wird nicht gemeldet.
-    assert not any("laeuft als root" in f.title
+    assert not any("läuft als root" in f.title
                    for f in analyze_container(_clean_container(user="1000")))
 
 
@@ -1354,3 +1354,57 @@ def test_container_invalid_input():
     assert analyze_container("nope") == []
     assert analyze_container({"containers": "x"}) == []
     assert analyze_container({"containers": [None, 7]}) == []
+
+
+# ==================== Härtung: robuste Analyzer-Eingaben ====================
+
+def test_ad_privileged_groups_wrong_type_degrades():
+    # privileged_groups als Liste (statt Dict) darf nicht crashen.
+    assert analyze_ad({"privileged_groups": ["Domain Admins"]}) == []
+
+
+def test_ad_bloodhound_skips_non_dict_entries_and_props():
+    out = analyze_ad({"data": [
+        "junk",                              # Nicht-Dict-Eintrag -> übersprungen
+        {"Properties": ["x"]},               # Properties keine Dict -> übersprungen
+        {"Properties": {"name": "svc", "admincount": True,
+                        "dontreqpreauth": True}},
+    ]})
+    assert any("AS-REP" in f.title for f in out)
+
+
+def test_entra_roles_wrong_type_degrades():
+    # roles als Liste (statt Dict) darf nicht crashen und keinen Rollen-Befund liefern.
+    out = analyze_entra({"roles": ["Global Administrator"]})
+    assert isinstance(out, list)
+    assert not any("Zu viele Konten" in f.title for f in out)
+
+
+def test_entra_ca_policies_wrong_type_no_crash():
+    out = analyze_entra({"conditional_access_policies": {"p1": {"state": "enabled"}}})
+    assert isinstance(out, list)
+
+
+def test_aws_admin_policy_as_string_detected():
+    out = analyze_aws({"users": [{"name": "u", "console_access": False,
+                                  "attached_policies": "AdministratorAccess"}]})
+    assert any("Überprivilegierter IAM-User" in f.title for f in out)
+
+
+def test_aws_sg_ports_wrong_type_no_garbage():
+    assert analyze_aws({"security_groups": [{"name": "db", "open_to_world_ports": 3306}]}) == []
+    assert analyze_aws({"security_groups": [{"name": "db", "open_to_world_ports": "3306"}]}) == []
+
+
+def test_azure_ports_and_rbac_wrong_type_no_crash():
+    assert analyze_azure({"network_security_groups": [
+        {"name": "n", "open_to_internet_ports": 3389}]}) == []
+    assert analyze_azure({"role_assignments": 5}) == []
+
+
+def test_dmarc_sp_none_not_flagged_as_monitoring():
+    out = analyze_email_security({
+        "domain": "x.de", "spf": "v=spf1 -all",
+        "dmarc": "v=DMARC1; p=reject; sp=none; rua=mailto:a@x.de",
+        "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
+    assert not any("Monitoring-Modus" in f.title for f in out)

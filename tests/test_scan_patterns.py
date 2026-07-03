@@ -1,6 +1,6 @@
-"""Praezisionstests je Erkennungsmuster: richtige Kategorie/CWE, keine Fehlalarme.
+"""Präzisionstests je Erkennungsmuster: richtige Kategorie/CWE, keine Fehlalarme.
 
-Sichert die Scan-Heuristik gegen Regressionen ab - fuer jede Schwachstellen-
+Sichert die Scan-Heuristik gegen Regressionen ab - für jede Schwachstellen-
 klasse ein positives Beispiel und am Ende eine Falsch-Positiv-Kontrolle.
 """
 
@@ -64,7 +64,7 @@ def test_clean_code_no_false_positives(tmp_path):
     clean = """
 import math
 
-def flaeche(radius: float) -> float:
+def fläche(radius: float) -> float:
     return math.pi * radius * radius
 
 class Rechnung:

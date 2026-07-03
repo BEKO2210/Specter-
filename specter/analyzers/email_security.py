@@ -1,9 +1,9 @@
 """Defensive E-Mail-Security-Analyse (SPF, DKIM, DMARC) aus DNS-Export.
 
-Wertet einen lokalen JSON-Export der relevanten DNS-Eintraege einer Domain aus
+Wertet einen lokalen JSON-Export der relevanten DNS-Einträge einer Domain aus
 und leitet typische E-Mail-Spoofing-/Phishing-Risiken ab - ohne jede
 Live-Abfrage, ohne Versand, ohne Ausnutzung. Diese drei Mechanismen entscheiden,
-ob Angreifer im Namen der Firma E-Mails faelschen koennen (BEC/CEO-Fraud) - im
+ob Angreifer im Namen der Firma E-Mails fälschen können (BEC/CEO-Fraud) - im
 Mittelstand und bei Versicherern ein Haupteinfallstor.
 
 Erwartete Struktur (alle Felder optional):
@@ -18,22 +18,23 @@ Erwartete Struktur (alle Felder optional):
       "mx": ["aspmx.l.google.com"]
     }
 
-Fehlt ein Eintrag (Schluessel nicht vorhanden oder leer), gilt er als NICHT
-vorhanden - das ist der haeufigste und schwerste Befund.
+Fehlt ein Eintrag (Schlüssel nicht vorhanden oder leer), gilt er als NICHT
+vorhanden - das ist der häufigste und schwerste Befund.
 """
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from ..findings import Finding, Severity
 
-# SPF-Qualifier fuer "alles andere": -all (streng), ~all (soft), ?all/+all (schwach).
+# SPF-Qualifier für "alles andere": -all (streng), ~all (soft), ?all/+all (schwach).
 _SPF_SOFT = "~all"
 _SPF_STRICT = "-all"
 _SPF_WEAK = ("?all", "+all")
 MIN_DKIM_BITS = 1024
-WEAK_DKIM_BITS = 2048  # < 2048 gilt heute als nicht mehr zeitgemaess
+WEAK_DKIM_BITS = 2048  # < 2048 gilt heute als nicht mehr zeitgemäß
 
 
 def _mk(title, category, severity, asset, evidence, *, cwe="", owner="E-Mail-/IT-Team") -> Finding:
@@ -50,9 +51,9 @@ def _analyze_spf(spf: Any, domain: str) -> list[Finding]:
     value = str(spf or "").strip().lower()
     if not value:
         out.append(_mk(
-            f"Kein SPF-Eintrag fuer {domain}",
+            f"Kein SPF-Eintrag für {domain}",
             "email_security", Severity.HOCH, loc,
-            "SPF fehlt - beliebige Absender koennen im Namen der Domain mailen",
+            "SPF fehlt - beliebige Absender können im Namen der Domain mailen",
             cwe="CWE-290",
         ))
         return out
@@ -64,7 +65,7 @@ def _analyze_spf(spf: Any, domain: str) -> list[Finding]:
         ))
     elif _SPF_STRICT not in value and _SPF_SOFT not in value:
         out.append(_mk(
-            f"SPF ohne abschliessenden all-Mechanismus: {domain}",
+            f"SPF ohne abschließenden all-Mechanismus: {domain}",
             "email_security", Severity.MITTEL, loc,
             f"SPF={spf} - kein -all/~all, Wirkung unklar", cwe="CWE-290",
         ))
@@ -77,13 +78,13 @@ def _analyze_dmarc(dmarc: Any, domain: str) -> list[Finding]:
     value = str(dmarc or "").strip().lower()
     if not value:
         out.append(_mk(
-            f"Kein DMARC-Eintrag fuer {domain}",
+            f"Kein DMARC-Eintrag für {domain}",
             "email_security", Severity.HOCH, loc,
-            "DMARC fehlt - SPF/DKIM werden nicht durchgesetzt, Spoofing moeglich",
+            "DMARC fehlt - SPF/DKIM werden nicht durchgesetzt, Spoofing möglich",
             cwe="CWE-290",
         ))
         return out
-    if "p=none" in value:
+    if re.search(r"(?:^|;)\s*p\s*=\s*none\b", value):
         out.append(_mk(
             f"DMARC nur im Monitoring-Modus (p=none): {domain}",
             "email_security", Severity.MITTEL, loc,
@@ -94,7 +95,7 @@ def _analyze_dmarc(dmarc: Any, domain: str) -> list[Finding]:
         out.append(_mk(
             f"DMARC ohne Auswertungs-Reports (kein rua): {domain}",
             "email_security", Severity.NIEDRIG, loc,
-            f"DMARC={dmarc} - ohne rua-Adresse keine Sichtbarkeit ueber Missbrauch",
+            f"DMARC={dmarc} - ohne rua-Adresse keine Sichtbarkeit über Missbrauch",
         ))
     return out
 
@@ -106,7 +107,7 @@ def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
     present = [d for d in selectors if d.get("present", True)]
     if not present:
         out.append(_mk(
-            f"Kein DKIM-Schluessel fuer {domain}",
+            f"Kein DKIM-Schlüssel für {domain}",
             "email_security", Severity.MITTEL, loc,
             "DKIM fehlt - Nachrichten sind nicht kryptografisch signiert",
             cwe="CWE-347",
@@ -120,14 +121,14 @@ def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
             bits = 0
         if 0 < bits < MIN_DKIM_BITS:
             out.append(_mk(
-                f"DKIM-Schluessel zu schwach ({bits} Bit, Selector {selector}): {domain}",
+                f"DKIM-Schlüssel zu schwach ({bits} Bit, Selector {selector}): {domain}",
                 "crypto_weakness", Severity.HOCH, loc,
                 f"key_bits={bits} - mindestens {MIN_DKIM_BITS}, empfohlen {WEAK_DKIM_BITS}",
                 cwe="CWE-326",
             ))
         elif MIN_DKIM_BITS <= bits < WEAK_DKIM_BITS:
             out.append(_mk(
-                f"DKIM-Schluessel nicht mehr zeitgemaess ({bits} Bit, Selector {selector}): {domain}",
+                f"DKIM-Schlüssel nicht mehr zeitgemäß ({bits} Bit, Selector {selector}): {domain}",
                 "crypto_weakness", Severity.NIEDRIG, loc,
                 f"key_bits={bits} - empfohlen sind {WEAK_DKIM_BITS} Bit", cwe="CWE-326",
             ))
@@ -135,7 +136,7 @@ def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
 
 
 def analyze_email_security(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle E-Mail-Security-Pruefungen aus und liefert die Findings."""
+    """Führt alle E-Mail-Security-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     domain = str(data.get("domain", "Domain"))

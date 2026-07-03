@@ -125,7 +125,7 @@ def test_build_tls_export_feeds_analyzer():
     findings = analyze_tls(export)
     titles = " ".join(f.title for f in findings)
     assert "abgelaufen" in titles
-    assert "zu kurzem Schluessel" in titles
+    assert "zu kurzem Schlüssel" in titles
     assert "Selbstsigniert" in titles
 
 

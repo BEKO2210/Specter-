@@ -23,10 +23,10 @@ class RecordFindingTool:
         return {
             "name": self.name,
             "description": (
-                "Erfasst eine bestaetigte Schwachstelle als strukturiertes "
+                "Erfasst eine bestätigte Schwachstelle als strukturiertes "
                 "Finding (Schweregrad, Kategorie, betroffenes Asset, Evidenz, "
-                "CWE, Owner, Gegenmassnahme). Nutze dies fuer jede belegte "
-                "Schwachstelle - es ist die Grundlage fuer Angriffspfad-"
+                "CWE, Owner, Gegenmaßnahme). Nutze dies für jede belegte "
+                "Schwachstelle - es ist die Grundlage für Angriffspfad-"
                 "Korrelation und Bericht."
             ),
             "input_schema": {
@@ -49,7 +49,7 @@ class RecordFindingTool:
                     "evidence": {"type": "string", "description": "Konkreter Beleg."},
                     "cwe": {"type": "string", "description": "z. B. CWE-89."},
                     "owner": {"type": "string", "description": "Verantwortliches Team/Person."},
-                    "remediation": {"type": "string", "description": "Empfohlene Gegenmassnahme."},
+                    "remediation": {"type": "string", "description": "Empfohlene Gegenmaßnahme."},
                 },
                 "required": ["title", "category", "severity", "asset"],
             },
@@ -68,10 +68,10 @@ class RecordFindingTool:
                 owner=str(arguments.get("owner", "")).strip(),
                 remediation=str(arguments.get("remediation", "")).strip(),
                 source="agent",
-                status="bestaetigt",
+                status="bestätigt",
             )
         except (KeyError, ValueError) as exc:
-            return ToolResult(f"Ungueltiges Finding: {exc}", is_error=True)
+            return ToolResult(f"Ungültiges Finding: {exc}", is_error=True)
 
         stored, is_new = self.state.findings.add(finding)
         self.audit.record(

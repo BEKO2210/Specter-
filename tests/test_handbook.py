@@ -1,4 +1,4 @@
-"""Tests fuer das Lern-/Bedien-Handbuch (HTML-Erzeugung)."""
+"""Tests für das Lern-/Bedien-Handbuch (HTML-Erzeugung)."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def test_handbook_html_default_company_and_date_branch():
     # Ohne generated_at wird das aktuelle Datum verwendet (kein Crash).
     html = build_handbook_html()
     assert "Ihr Unternehmen" in html
-    assert "Handbuch fuer" in html
+    assert "Handbuch für" in html
 
 
 def test_write_handbook_creates_file(tmp_path):

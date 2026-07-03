@@ -1,4 +1,4 @@
-"""Tests fuer die neuen Werkzeuge: analyze_ad, analyze_exchange, run_scanner."""
+"""Tests für die neuen Werkzeuge: analyze_ad, analyze_exchange, run_scanner."""
 
 from __future__ import annotations
 
@@ -96,7 +96,7 @@ def test_analyze_ad_too_large(tmp_path):
     tool, _ = _ad_tool(cfg, tmp_path)
     path = _write_json(tmp_path, "big.json", {"domain": "x" * 100})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_ad_no_findings(tmp_path):
@@ -154,7 +154,7 @@ def test_analyze_exchange_too_large(tmp_path):
     tool = AnalyzeExchangeTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", {"host": "x" * 50})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_exchange_no_findings(tmp_path):
@@ -214,7 +214,7 @@ def test_analyze_entra_too_large(tmp_path):
     tool = AnalyzeEntraTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", {"tenant": "x" * 50})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_entra_no_findings(tmp_path):
@@ -275,7 +275,7 @@ def test_analyze_aws_too_large(tmp_path):
     tool = AnalyzeAwsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", {"account_id": "x" * 50})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_aws_no_findings(tmp_path):
@@ -335,7 +335,7 @@ def test_analyze_azure_too_large(tmp_path):
     tool = AnalyzeAzureTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", {"subscription_id": "x" * 50})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_azure_no_findings(tmp_path):
@@ -395,7 +395,7 @@ def test_analyze_email_security_too_large(tmp_path):
     tool = AnalyzeEmailSecurityTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", {"domain": "x" * 50})
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_email_security_no_findings(tmp_path):
@@ -427,7 +427,7 @@ def test_analyze_dependencies_success(tmp_path):
     tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "deps.json", _dep_export())
     r = tool.run({"path": path})
-    assert not r.is_error and "SCA-/Abhaengigkeits-Analyse" in r.content
+    assert not r.is_error and "SCA-/Abhängigkeits-Analyse" in r.content
     assert len(state.findings) == 1
 
 
@@ -463,7 +463,7 @@ def test_analyze_dependencies_too_large(tmp_path):
     tool = AnalyzeDependenciesTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _dep_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_dependencies_no_findings(tmp_path):
@@ -526,7 +526,7 @@ def test_analyze_firewall_too_large(tmp_path):
     tool = AnalyzeFirewallTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _fw_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_firewall_no_findings(tmp_path):
@@ -589,7 +589,7 @@ def test_analyze_tls_too_large(tmp_path):
     tool = AnalyzeTlsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _tls_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_tls_no_findings(tmp_path):
@@ -652,7 +652,7 @@ def test_analyze_backup_too_large(tmp_path):
     tool = AnalyzeBackupTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _backup_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_backup_no_findings(tmp_path):
@@ -716,7 +716,7 @@ def test_analyze_http_headers_too_large(tmp_path):
     tool = AnalyzeHttpHeadersTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _hdr_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_http_headers_no_findings(tmp_path):
@@ -779,7 +779,7 @@ def test_analyze_dns_too_large(tmp_path):
     tool = AnalyzeDnsTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _dns_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_dns_no_findings(tmp_path):
@@ -842,7 +842,7 @@ def test_analyze_database_too_large(tmp_path):
     tool = AnalyzeDatabaseTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _db_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_database_no_findings(tmp_path):
@@ -906,7 +906,7 @@ def test_analyze_container_too_large(tmp_path):
     tool = AnalyzeContainerTool(cfg, SafetyPolicy(cfg), AuditLog(tmp_path / "a"), state)
     path = _write_json(tmp_path, "big.json", _container_export())
     r = tool.run({"path": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_analyze_container_no_findings(tmp_path):
@@ -992,7 +992,7 @@ def test_run_scanner_truncated_output_note(tmp_path):
     fake = subprocess.CompletedProcess([], 0, stdout=big, stderr="")
     with patch("subprocess.run", return_value=fake):
         r = tool.run({"scanner": "nmap", "target": "127.0.0.1"})
-    assert "gekuerzt" in r.content
+    assert "gekürzt" in r.content
     assert state.scanner_runs[0]["truncated"] is True
 
 

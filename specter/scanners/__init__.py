@@ -1,9 +1,9 @@
-"""Sichere Wrapper fuer aktive Scanner (nmap, nikto).
+"""Sichere Wrapper für aktive Scanner (nmap, nikto).
 
-Jeder Scanner laeuft nur, wenn er in scope.yaml ausdruecklich freigegeben ist,
-gegen ein Ziel im Netzwerk-Scope, mit strikt gepruefter Argumentliste
-(Allowlist + Blocklist gefaehrlicher Flags), ohne Shell, mit Timeout und
-begrenzter Ausgabe. Ergebnisse werden strukturiert als Findings uebernommen.
+Jeder Scanner läuft nur, wenn er in scope.yaml ausdrücklich freigegeben ist,
+gegen ein Ziel im Netzwerk-Scope, mit strikt geprüfter Argumentliste
+(Allowlist + Blocklist gefährlicher Flags), ohne Shell, mit Timeout und
+begrenzter Ausgabe. Ergebnisse werden strukturiert als Findings übernommen.
 """
 
 from .base import Scanner, ScannerError, ScannerResult

@@ -1,4 +1,4 @@
-"""Tests fuer den Angebots-/Preis-One-Pager."""
+"""Tests für den Angebots-/Preis-One-Pager."""
 
 from __future__ import annotations
 

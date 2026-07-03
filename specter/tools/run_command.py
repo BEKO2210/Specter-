@@ -1,10 +1,10 @@
-"""Tool: Terminal-Befehl ausfuehren (Netzwerk-Scan etc.) - die "Haende".
+"""Tool: Terminal-Befehl ausführen (Netzwerk-Scan etc.) - die "Hände".
 
 Streng abgesichert:
   * Nur Programme aus der Allowlist (commands.allowed_binaries).
   * Nur Ziele im Netzwerk-Scope (network.allowed_targets).
   * Kein shell=True; keine Shell-Metazeichen; hartes Timeout.
-  * Optional Human-in-the-loop-Bestaetigung (runtime.require_approval).
+  * Optional Human-in-the-loop-Bestätigung (runtime.require_approval).
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ from ..config import Config
 from ..safety import SafetyPolicy, ScopeViolation
 from .base import ToolResult
 
-# Callback fuer manuelle Freigabe: (befehl) -> bool. Standard: automatisch True,
-# wird von der CLI ueberschrieben, wenn require_approval aktiv ist.
+# Callback für manuelle Freigabe: (befehl) -> bool. Standard: automatisch True,
+# wird von der CLI überschrieben, wenn require_approval aktiv ist.
 ApprovalFn = Callable[[str], bool]
 
 
@@ -43,11 +43,11 @@ class RunCommandTool:
         return {
             "name": self.name,
             "description": (
-                "Fuehrt EINEN erlaubten Kommandozeilen-Befehl aus (z. B. einen "
-                "Netzwerk-Scan mit nmap) und gibt stdout/stderr zurueck. "
+                "Führt EINEN erlaubten Kommandozeilen-Befehl aus (z. B. einen "
+                "Netzwerk-Scan mit nmap) und gibt stdout/stderr zurück. "
                 "Nur Programme aus der Allowlist und nur gegen freigegebene "
-                "Ziele. Keine Pipes, keine Verkettung. Nutze dies fuer aktive, "
-                "aber autorisierte Pruefungen."
+                "Ziele. Keine Pipes, keine Verkettung. Nutze dies für aktive, "
+                "aber autorisierte Prüfungen."
             ),
             "input_schema": {
                 "type": "object",
@@ -55,12 +55,12 @@ class RunCommandTool:
                     "command": {
                         "type": "string",
                         "description": (
-                            "Vollstaendiger Befehl, z. B. 'nmap -sV 127.0.0.1'."
+                            "Vollständiger Befehl, z. B. 'nmap -sV 127.0.0.1'."
                         ),
                     },
                     "rationale": {
                         "type": "string",
-                        "description": "Kurze Begruendung, warum dieser Schritt noetig ist.",
+                        "description": "Kurze Begründung, warum dieser Schritt nötig ist.",
                     },
                 },
                 "required": ["command"],
@@ -101,7 +101,7 @@ class RunCommandTool:
         except subprocess.TimeoutExpired:
             self.audit.record("run_command.timeout", command=command)
             return ToolResult(
-                f"Zeitlimit ({self.config.command_timeout}s) ueberschritten.",
+                f"Zeitlimit ({self.config.command_timeout}s) überschritten.",
                 is_error=True,
             )
 

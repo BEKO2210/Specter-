@@ -1,8 +1,8 @@
-"""Tests fuer die Agenten-Schleife mit einem simulierten LLM (kein API-Key noetig).
+"""Tests für die Agenten-Schleife mit einem simulierten LLM (kein API-Key nötig).
 
 Bildet die echten Anthropic-Response-Objekte nach (content-Bloecke mit .type,
-.text bzw. .id/.name/.input und .stop_reason), damit die vollstaendige
-5-Phasen-Schleife inklusive Tool-Ausfuehrung getestet werden kann.
+.text bzw. .id/.name/.input und .stop_reason), damit die vollständige
+5-Phasen-Schleife inklusive Tool-Ausführung getestet werden kann.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def _resp(blocks, stop_reason):
 
 
 class FakeLLM:
-    """Gibt eine vorgegebene Sequenz von Antworten zurueck."""
+    """Gibt eine vorgegebene Sequenz von Antworten zurück."""
 
     def __init__(self, responses):
         self._responses = list(responses)
@@ -69,10 +69,10 @@ def test_agent_runs_full_pipeline(config, tmp_path, targets_dir, monkeypatch):
         # 5) Bericht
         _resp([_tool("t5", "generate_report", {"include_pr_drafts": True})], "tool_use"),
         # Abschluss
-        _resp([_text("Pruefung fertig. ABGESCHLOSSEN")], "end_turn"),
+        _resp([_text("Prüfung fertig. ABGESCHLOSSEN")], "end_turn"),
     ])
     agent = _agent(config, llm, tmp_path, state)
-    summary = agent.run("Pruefe die Anwendung.")
+    summary = agent.run("Prüfe die Anwendung.")
 
     assert "ABGESCHLOSSEN" in summary
     assert len(state.assets) >= 1
@@ -101,7 +101,7 @@ def test_agent_handles_unknown_tool(config, tmp_path):
 
 def test_agent_respects_max_iterations(config, tmp_path, targets_dir):
     config.max_iterations = 3
-    # Immer wieder ein Tool aufrufen, nie abschliessen -> Grenze greift.
+    # Immer wieder ein Tool aufrufen, nie abschließen -> Grenze greift.
     def endless():
         while True:
             yield _resp([_tool("t", "register_asset",

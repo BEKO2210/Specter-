@@ -31,12 +31,12 @@ class AnalyzeAzureTool:
             "description": (
                 "Analysiert einen bereitgestellten Azure-Export (JSON) rein "
                 "defensiv und erfasst typische Cloud-Risiken als Findings: "
-                "oeffentliche/unverschluesselte Storage-Accounts, schwache "
+                "öffentliche/unverschlüsselte Storage-Accounts, schwache "
                 "TLS-Mindestversion, NSGs mit 0.0.0.0/0 auf sensiblen Ports, "
-                "VMs mit Public IP oder veraltetem OS, oeffentlich erreichbare "
+                "VMs mit Public IP oder veraltetem OS, öffentlich erreichbare "
                 "Key Vaults und Azure-SQL-Server ohne TDE, zu viele "
                 "Subscription-Owner. Keine Live-Verbindung zur Subscription - "
-                "nur die lokale Datei im Scope. Identitaets-/M365-Themen deckt "
+                "nur die lokale Datei im Scope. Identitäts-/M365-Themen deckt "
                 "analyze_entra ab."
             ),
             "input_schema": {
@@ -58,7 +58,7 @@ class AnalyzeAzureTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

@@ -2,12 +2,12 @@
 
 Wertet einen lokalen JSON-Export einer Firewall-/VPN-Konfiguration aus
 (Regelwerk, VPN-Tunnel, Management-Ebene) und leitet typische Perimeter-Risiken
-ab - ohne jede Live-Verbindung zum Geraet, ohne Credential-Nutzung, ohne
+ab - ohne jede Live-Verbindung zum Gerät, ohne Credential-Nutzung, ohne
 Ausnutzung.
 
 Im Mittelstand ein Haupteinfallstor: offene RDP-/SSH-Ports ins Internet,
 "Any-Any"-Freigaben, VPN ohne MFA oder mit veralteter Kryptographie/IKEv1 und
-oeffentlich erreichbare Management-Interfaces.
+öffentlich erreichbare Management-Interfaces.
 
 Erwartete Struktur (alle Felder optional):
 
@@ -35,14 +35,14 @@ from ..findings import Finding, Severity
 
 # Werte, die "beliebig / aus dem Internet" bedeuten.
 _ANY = {"any", "*", "all", "0.0.0.0/0", "0.0.0.0", "::/0", ""}
-# Fernzugangs-Ports (fuer den Mittelstand besonders kritisch).
+# Fernzugangs-Ports (für den Mittelstand besonders kritisch).
 _REMOTE_PORTS = {22: "SSH", 3389: "RDP"}
-# Weitere sensible Dienste, die nicht offen ins Internet gehoeren.
+# Weitere sensible Dienste, die nicht offen ins Internet gehören.
 _SENSITIVE_PORTS = {
     23: "Telnet", 445: "SMB", 1433: "MSSQL", 3306: "MySQL",
     5432: "PostgreSQL", 5900: "VNC", 6379: "Redis", 27017: "MongoDB",
 }
-# Servicename -> Port (fuer Regeln ohne numerisches Port-Feld).
+# Servicename -> Port (für Regeln ohne numerisches Port-Feld).
 _SERVICE_PORTS = {
     "ssh": 22, "rdp": 3389, "telnet": 23, "smb": 445, "cifs": 445,
     "mssql": 1433, "mysql": 3306, "postgres": 5432, "postgresql": 5432,
@@ -97,7 +97,7 @@ def _analyze_rule(rule: dict[str, Any], device: str) -> list[Finding]:
             f"{_REMOTE_PORTS[port]} aus dem Internet erreichbar: {name}",
             "remote_access", Severity.HOCH, loc,
             f"source={src} -> Port {port} ({_REMOTE_PORTS[port]}) offen - "
-            "Fernzugang gehoert hinter VPN/MFA", location=loc, cwe="CWE-284",
+            "Fernzugang gehört hinter VPN/MFA", location=loc, cwe="CWE-284",
         )]
     if port in _SENSITIVE_PORTS:
         return [_mk(
@@ -139,7 +139,7 @@ def _analyze_vpn(vpn: dict[str, Any], device: str) -> list[Finding]:
         ))
     if vpn.get("eol") or vpn.get("outdated"):
         out.append(_mk(
-            f"Veraltetes/abgekuendigtes VPN-Gateway: {name}", "outdated_component",
+            f"Veraltetes/abgekündigtes VPN-Gateway: {name}", "outdated_component",
             Severity.HOCH, loc, "eol/outdated=true - kein Sicherheits-Support mehr",
             location=loc, cwe="CWE-1104",
         ))
@@ -156,11 +156,11 @@ def _analyze_management(mgmt: dict[str, Any], device: str) -> list[Finding]:
         "Management-Interface aus dem Internet erreichbar",
         "exposed_service", Severity.HOCH, loc,
         f"public=true, exposed={exposed or 'unbekannt'} - Verwaltungsebene "
-        "gehoert nur ins interne/Out-of-Band-Netz", location=loc, cwe="CWE-284",
+        "gehört nur ins interne/Out-of-Band-Netz", location=loc, cwe="CWE-284",
     ))
     if "ssh" in exposed:
         out.append(_mk(
-            "SSH-Fernzugang der Firewall oeffentlich erreichbar",
+            "SSH-Fernzugang der Firewall öffentlich erreichbar",
             "remote_access", Severity.HOCH, loc,
             "ssh in exposed_interfaces bei public=true", location=loc, cwe="CWE-284",
         ))
@@ -168,7 +168,7 @@ def _analyze_management(mgmt: dict[str, Any], device: str) -> list[Finding]:
 
 
 def analyze_firewall(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Firewall-/VPN-Pruefungen aus und liefert die Findings."""
+    """Führt alle Firewall-/VPN-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     device = str(data.get("device", "Firewall"))

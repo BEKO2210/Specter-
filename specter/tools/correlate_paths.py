@@ -24,10 +24,10 @@ class CorrelatePathsTool:
         return {
             "name": self.name,
             "description": (
-                "Korreliert die bisher erfassten Findings ueber den Asset-Graph "
+                "Korreliert die bisher erfassten Findings über den Asset-Graph "
                 "zu Angriffspfaden ('toxische Kombinationen'). Ruft die "
                 "regelbasierte Engine auf und liefert die gefundenen Pfade "
-                "zurueck. Sinnvoll, nachdem mehrere Findings erfasst wurden."
+                "zurück. Sinnvoll, nachdem mehrere Findings erfasst wurden."
             ),
             "input_schema": {
                 "type": "object",
@@ -54,7 +54,7 @@ class CorrelatePathsTool:
 
         if not paths:
             return ToolResult(
-                "Keine Angriffspfade korreliert. Mehr/andere Findings noetig "
+                "Keine Angriffspfade korreliert. Mehr/andere Findings nötig "
                 "(z. B. exponierter Dienst + Secret, Injection + Datenspeicher)."
             )
         lines = [f"{len(paths)} Angriffspfad(e) korreliert:"]

@@ -1,9 +1,9 @@
 """Tool: Code auf typische Sicherheitsmuster durchsuchen.
 
-Statische, regelbasierte Vorfilterung (kein Ersatz fuer ein echtes SAST, aber
+Statische, regelbasierte Vorfilterung (kein Ersatz für ein echtes SAST, aber
 ein schneller Einstieg). Findet Kandidaten und legt sie - wie bei Esprit - als
 strukturierte Findings automatisch im Store ab. Das Modell verifiziert und
-ergaenzt sie anschliessend.
+ergänzt sie anschließend.
 """
 
 from __future__ import annotations
@@ -34,21 +34,21 @@ class Pattern:
 PATTERNS: list[Pattern] = [
     Pattern(
         re.compile(r"""(?i)(password|passwd|pwd|secret|api[_-]?key|token)\s*[:=]\s*['"][^'"]{3,}['"]"""),
-        "Moeglicherweise fest kodiertes Secret/Passwort", Severity.HOCH,
+        "Möglicherweise fest kodiertes Secret/Passwort", Severity.HOCH,
         "secret_exposure", "CWE-798"),
     Pattern(
         re.compile(r"(?i)aws_secret_access_key\s*[:=]"),
         "AWS-Secret im Klartext", Severity.HOCH, "secret_exposure", "CWE-798"),
     Pattern(
-        # Unquotierte Secrets in .env/Config-Dateien (haeufig im Mittelstand).
+        # Unquotierte Secrets in .env/Config-Dateien (häufig im Mittelstand).
         # Wert beginnt NICHT mit Anführungszeichen (sonst greift das quotierte
-        # Muster) und enthaelt keine Klammer (kein Funktionsaufruf).
+        # Muster) und enthält keine Klammer (kein Funktionsaufruf).
         re.compile(r"""(?i)(password|passwd|secret|api[_-]?key|access[_-]?key|jwt[_-]?secret|client[_-]?secret|token)\s*[:=]\s*[A-Za-z0-9._+\-!@#$%^&*/]{6,}"""),
-        "Moeglicherweise fest kodiertes Secret (unquotiert)", Severity.HOCH,
+        "Möglicherweise fest kodiertes Secret (unquotiert)", Severity.HOCH,
         "secret_exposure", "CWE-798"),
     Pattern(
         re.compile(r"\beval\s*\(|\bexec\s*\("),
-        "Dynamische Codeausfuehrung (eval/exec)", Severity.HOCH,
+        "Dynamische Codeausführung (eval/exec)", Severity.HOCH,
         "injection", "CWE-95"),
     Pattern(
         re.compile(r"subprocess\.(call|run|Popen)\([^)]*shell\s*=\s*True"),
@@ -56,7 +56,7 @@ PATTERNS: list[Pattern] = [
         "injection", "CWE-78"),
     Pattern(
         re.compile(r"""(?i)(SELECT|INSERT|UPDATE|DELETE)\b.*(\+|%|\.format\(|f['"])"""),
-        "Moegliche SQL-Injection (String-Verkettung in Query)", Severity.HOCH,
+        "Mögliche SQL-Injection (String-Verkettung in Query)", Severity.HOCH,
         "injection", "CWE-89"),
     Pattern(
         re.compile(r"\bmd5\s*\(|\bsha1\s*\(|hashlib\.(md5|sha1)\b"),
@@ -64,7 +64,7 @@ PATTERNS: list[Pattern] = [
         "crypto_weakness", "CWE-327"),
     Pattern(
         re.compile(r"verify\s*=\s*False|CERT_NONE|InsecureRequestWarning"),
-        "TLS-Zertifikatspruefung deaktiviert", Severity.MITTEL,
+        "TLS-Zertifikatsprüfung deaktiviert", Severity.MITTEL,
         "transport_security", "CWE-295"),
     Pattern(
         re.compile(r"(?i)pickle\.loads?\(|yaml\.load\((?!.*Loader)"),
@@ -85,7 +85,7 @@ PATTERNS: list[Pattern] = [
         "personal_data", "CWE-359"),
     Pattern(
         re.compile(r"(?i)\b(log4j|struts2?|openssl[/-]?1\.0|jquery[/-]?1\.|angularjs|php[/-]?5\.|python[/-]?2\.7|tls\s*1\.0|sslv3)\b"),
-        "Hinweis auf veraltete Komponente (bekannte CVEs moeglich)", Severity.MITTEL,
+        "Hinweis auf veraltete Komponente (bekannte CVEs möglich)", Severity.MITTEL,
         "outdated_component", "CWE-1104"),
 ]
 
@@ -95,7 +95,7 @@ DEFAULT_EXTENSIONS = {
     ".txt", ".md", ".xml", ".json", ".properties", ".tf",
 }
 
-# Dateien ohne (aussagekraeftige) Endung, die dennoch gescannt werden.
+# Dateien ohne (aussagekräftige) Endung, die dennoch gescannt werden.
 SCANNED_FILENAMES = {
     "Dockerfile", "docker-compose.yml", "docker-compose.yaml",
     ".env", ".env.local", ".env.prod", "web.config", ".htpasswd",
@@ -125,10 +125,10 @@ class CodeScanTool:
             "description": (
                 "Durchsucht ein Verzeichnis (innerhalb des Datei-Scopes) rekursiv "
                 "nach typischen Sicherheitsmustern: fest kodierte Secrets, "
-                "eval/exec, shell=True, moegliche SQL-Injection, schwache Hashes, "
-                "deaktivierte TLS-Pruefung u. a. Fundstellen werden automatisch "
+                "eval/exec, shell=True, mögliche SQL-Injection, schwache Hashes, "
+                "deaktivierte TLS-Prüfung u. a. Fundstellen werden automatisch "
                 "als Findings (mit Kategorie, Schweregrad, CWE) erfasst. "
-                "Ergebnisse sind Kandidaten und muessen verifiziert werden."
+                "Ergebnisse sind Kandidaten und müssen verifiziert werden."
             ),
             "input_schema": {
                 "type": "object",
@@ -139,7 +139,7 @@ class CodeScanTool:
                     },
                     "max_results": {
                         "type": "integer",
-                        "description": "Obergrenze fuer Fundstellen (Standard 200).",
+                        "description": "Obergrenze für Fundstellen (Standard 200).",
                     },
                 },
                 "required": ["path"],
@@ -200,7 +200,7 @@ class CodeScanTool:
         )
         if not lines:
             return ToolResult(
-                f"Keine verdaechtigen Muster in {scanned} Datei(en) gefunden."
+                f"Keine verdächtigen Muster in {scanned} Datei(en) gefunden."
             )
         header = (
             f"{len(lines)} Fundstelle(n) in {scanned} Datei(en), "

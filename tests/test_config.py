@@ -1,4 +1,4 @@
-"""Tests fuer das Laden und Validieren der Scope-Datei."""
+"""Tests für das Laden und Validieren der Scope-Datei."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ engagement:
   authorization_ref: R
   valid_until: "kein-datum"
 """)
-    with pytest.raises(ScopeError, match="gueltiges Datum"):
+    with pytest.raises(ScopeError, match="gültiges Datum"):
         Config.load(p)
 
 

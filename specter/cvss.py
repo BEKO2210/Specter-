@@ -1,12 +1,12 @@
 """CVSS-Lite: ein deterministischer, numerischer Schweregrad-Score je Finding.
 
-Kunden erwarten oft einen CVSS-Zahlwert. Specter erhebt keine vollstaendigen
-CVSS-Vektoren (dafuer fehlt der Kontext), liefert aber einen nachvollziehbaren
+Kunden erwarten oft einen CVSS-Zahlwert. Specter erhebt keine vollständigen
+CVSS-Vektoren (dafür fehlt der Kontext), liefert aber einen nachvollziehbaren
 Basis-Score von 0.0 bis 10.0, abgeleitet aus dem Schweregrad und einer
-kategoriespezifischen Feinjustierung. Die Qualitaetsstufe folgt den Baendern
+kategoriespezifischen Feinjustierung. Die Qualitätsstufe folgt den Bändern
 von CVSS v3.1.
 
-WICHTIG: Dies ist eine transparente Naeherung ("CVSS-Lite"), kein offizieller
+WICHTIG: Dies ist eine transparente Näherung ("CVSS-Lite"), kein offizieller
 CVSS-Base-Score. Der Bericht weist das entsprechend aus.
 """
 
@@ -59,7 +59,7 @@ def cvss_score(category: str, severity: Severity) -> float:
 
 
 def cvss_rating(score: float) -> str:
-    """Qualitaetsstufe nach CVSS v3.1 (deutsche Bezeichnung)."""
+    """Qualitätsstufe nach CVSS v3.1 (deutsche Bezeichnung)."""
     if score <= 0.0:
         return "Keine"
     if score < 4.0:

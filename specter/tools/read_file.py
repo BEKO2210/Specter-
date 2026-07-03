@@ -25,8 +25,8 @@ class ReadFileTool:
             "name": self.name,
             "description": (
                 "Liest eine lokale Datei aus dem freigegebenen Zielverzeichnis "
-                "fuer White-Box-Code-Analyse. Gibt den Inhalt mit Zeilennummern "
-                "zurueck. Nur Pfade innerhalb von filesystem.allowed_paths sind "
+                "für White-Box-Code-Analyse. Gibt den Inhalt mit Zeilennummern "
+                "zurück. Nur Pfade innerhalb von filesystem.allowed_paths sind "
                 "erlaubt."
             ),
             "input_schema": {
@@ -57,7 +57,7 @@ class ReadFileTool:
         if size > self.config.max_file_bytes:
             self.audit.record("read_file.too_large", path=str(path), size=size)
             return ToolResult(
-                f"Datei zu gross ({size} Bytes > {self.config.max_file_bytes}).",
+                f"Datei zu groß ({size} Bytes > {self.config.max_file_bytes}).",
                 is_error=True,
             )
 

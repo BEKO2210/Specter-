@@ -1,4 +1,4 @@
-"""Tool: einen freigegebenen aktiven Scanner (nmap/nikto) sicher ausfuehren."""
+"""Tool: einen freigegebenen aktiven Scanner (nmap/nikto) sicher ausführen."""
 
 from __future__ import annotations
 
@@ -37,11 +37,11 @@ class RunScannerTool:
         return {
             "name": self.name,
             "description": (
-                "Fuehrt einen freigegebenen aktiven Scanner sicher aus "
+                "Führt einen freigegebenen aktiven Scanner sicher aus "
                 f"({', '.join(SCANNERS)}). Nur gegen Ziele im Netzwerk-Scope und "
                 "nur, wenn der Scanner in scope.yaml aktiviert ist. Argumente "
-                "werden streng geprueft; gefaehrliche Flags sind blockiert. "
-                "Ergebnisse werden als Findings uebernommen."
+                "werden streng geprüft; gefährliche Flags sind blockiert. "
+                "Ergebnisse werden als Findings übernommen."
             ),
             "input_schema": {
                 "type": "object",
@@ -56,9 +56,9 @@ class RunScannerTool:
                     "extra_args": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Zusaetzliche, streng gepruefte Flags (Allowlist).",
+                        "description": "Zusätzliche, streng geprüfte Flags (Allowlist).",
                     },
-                    "rationale": {"type": "string", "description": "Begruendung."},
+                    "rationale": {"type": "string", "description": "Begründung."},
                 },
                 "required": ["scanner", "target"],
             },
@@ -82,7 +82,7 @@ class RunScannerTool:
 
         policy = self.config.scanner_policy(name)
 
-        # Vorab-Validierung (Freigabe/Scope/Argumente) OHNE Ausfuehrung.
+        # Vorab-Validierung (Freigabe/Scope/Argumente) OHNE Ausführung.
         try:
             if not policy.enabled:
                 raise ScannerError(
@@ -92,7 +92,7 @@ class RunScannerTool:
             host = self.policy.check_target(target)
             if aggressive and not policy.allow_aggressive:
                 raise ScannerError(
-                    f"Aggressiver Modus fuer '{name}' nicht freigegeben."
+                    f"Aggressiver Modus für '{name}' nicht freigegeben."
                 )
             argv = scanner.build_argv(host, policy, ports, aggressive, extra_args)
         except (ScannerError, ScopeViolation) as exc:
@@ -124,7 +124,7 @@ class RunScannerTool:
             f"{len(result.findings)} Finding(s), {recorded} neu erfasst.",
         ]
         if result.truncated:
-            lines.append("(Ausgabe gekuerzt - Obergrenze erreicht.)")
+            lines.append("(Ausgabe gekürzt - Obergrenze erreicht.)")
         if result.findings:
             lines.append("Gefunden:")
             for f in result.findings[:20]:

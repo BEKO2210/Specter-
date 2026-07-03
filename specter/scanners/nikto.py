@@ -1,7 +1,7 @@
 """Sicherer nikto-Wrapper (Webserver-Schwachstellen-Scan).
 
 Nicht-destruktiv: Mutations-/Evasion-/DoS-Optionen und Dateiausgabe sind
-blockiert. Ergebnisse werden als Findings uebernommen.
+blockiert. Ergebnisse werden als Findings übernommen.
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ class NiktoScanner(Scanner):
             super().validate_value("-p", value)
             return
         if flag in {"-timeout", "-maxtime"} and not value.isdigit():
-            raise ScannerError(f"Ungueltiger Zahlenwert fuer {flag}: {value!r}")
+            raise ScannerError(f"Ungültiger Zahlenwert für {flag}: {value!r}")
 
     def default_argv(self, target: str, ports: str | None, aggressive: bool) -> list[str]:
         args = ["-h", target, "-timeout", "10"]

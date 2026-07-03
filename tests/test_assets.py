@@ -1,4 +1,4 @@
-"""Tests fuer den Asset-Graph."""
+"""Tests für den Asset-Graph."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def test_edges_and_neighbors():
     assert g.add_edge("host:h", "service:ssh", "betreibt") is True
     # Duplikat wird nicht doppelt erfasst.
     assert g.add_edge("host:h", "service:ssh", "betreibt") is False
-    # Kante zu unbekanntem Asset schlaegt fehl.
+    # Kante zu unbekanntem Asset schlägt fehl.
     assert g.add_edge("host:h", "host:unknown", "x") is False
     neigh = g.neighbors("host:h")
     assert ("service:ssh", "betreibt") in neigh

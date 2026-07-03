@@ -52,8 +52,15 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
     )
 
 
+def _normalize_policies(policies: Any) -> list[Any]:
+    if isinstance(policies, str):
+        return [policies]
+    return policies if isinstance(policies, list) else []
+
+
 def _is_admin(policies: Any) -> bool:
-    return any(str(p).strip().lower() in ADMIN_POLICIES for p in (policies or []))
+    return any(str(p).strip().lower() in ADMIN_POLICIES
+              for p in _normalize_policies(policies))
 
 
 def _analyze_root(root: dict[str, Any], account: str) -> list[Finding]:
@@ -82,7 +89,7 @@ def _analyze_password_policy(pol: dict[str, Any], account: str) -> list[Finding]
     ml = pol.get("minimum_length")
     if isinstance(ml, int) and ml < MIN_PASSWORD_LENGTH:
         out.append(_mk(
-            f"Schwache IAM-Passwort-Policy (Mindestlaenge {ml})", "auth_weakness",
+            f"Schwache IAM-Passwort-Policy (Mindestlänge {ml})", "auth_weakness",
             Severity.MITTEL, account, f"password_policy.minimum_length={ml}",
             cwe="CWE-521",
         ))
@@ -93,7 +100,7 @@ def _analyze_password_policy(pol: dict[str, Any], account: str) -> list[Finding]
         ))
     if pol.get("max_age_days") == 0:
         out.append(_mk(
-            "IAM-Passwoerter laufen nie ab", "auth_weakness", Severity.NIEDRIG,
+            "IAM-Passwörter laufen nie ab", "auth_weakness", Severity.NIEDRIG,
             account, "password_policy.max_age_days=0",
         ))
     return out
@@ -109,11 +116,12 @@ def _analyze_user(user: dict[str, Any], account: str) -> list[Finding]:
             Severity.HOCH, name, "console_access=true, mfa_enabled=false",
             location=loc, cwe="CWE-308",
         ))
-    if _is_admin(user.get("attached_policies")):
+    pols = _normalize_policies(user.get("attached_policies"))
+    if _is_admin(pols):
         out.append(_mk(
-            f"Ueberprivilegierter IAM-User (Admin): {name}", "access_control",
+            f"Überprivilegierter IAM-User (Admin): {name}", "access_control",
             Severity.HOCH, name,
-            f"attached_policies={list(user.get('attached_policies'))[:3]}",
+            f"attached_policies={pols[:3]}",
             location=loc, cwe="CWE-269",
         ))
     for key in (user.get("access_keys") or []):
@@ -161,12 +169,12 @@ def _analyze_bucket(bucket: dict[str, Any], account: str) -> list[Finding]:
     loc = f"s3://{name}"
     if bucket.get("public"):
         out.append(_mk(
-            f"Oeffentlicher S3-Bucket: {name}", "cloud_storage", Severity.HOCH,
+            f"Öffentlicher S3-Bucket: {name}", "cloud_storage", Severity.HOCH,
             loc, "public=true - ohne Zugangskontrolle erreichbar", cwe="CWE-284",
         ))
     if bucket.get("encryption") is False:
         out.append(_mk(
-            f"S3-Bucket ohne Verschluesselung: {name}", "misconfiguration",
+            f"S3-Bucket ohne Verschlüsselung: {name}", "misconfiguration",
             Severity.NIEDRIG, loc, "encryption=false", cwe="CWE-311",
         ))
     return out
@@ -175,7 +183,8 @@ def _analyze_bucket(bucket: dict[str, Any], account: str) -> list[Finding]:
 def _analyze_sg(sg: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(sg.get("name", "sg"))
-    ports = sg.get("open_to_world_ports") or []
+    raw_ports = sg.get("open_to_world_ports")
+    ports = raw_ports if isinstance(raw_ports, list) else []
     for port in ports:
         try:
             pnum = int(port)
@@ -185,14 +194,14 @@ def _analyze_sg(sg: dict[str, Any], account: str) -> list[Finding]:
         out.append(_mk(
             f"Security-Group offen ins Internet (0.0.0.0/0) auf Port {pnum}",
             "exposed_service", sev, f"{account}/sg/{name}",
-            f"open_to_world_ports enthaelt {pnum}", location=f"{account}/sg/{name}",
+            f"open_to_world_ports enthält {pnum}", location=f"{account}/sg/{name}",
             cwe="CWE-284",
         ))
     return out
 
 
 def analyze_aws(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle AWS-Pruefungen aus und liefert die Findings."""
+    """Führt alle AWS-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     account = str(data.get("account_id", "AWS-Konto"))

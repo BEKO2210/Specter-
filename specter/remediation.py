@@ -1,7 +1,7 @@
-"""Remediation-Vorschlaege und Draft-PR-Inhalte ("Fix & Draft PR").
+"""Remediation-Vorschläge und Draft-PR-Inhalte ("Fix & Draft PR").
 
 Entspricht der letzten Esprit/Trident-Stufe: zu jedem Finding wird eine
-konkrete Gegenmassnahme und ein fertiger Pull-Request-Text (Titel + Body auf
+konkrete Gegenmaßnahme und ein fertiger Pull-Request-Text (Titel + Body auf
 Deutsch) erzeugt, den der/die Verantwortliche direkt umsetzen kann.
 """
 
@@ -9,88 +9,88 @@ from __future__ import annotations
 
 from .findings import Finding
 
-# Standard-Gegenmassnahmen je Kategorie (falls das Finding keine mitbringt).
+# Standard-Gegenmaßnahmen je Kategorie (falls das Finding keine mitbringt).
 DEFAULT_REMEDIATION: dict[str, str] = {
     "secret_exposure": (
-        "Secret sofort rotieren und aus dem Code entfernen. Geheimnisse ueber "
+        "Secret sofort rotieren und aus dem Code entfernen. Geheimnisse über "
         "Umgebungsvariablen oder einen Secret-Manager (z. B. HashiCorp Vault, "
         "AWS Secrets Manager) laden. Git-Historie bereinigen (git filter-repo)."
     ),
     "injection": (
         "Parametrisierte Abfragen / Prepared Statements verwenden, Eingaben "
-        "streng validieren und niemals ungeprueft in Befehle/Queries einsetzen. "
+        "streng validieren und niemals ungeprüft in Befehle/Queries einsetzen. "
         "shell=True vermeiden; Argumentlisten statt Shell-Strings nutzen."
     ),
     "auth_weakness": (
         "Starke Passwort-/MFA-Richtlinien, sichere Session-Verwaltung und "
-        "serverseitige Rechtepruefung durchsetzen. Standard-Zugangsdaten entfernen."
+        "serverseitige Rechteprüfung durchsetzen. Standard-Zugangsdaten entfernen."
     ),
     "access_control": (
-        "Zugriffskontrolle serverseitig pro Objekt/Ressource pruefen "
+        "Zugriffskontrolle serverseitig pro Objekt/Ressource prüfen "
         "(Deny-by-default). Direkte Objektreferenzen (IDs) nicht ohne "
-        "Berechtigungspruefung akzeptieren."
+        "Berechtigungsprüfung akzeptieren."
     ),
     "crypto_weakness": (
-        "Schwache Algorithmen (MD5/SHA1) durch SHA-256+ bzw. fuer Passwoerter "
+        "Schwache Algorithmen (MD5/SHA1) durch SHA-256+ bzw. für Passwörter "
         "durch bcrypt/scrypt/Argon2 ersetzen. Keine Eigenbau-Kryptographie."
     ),
     "misconfiguration": (
         "Sichere Standardkonfiguration erzwingen: Debug-Modus in Produktion aus, "
-        "unnoetige Dienste deaktivieren, Sicherheits-Header setzen."
+        "unnötige Dienste deaktivieren, Sicherheits-Header setzen."
     ),
     "cloud_storage": (
-        "Oeffentlichen Zugriff auf Speicher/Buckets sperren, Least-Privilege-"
-        "Policies setzen und Verschluesselung im Ruhezustand aktivieren."
+        "Öffentlichen Zugriff auf Speicher/Buckets sperren, Least-Privilege-"
+        "Policies setzen und Verschlüsselung im Ruhezustand aktivieren."
     ),
     "transport_security": (
-        "TLS-Zertifikatspruefung aktivieren (verify=True), aktuelle TLS-Version "
+        "TLS-Zertifikatsprüfung aktivieren (verify=True), aktuelle TLS-Version "
         "erzwingen und HSTS setzen."
     ),
     "deserialization": (
-        "Keine ungepruefte Deserialisierung nicht-vertrauenswuerdiger Daten. "
+        "Keine ungeprüfte Deserialisierung nicht-vertrauenswürdiger Daten. "
         "Sichere Formate (JSON mit Schema) und yaml.safe_load verwenden."
     ),
     "exposed_service": (
-        "Dienst hinter Firewall/VPN legen, auf benoetigte Quell-IPs beschraenken "
-        "und nicht benoetigte Ports schliessen."
+        "Dienst hinter Firewall/VPN legen, auf benötigte Quell-IPs beschränken "
+        "und nicht benötigte Ports schließen."
     ),
     "sensitive_data": (
-        "Sensible Daten verschluesseln, Zugriff protokollieren und nach "
-        "Least-Privilege einschraenken (DSGVO-Konformitaet pruefen)."
+        "Sensible Daten verschlüsseln, Zugriff protokollieren und nach "
+        "Least-Privilege einschränken (DSGVO-Konformität prüfen)."
     ),
     "remote_access": (
         "Fernzugang (RDP/VPN) nie direkt ins Internet. MFA erzwingen, hinter "
-        "VPN/Zero-Trust-Gateway legen, auf benoetigte Quell-IPs beschraenken, "
+        "VPN/Zero-Trust-Gateway legen, auf benötigte Quell-IPs beschränken, "
         "Accounts nach Fehlversuchen sperren und Zugriffe protokollieren."
     ),
     "default_credentials": (
-        "Alle Standard-/Default-Zugangsdaten aendern, ungenutzte Konten "
+        "Alle Standard-/Default-Zugangsdaten ändern, ungenutzte Konten "
         "deaktivieren, starke Passwort-Richtlinie und MFA durchsetzen."
     ),
     "outdated_component": (
-        "Komponente auf eine unterstuetzte, gepatchte Version aktualisieren. "
+        "Komponente auf eine unterstützte, gepatchte Version aktualisieren. "
         "Patch-Management und ein Software-Inventar (SBOM) etablieren; "
-        "veraltete, nicht mehr benoetigte Dienste abschalten."
+        "veraltete, nicht mehr benötigte Dienste abschalten."
     ),
     "personal_data": (
-        "Personenbezogene Daten nach DSGVO schuetzen: Datenminimierung, "
-        "Verschluesselung, Pseudonymisierung, Zugriff nach Least-Privilege, "
-        "Loeschkonzept und Verarbeitungsverzeichnis. Besondere Kategorien "
-        "(Art. 9 DSGVO) gesondert schuetzen."
+        "Personenbezogene Daten nach DSGVO schützen: Datenminimierung, "
+        "Verschlüsselung, Pseudonymisierung, Zugriff nach Least-Privilege, "
+        "Löschkonzept und Verarbeitungsverzeichnis. Besondere Kategorien "
+        "(Art. 9 DSGVO) gesondert schützen."
     ),
     "email_security": (
         "E-Mail-Spoofing verhindern: SPF mit -all (bzw. mindestens ~all) setzen, "
-        "DKIM mit >= 2048-Bit-Schluessel signieren und DMARC schrittweise auf "
+        "DKIM mit >= 2048-Bit-Schlüssel signieren und DMARC schrittweise auf "
         "p=quarantine, dann p=reject anheben. rua-Reportadresse konfigurieren und "
-        "die Berichte regelmaessig auswerten (Schutz vor CEO-Fraud/BEC)."
+        "die Berichte regelmäßig auswerten (Schutz vor CEO-Fraud/BEC)."
     ),
     "backup_resilience": (
         "3-2-1-Regel umsetzen: mindestens 3 Kopien, 2 verschiedene Medien, 1 Kopie "
-        "offsite - und mindestens eine offline bzw. unveraenderbar (WORM/Immutable) "
-        "gegen Ransomware. Restores regelmaessig testen (mind. jaehrlich, besser "
-        "quartalsweise), die Backup-Konsole mit MFA schuetzen, Aufbewahrung an die "
-        "Angreifer-Verweildauer anpassen (>= 30 Tage) und Backups verschluesseln. "
-        "Wiederanlauf-/Notfallkonzept dokumentieren und ueben."
+        "offsite - und mindestens eine offline bzw. unveränderbar (WORM/Immutable) "
+        "gegen Ransomware. Restores regelmäßig testen (mind. jährlich, besser "
+        "quartalsweise), die Backup-Konsole mit MFA schützen, Aufbewahrung an die "
+        "Angreifer-Verweildauer anpassen (>= 30 Tage) und Backups verschlüsseln. "
+        "Wiederanlauf-/Notfallkonzept dokumentieren und üben."
     ),
     "web_security": (
         "Sicherheits-Header setzen: HSTS (max-age >= 1 Jahr, includeSubDomains), "
@@ -102,21 +102,21 @@ DEFAULT_REMEDIATION: dict[str, str] = {
     "dns_security": (
         "DNS absichern: DNSSEC aktivieren und die Zone signieren (Schutz vor "
         "Cache-Poisoning/Spoofing), CAA-Records setzen, damit nur autorisierte "
-        "Zertifizierungsstellen ausstellen duerfen, Zonentransfer (AXFR) auf "
-        "berechtigte Secondaries beschraenken, Wildcard-Eintraege vermeiden bzw. "
+        "Zertifizierungsstellen ausstellen dürfen, Zonentransfer (AXFR) auf "
+        "berechtigte Secondaries beschränken, Wildcard-Einträge vermeiden bzw. "
         "eng fassen und ungenutzte CNAME-Verweise (dangling) entfernen, um "
         "Subdomain-Takeover zu verhindern."
     ),
     "container_security": (
-        "Container haerten: nicht privilegiert und als unprivilegierter Benutzer "
+        "Container härten: nicht privilegiert und als unprivilegierter Benutzer "
         "laufen (USER != root), das Docker-Socket niemals in Container mounten, "
-        "Host-Networking vermeiden, nur die minimal noetigen Capabilities vergeben "
+        "Host-Networking vermeiden, nur die minimal nötigen Capabilities vergeben "
         "(--cap-drop=ALL, gezielt einzelne --cap-add), Images mit festem Tag/Digest "
-        "pinnen (kein :latest) und regelmaessig aktualisieren, Ports nur auf "
-        "benoetigte Quell-IPs/127.0.0.1 veroeffentlichen und den Docker-Daemon nicht "
-        "ungeschuetzt exponieren."
+        "pinnen (kein :latest) und regelmäßig aktualisieren, Ports nur auf "
+        "benötigte Quell-IPs/127.0.0.1 veröffentlichen und den Docker-Daemon nicht "
+        "ungeschützt exponieren."
     ),
-    "other": "Schwachstelle nach Stand der Technik beheben und erneut pruefen.",
+    "other": "Schwachstelle nach Stand der Technik beheben und erneut prüfen.",
 }
 
 
@@ -127,7 +127,7 @@ def remediation_for(finding: Finding) -> str:
 
 
 def draft_pr(finding: Finding) -> dict[str, str]:
-    """Erzeugt Titel und Body fuer einen Remediation-Pull-Request (Deutsch)."""
+    """Erzeugt Titel und Body für einen Remediation-Pull-Request (Deutsch)."""
     fix = remediation_for(finding)
     cwe = f" ({finding.cwe})" if finding.cwe else ""
     title = f"fix(security): {finding.title} [{finding.severity.label}]"
@@ -144,14 +144,14 @@ def draft_pr(finding: Finding) -> dict[str, str]:
 {finding.evidence or "(keine Evidenz erfasst)"}
 ```
 
-### Empfohlene Gegenmassnahme
+### Empfohlene Gegenmaßnahme
 {fix}
 
 ### Verantwortlich
 {finding.owner or "noch zuzuweisen"}
 
 ---
-_Automatisch erzeugt von Specter (autorisierte Sicherheitspruefung). Bitte den
-Fix pruefen, testen und die Fundstelle nach dem Merge erneut verifizieren._
+_Automatisch erzeugt von Specter (autorisierte Sicherheitsprüfung). Bitte den
+Fix prüfen, testen und die Fundstelle nach dem Merge erneut verifizieren._
 """
     return {"title": title, "body": body}
