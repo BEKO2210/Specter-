@@ -35,7 +35,7 @@ dependencies = [
 # KI-gesteuerter, autonomer Lauf (nur mit API-Key): `pip install .[ai]`
 ai = ["anthropic>=0.40.0"]
 # Entwicklung/Tests inkl. echter Testzertifikate für die Labor-Harnesse.
-dev = ["pytest>=8.0", "pytest-cov>=5.0", "cryptography>=41.0"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "hypothesis>=6.100", "cryptography>=41.0"]
 
 [project.urls]
 Homepage = "https://beko2210.github.io/Specter-/"

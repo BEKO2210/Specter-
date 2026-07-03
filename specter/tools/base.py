@@ -36,6 +36,56 @@ class Tool(Protocol):
         ...
 
 
+class SafeTool:
+    """Robuste Hülle um ein Tool.
+
+    Sie erzwingt zwei fail-safe-Eigenschaften für die gesamte Werkzeugschicht
+    an einer einzigen Stelle:
+
+    1. **Argument-Normalisierung:** Der Tool-Vertrag erwartet ein JSON-Objekt.
+       Liefert ein fehlgeleiteter Aufrufer (oder ein fehlerhafter Tool-Call)
+       etwas anderes — ``None``, eine Liste, einen String —, wird daraus eine
+       leere Argumentliste statt eines ``AttributeError`` beim ``.get()``.
+    2. **Ausnahme-Isolierung:** Kein einzelnes Tool darf den gesamten
+       Audit-Lauf abbrechen. Jede unerwartete Ausnahme wird zu einem
+       ``is_error``-Ergebnis, das der Agent sieht und aus dem er sich erholen
+       kann; der Vorfall wird zusätzlich im Audit-Log vermerkt.
+    """
+
+    def __init__(self, inner: Tool, audit: AuditLog) -> None:
+        self._inner = inner
+        self._audit = audit
+        self.name = inner.name
+
+    @property
+    def inner(self) -> Tool:
+        """Das umhüllte Tool (z. B. für gezielte Introspektion/Tests)."""
+        return self._inner
+
+    @property
+    def spec(self) -> dict[str, Any]:
+        return self._inner.spec
+
+    @property
+    def active(self) -> bool:
+        return self._inner.active
+
+    def run(self, arguments: Any) -> ToolResult:
+        args = arguments if isinstance(arguments, dict) else {}
+        try:
+            return self._inner.run(args)
+        except Exception as exc:  # fail-safe: kein Tool bricht den Lauf ab
+            self._audit.record(
+                "tool.exception", tool=self.name,
+                error=f"{type(exc).__name__}: {exc}"[:500],
+            )
+            return ToolResult(
+                f"Tool '{self.name}' fehlgeschlagen ({type(exc).__name__}): {exc}. "
+                "Der Lauf wird fortgesetzt.",
+                is_error=True,
+            )
+
+
 def build_registry(
     config: Config,
     policy: SafetyPolicy,
@@ -99,4 +149,6 @@ def build_registry(
         GenerateReportTool(config, state, audit),
         OpenPullRequestsTool(config, audit, state),
     ]
-    return {t.name: t for t in tools}
+    # Jedes Tool in die fail-safe-Hülle legen (Argument-Normalisierung +
+    # Ausnahme-Isolierung an einer zentralen Stelle).
+    return {t.name: SafeTool(t, audit) for t in tools}

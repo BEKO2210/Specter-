@@ -3,6 +3,7 @@
 
 pytest>=8.0
 pytest-cov>=5.0
+hypothesis>=6.100        # Property-Based-Tests (Analyzer-Robustheit)
 
 # Fuer das Labor-Harness (examples/live_lab): echte Testzertifikate erzeugen
 cryptography>=41.0
