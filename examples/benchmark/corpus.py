@@ -1270,4 +1270,227 @@ SCENARIOS: list[Scenario] = [
         "privileged=\"true\" ist kritisch; host_network/docker_socket=\"false\"/"
         "\"no\" dürfen keine Fehlalarme werfen.",
     ),
+
+    # ====================== ROH-FORMATE (Vendor-Ausgaben) ======================
+    # Diese Szenarien füttern die *unveränderten* Formate echter Werkzeuge
+    # (docker inspect, AWS CLI) durch dieselben Normalisierer, die auch die
+    # Kundenanalyse nutzt — die Bewertung wird aus den Roh-Daten abgeleitet,
+    # nicht vom Einreicher vorweggenommen.
+    Scenario(
+        "raw-docker-vuln", "container_raw", "vuln",
+        "Echte docker-inspect-Ausgabe: unsicherer Legacy-Container",
+        [{
+            "Id": "9f3a1c7e2b4d",
+            "Name": "/legacy-web",
+            "Config": {"Image": "nginx:latest", "User": ""},
+            "HostConfig": {
+                "Privileged": True,
+                "NetworkMode": "host",
+                "CapAdd": ["SYS_ADMIN"],
+                "Binds": ["/var/run/docker.sock:/var/run/docker.sock"],
+            },
+            "NetworkSettings": {"Ports": {
+                "80/tcp": [{"HostIp": "0.0.0.0", "HostPort": "8080"}]}},
+        }],
+        (
+            Expect("container_security", "Privilegierter Container", K),
+            Expect("container_security", "Docker-Socket im Container gemountet", K),
+            Expect("container_security", "Gefährliche Capabilities", H),
+            Expect("container_security", "Host-Networking aktiv", M),
+            Expect("container_security", "Container läuft als root", M),
+            Expect("container_security", "Ungepinntes Image", N),
+            Expect("exposed_service", "Container-Port auf allen Interfaces", M),
+        ),
+        "PascalCase-Rohformat direkt von `docker inspect` — kein vorgeformter Export.",
+    ),
+    Scenario(
+        "raw-docker-hardened", "container_raw", "hardened",
+        "Echte docker-inspect-Ausgabe: sauber konfigurierter Container",
+        [{
+            "Id": "a1b2c3d4e5f6",
+            "Name": "/app",
+            "Config": {"Image": "registry.example.de/app:1.4.2", "User": "1000"},
+            "HostConfig": {"Privileged": False, "NetworkMode": "bridge",
+                           "CapAdd": None, "Binds": ["/srv/app-daten:/data"]},
+            "NetworkSettings": {"Ports": {
+                "3000/tcp": [{"HostIp": "127.0.0.1", "HostPort": "3000"}]}},
+        }],
+        (),
+        "Gepinntes Image, unprivilegierter User, lokale Port-Bindung: null Funde.",
+    ),
+    Scenario(
+        "raw-docker-socket-lookalike", "container_raw", "confuser",
+        "Bind-Mount, der nur wie das Docker-Socket aussieht",
+        [{
+            "Name": "/backup",
+            "Config": {"Image": "backup-agent:2.1.0", "User": "backup"},
+            "HostConfig": {"NetworkMode": "bridge",
+                           "CapAdd": ["NET_BIND_SERVICE"],
+                           "Binds": ["/var/run/docker.sock.backup:/data"]},
+        }],
+        (),
+        "/var/run/docker.sock.backup ist NICHT das Socket; NET_BIND_SERVICE ist "
+        "harmlos — beides darf keinen Fehlalarm werfen.",
+    ),
+    Scenario(
+        "raw-aws-vuln", "aws_raw", "vuln",
+        "Echtes AWS-CLI-Bündel: typisch verwundbares Konto",
+        {
+            "account_id": "123456789012",
+            "account_summary": {"SummaryMap": {
+                "AccountMFAEnabled": 0, "AccountAccessKeysPresent": 1}},
+            "password_policy": {"PasswordPolicy": {
+                "MinimumPasswordLength": 8, "RequireSymbols": False,
+                "ExpirePasswords": False}},
+            "users": [{
+                "User": {"UserName": "deploy"},
+                "LoginProfile": {"CreateDate": "2023-02-01T09:00:00Z"},
+                "MFADevices": [],
+                "AttachedPolicies": [{"PolicyName": "AdministratorAccess"}],
+                "AccessKeys": [{
+                    "AccessKeyId": "AKIADEPLOY01",
+                    "CreateDate": "2024-05-01T00:00:00Z",
+                    "AccessKeyLastUsed": {"LastUsedDate": "2024-07-01T00:00:00Z"},
+                }],
+            }],
+            "roles": [{
+                "Role": {"RoleName": "ci",
+                         "AssumeRolePolicyDocument": {"Statement": [
+                             {"Effect": "Allow", "Principal": {"AWS": "*"},
+                              "Action": "sts:AssumeRole"}]}},
+                "AttachedPolicies": [{"PolicyName": "AdministratorAccess"}],
+            }],
+            "buckets": [{"Name": "firmen-backups",
+                         "PolicyStatus": {"IsPublic": True},
+                         "Encryption": None}],
+            "security_groups": {"SecurityGroups": [{
+                "GroupName": "rdp-sg",
+                "IpPermissions": [{"IpProtocol": "tcp", "FromPort": 3389,
+                                   "ToPort": 3389,
+                                   "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}],
+            }]},
+        },
+        (
+            Expect("auth_weakness", "Root-Konto ohne MFA", K),
+            Expect("access_control", "Root-Konto besitzt Access-Keys", K),
+            Expect("auth_weakness", "Schwache IAM-Passwort-Policy (Mindestlänge 8)", M),
+            Expect("auth_weakness", "ohne Sonderzeichen-Pflicht", N),
+            Expect("auth_weakness", "IAM-Passwörter laufen nie ab", N),
+            Expect("auth_weakness", "IAM-Konsolenzugriff ohne MFA: deploy", H),
+            Expect("access_control", "Überprivilegierter IAM-User (Admin): deploy", H),
+            Expect("access_control", "Alter Access-Key", M),
+            Expect("access_control", "Ungenutzter Access-Key", N),
+            Expect("access_control", "Admin-Rolle von beliebigem Prinzipal", K),
+            Expect("cloud_storage", "Öffentlicher S3-Bucket: firmen-backups", H),
+            Expect("misconfiguration", "S3-Bucket ohne Verschlüsselung", N),
+            Expect("exposed_service", "Port 3389", H),
+        ),
+        "Unveränderte CLI-Antworten (get-account-summary, describe-security-groups, "
+        "get-bucket-policy-status ...) — weltoffene Ports, Trust und Schlüssel-Alter "
+        "werden aus den Roh-Daten abgeleitet.",
+    ),
+    Scenario(
+        "raw-aws-hardened", "aws_raw", "hardened",
+        "Echtes AWS-CLI-Bündel: gehärtetes Konto",
+        {
+            "account_id": "123456789012",
+            "account_summary": {"SummaryMap": {
+                "AccountMFAEnabled": 1, "AccountAccessKeysPresent": 0}},
+            "password_policy": {"PasswordPolicy": {
+                "MinimumPasswordLength": 16, "RequireSymbols": True,
+                "ExpirePasswords": True, "MaxPasswordAge": 90}},
+            "users": [{
+                "User": {"UserName": "ops"},
+                "LoginProfile": {"CreateDate": "2026-01-01T00:00:00Z"},
+                "MFADevices": [{"SerialNumber": "arn:aws:iam::123456789012:mfa/ops"}],
+                "AttachedPolicies": [{"PolicyName": "ReadOnlyAccess"}],
+                "AccessKeys": [{
+                    "AccessKeyId": "AKIAOPS01",
+                    "CreateDate": "2026-06-01T00:00:00Z",
+                    "AccessKeyLastUsed": {"LastUsedDate": "2026-06-30T00:00:00Z"},
+                }],
+            }],
+            "roles": [{
+                "Role": {"RoleName": "ec2-runner",
+                         "AssumeRolePolicyDocument": {"Statement": [
+                             {"Effect": "Allow",
+                              "Principal": {"Service": "ec2.amazonaws.com"},
+                              "Action": "sts:AssumeRole"}]}},
+                "AttachedPolicies": [{"PolicyName": "AmazonS3ReadOnlyAccess"}],
+            }],
+            "buckets": [{"Name": "interne-daten",
+                         "PolicyStatus": {"IsPublic": False},
+                         "Encryption": {"ServerSideEncryptionConfiguration": {
+                             "Rules": []}}}],
+            "security_groups": {"SecurityGroups": [{
+                "GroupName": "intern-sg",
+                "IpPermissions": [{"IpProtocol": "tcp", "FromPort": 22,
+                                   "ToPort": 22,
+                                   "IpRanges": [{"CidrIp": "10.0.0.0/8"}]}],
+            }]},
+        },
+        (),
+        "MFA überall, starke Policy, frischer Schlüssel, Service-Trust, "
+        "interner SSH-Zugang: null Funde.",
+    ),
+    Scenario(
+        "raw-aws-lookalikes", "aws_raw", "confuser",
+        "AWS-Roh-Daten, die gefährlich aussehen, es aber nicht sind",
+        {
+            "account_id": "123456789012",
+            "users": [{
+                "User": {"UserName": "audit"},
+                "MFADevices": [{"SerialNumber": "arn:mfa/audit"}],
+                "AttachedPolicies": [{"PolicyName": "SecurityAudit"}],
+            }],
+            "roles": [
+                # Deny mit '*' öffnet nichts.
+                {"Role": {"RoleName": "deny-all",
+                          "AssumeRolePolicyDocument": {"Statement": [
+                              {"Effect": "Deny", "Principal": "*"}]}},
+                 "AttachedPolicies": [{"PolicyName": "AdministratorAccess"}]},
+                # Konto-Root-ARN ist ein konkreter Prinzipal, kein Wildcard.
+                {"Role": {"RoleName": "intern",
+                          "AssumeRolePolicyDocument": {"Statement": [
+                              {"Effect": "Allow", "Principal": {
+                                  "AWS": "arn:aws:iam::123456789012:root"}}]}},
+                 "AttachedPolicies": [{"PolicyName": "ReadOnlyAccess"}]},
+            ],
+            "security_groups": {"SecurityGroups": [{
+                "GroupName": "db-intern",
+                "IpPermissions": [{"IpProtocol": "tcp", "FromPort": 3306,
+                                   "ToPort": 3306,
+                                   "IpRanges": [{"CidrIp": "172.16.0.0/12"}]}],
+            }]},
+        },
+        (),
+        "Deny-Wildcard, Konto-Root-ARN und intern offene DB-Ports sehen riskant "
+        "aus, sind aber sauber — null Fehlalarme.",
+    ),
+    Scenario(
+        "raw-aws-key-age-boundary", "aws_raw", "boundary",
+        "Access-Key exakt auf der Alters-Schwelle (180 Tage)",
+        {
+            "account_id": "123456789012",
+            "users": [{
+                "User": {"UserName": "grenzfall"},
+                "MFADevices": [{"SerialNumber": "arn:mfa/grenzfall"}],
+                "AccessKeys": [
+                    # 2026-01-02 -> exakt 180 Tage vor dem Referenzdatum: kein Fund.
+                    {"AccessKeyId": "AKIAEXAKT180",
+                     "CreateDate": "2026-01-02T00:00:00Z",
+                     "AccessKeyLastUsed": {"LastUsedDate": "2026-06-30T00:00:00Z"}},
+                    # 2026-01-01 -> 181 Tage: MUSS als alt gemeldet werden.
+                    {"AccessKeyId": "AKIA181TAGE",
+                     "CreateDate": "2026-01-01T00:00:00Z",
+                     "AccessKeyLastUsed": {"LastUsedDate": "2026-06-30T00:00:00Z"}},
+                ],
+            }],
+        },
+        (
+            Expect("access_control", "Alter Access-Key (181 Tage): grenzfall [AKIA181TAGE]", M),
+        ),
+        "Die 180-Tage-Schwelle wird aus echten CreateDate-Zeitstempeln abgeleitet — "
+        "exakt 180 ist sauber, 181 schlägt an.",
+    ),
 ]
