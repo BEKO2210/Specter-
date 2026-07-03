@@ -100,7 +100,9 @@ def _analyze_krbtgt(age: Any, domain: str) -> list[Finding]:
 
 def _analyze_privileged_groups(groups: dict[str, Any], domain: str) -> list[Finding]:
     out: list[Finding] = []
-    for name, members in (groups or {}).items():
+    if not isinstance(groups, dict):
+        return out
+    for name, members in groups.items():
         if not isinstance(members, list):
             continue
         if name.strip().lower() in HIGH_PRIV_GROUPS and len(members) > MAX_DOMAIN_ADMINS:
@@ -186,7 +188,11 @@ def normalize_bloodhound_users(data: Any) -> list[dict[str, Any]]:
         return []
     users: list[dict[str, Any]] = []
     for entry in entries:
-        props = (entry or {}).get("Properties") or {}
+        if not isinstance(entry, dict):
+            continue
+        props = entry.get("Properties")
+        if not isinstance(props, dict):
+            props = {}
         if "name" not in props and "samaccountname" not in props:
             continue
         users.append({

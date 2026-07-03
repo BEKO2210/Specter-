@@ -88,7 +88,8 @@ def _analyze_storage(sa: dict[str, Any], sub: str) -> list[Finding]:
 def _analyze_nsg(nsg: dict[str, Any], sub: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(nsg.get("name", "nsg"))
-    for port in (nsg.get("open_to_internet_ports") or []):
+    raw_ports = nsg.get("open_to_internet_ports")
+    for port in (raw_ports if isinstance(raw_ports, list) else []):
         try:
             pnum = int(port)
         except (TypeError, ValueError):
@@ -162,8 +163,10 @@ def _analyze_sql(sql: dict[str, Any], sub: str) -> list[Finding]:
 
 
 def _analyze_rbac(assignments: Any, sub: str) -> list[Finding]:
+    if not isinstance(assignments, list):
+        assignments = []
     owners = [
-        a for a in (assignments or [])
+        a for a in assignments
         if isinstance(a, dict)
         and str(a.get("role", "")).strip().lower() == "owner"
         and str(a.get("scope", "")).strip().lower() == "subscription"

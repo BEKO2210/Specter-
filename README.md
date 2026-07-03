@@ -138,7 +138,7 @@ python -m pytest
 4. **Prüfen.** Ohne KI-Schlüssel laufen die Analyzer direkt; mit Schlüssel steuert das
    KI-Modell den Ablauf:
    ```bash
-   python main.py --scope scope.yaml --objective "Pruefe die Exporte in ./kundendaten"
+   python main.py --scope scope.yaml --objective "Prüfe die Exporte in ./kundendaten"
    ```
 5. **Bericht & PDF.** Specter schreibt Markdown-, JSON- und einen schönen HTML-Bericht.
    HTML im Browser öffnen → **Drucken → Als PDF speichern** → fertiges Kunden-PDF.

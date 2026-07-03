@@ -55,8 +55,10 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
 def _analyze_baseline(data: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
     sec_defaults = bool(data.get("security_defaults_enabled", False))
-    policies = data.get("conditional_access_policies") or []
-    enabled = [p for p in policies if str((p or {}).get("state", "")).lower() == "enabled"]
+    policies = data.get("conditional_access_policies")
+    policies = policies if isinstance(policies, list) else []
+    enabled = [p for p in policies
+               if isinstance(p, dict) and str(p.get("state", "")).lower() == "enabled"]
     requires_mfa = any((p or {}).get("requires_mfa") for p in enabled)
     blocks_legacy = any((p or {}).get("blocks_legacy_auth") for p in enabled)
     legacy_allowed = bool(data.get("legacy_auth_allowed", False))
@@ -85,7 +87,9 @@ def _analyze_baseline(data: dict[str, Any], tenant: str) -> list[Finding]:
 
 def _analyze_roles(roles: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
-    for name, members in (roles or {}).items():
+    if not isinstance(roles, dict):
+        return out
+    for name, members in roles.items():
         if not isinstance(members, list):
             continue
         if name.strip().lower() in HIGH_PRIV_ROLES and len(members) > MAX_GLOBAL_ADMINS:

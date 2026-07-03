@@ -24,6 +24,7 @@ vorhanden - das ist der haeufigste und schwerste Befund.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from ..findings import Finding, Severity
@@ -83,7 +84,7 @@ def _analyze_dmarc(dmarc: Any, domain: str) -> list[Finding]:
             cwe="CWE-290",
         ))
         return out
-    if "p=none" in value:
+    if re.search(r"(?:^|;)\s*p\s*=\s*none\b", value):
         out.append(_mk(
             f"DMARC nur im Monitoring-Modus (p=none): {domain}",
             "email_security", Severity.MITTEL, loc,

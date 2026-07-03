@@ -52,8 +52,15 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
     )
 
 
+def _normalize_policies(policies: Any) -> list[Any]:
+    if isinstance(policies, str):
+        return [policies]
+    return policies if isinstance(policies, list) else []
+
+
 def _is_admin(policies: Any) -> bool:
-    return any(str(p).strip().lower() in ADMIN_POLICIES for p in (policies or []))
+    return any(str(p).strip().lower() in ADMIN_POLICIES
+              for p in _normalize_policies(policies))
 
 
 def _analyze_root(root: dict[str, Any], account: str) -> list[Finding]:
@@ -109,11 +116,12 @@ def _analyze_user(user: dict[str, Any], account: str) -> list[Finding]:
             Severity.HOCH, name, "console_access=true, mfa_enabled=false",
             location=loc, cwe="CWE-308",
         ))
-    if _is_admin(user.get("attached_policies")):
+    pols = _normalize_policies(user.get("attached_policies"))
+    if _is_admin(pols):
         out.append(_mk(
             f"Ueberprivilegierter IAM-User (Admin): {name}", "access_control",
             Severity.HOCH, name,
-            f"attached_policies={list(user.get('attached_policies'))[:3]}",
+            f"attached_policies={pols[:3]}",
             location=loc, cwe="CWE-269",
         ))
     for key in (user.get("access_keys") or []):
@@ -175,7 +183,8 @@ def _analyze_bucket(bucket: dict[str, Any], account: str) -> list[Finding]:
 def _analyze_sg(sg: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(sg.get("name", "sg"))
-    ports = sg.get("open_to_world_ports") or []
+    raw_ports = sg.get("open_to_world_ports")
+    ports = raw_ports if isinstance(raw_ports, list) else []
     for port in ports:
         try:
             pnum = int(port)

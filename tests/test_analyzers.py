@@ -1354,3 +1354,57 @@ def test_container_invalid_input():
     assert analyze_container("nope") == []
     assert analyze_container({"containers": "x"}) == []
     assert analyze_container({"containers": [None, 7]}) == []
+
+
+# ==================== Härtung: robuste Analyzer-Eingaben ====================
+
+def test_ad_privileged_groups_wrong_type_degrades():
+    # privileged_groups als Liste (statt Dict) darf nicht crashen.
+    assert analyze_ad({"privileged_groups": ["Domain Admins"]}) == []
+
+
+def test_ad_bloodhound_skips_non_dict_entries_and_props():
+    out = analyze_ad({"data": [
+        "junk",                              # Nicht-Dict-Eintrag -> uebersprungen
+        {"Properties": ["x"]},               # Properties keine Dict -> uebersprungen
+        {"Properties": {"name": "svc", "admincount": True,
+                        "dontreqpreauth": True}},
+    ]})
+    assert any("AS-REP" in f.title for f in out)
+
+
+def test_entra_roles_wrong_type_degrades():
+    # roles als Liste (statt Dict) darf nicht crashen und keinen Rollen-Befund liefern.
+    out = analyze_entra({"roles": ["Global Administrator"]})
+    assert isinstance(out, list)
+    assert not any("Zu viele Konten" in f.title for f in out)
+
+
+def test_entra_ca_policies_wrong_type_no_crash():
+    out = analyze_entra({"conditional_access_policies": {"p1": {"state": "enabled"}}})
+    assert isinstance(out, list)
+
+
+def test_aws_admin_policy_as_string_detected():
+    out = analyze_aws({"users": [{"name": "u", "console_access": False,
+                                  "attached_policies": "AdministratorAccess"}]})
+    assert any("Ueberprivilegierter IAM-User" in f.title for f in out)
+
+
+def test_aws_sg_ports_wrong_type_no_garbage():
+    assert analyze_aws({"security_groups": [{"name": "db", "open_to_world_ports": 3306}]}) == []
+    assert analyze_aws({"security_groups": [{"name": "db", "open_to_world_ports": "3306"}]}) == []
+
+
+def test_azure_ports_and_rbac_wrong_type_no_crash():
+    assert analyze_azure({"network_security_groups": [
+        {"name": "n", "open_to_internet_ports": 3389}]}) == []
+    assert analyze_azure({"role_assignments": 5}) == []
+
+
+def test_dmarc_sp_none_not_flagged_as_monitoring():
+    out = analyze_email_security({
+        "domain": "x.de", "spf": "v=spf1 -all",
+        "dmarc": "v=DMARC1; p=reject; sp=none; rua=mailto:a@x.de",
+        "dkim": [{"selector": "g", "key_bits": 2048, "present": True}]})
+    assert not any("Monitoring-Modus" in f.title for f in out)

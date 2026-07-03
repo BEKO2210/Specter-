@@ -49,4 +49,4 @@ def test_write_trust_onepager_creates_file(tmp_path):
     assert path.name == "specter-vertrauen-onepager.html"
     text = path.read_text(encoding="utf-8")
     assert "Beispiel AG" in text
-    assert "Warum Sie Specter an Ihre Systeme lassen koennen" in text
+    assert "Warum Sie Specter an Ihre Systeme lassen können" in text

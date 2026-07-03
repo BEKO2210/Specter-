@@ -16,7 +16,7 @@ def test_landing_html_structure_and_content():
     # Kontaktadresse als mailto verlinkt.
     assert "mailto:info@example.de" in html
     # Alle Inhaltsbloecke sind gerendert.
-    assert len(PROBLEMS) == 3 and len(COVERAGE) == 10 and len(PACKAGES) == 3
+    assert len(PROBLEMS) == 3 and len(COVERAGE) == 14 and len(PACKAGES) == 3
     for title, _d in PROBLEMS:
         assert title in html
     for title, _d in COVERAGE:
@@ -36,7 +36,7 @@ def test_landing_html_structure_and_content():
 
 def test_landing_html_defaults_branch():
     html = build_landing_html()
-    assert "kontakt@specter-security.de" in html
+    assert "belkis.aslani@gmail.com" in html
     assert "Specter" in html
 
 

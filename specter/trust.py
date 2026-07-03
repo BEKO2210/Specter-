@@ -1,14 +1,14 @@
-"""Vertrauens-/Sicherheits-One-Pager fuer Kunden (HTML -> PDF) + Garantien.
+"""Vertrauens-/Sicherheits-One-Pager für Kunden (HTML -> PDF) + Garantien.
 
 Damit echte Firmen Specter an ihre Systeme lassen, braucht es einen klaren,
-kundentauglichen Nachweis, *warum* die Pruefung sicher ist. Dieses Modul
+kundentauglichen Nachweis, *warum* die Prüfung sicher ist. Dieses Modul
 buendelt die technischen Garantien maschinenlesbar (`trust_guarantees()`,
 `data_protection_points()`) und erzeugt daraus einen markengerechten,
 druckoptimierten One-Pager.
 
 Die Garantien sind keine Marketing-Aussagen, sondern spiegeln das tatsaechliche
 Verhalten der Software wider: offline-first, fail-closed Scope, keine
-Ausnutzung, aktive Scanner standardmaessig aus, vollstaendiges Audit-Log.
+Ausnutzung, aktive Scanner standardmäßig aus, vollständiges Audit-Log.
 """
 
 from __future__ import annotations
@@ -28,44 +28,44 @@ _MARK_IMG = (
 # Kern-Garantien (Titel, Zusage) - spiegeln das reale Verhalten der Software.
 GUARANTEES: list[tuple[str, str]] = [
     ("Offline &amp; lesend",
-     "Specter wertet ausschliesslich von Ihnen bereitgestellte Export-Dateien aus. "
+     "Specter wertet ausschließlich von Ihnen bereitgestellte Export-Dateien aus. "
      "Es baut keine Live-Verbindung zu Ihren Systemen auf und liest keine "
      "Produktivdaten direkt aus."),
     ("Keine Angriffe (kein Exploit)",
-     "Es werden keine Schwachstellen ausgenutzt, keine Passwoerter geknackt, keine "
-     "Rechte ausgeweitet, keine Dienste lahmgelegt (kein DoS) und keine Hintertueren "
+     "Es werden keine Schwachstellen ausgenutzt, keine Passwörter geknackt, keine "
+     "Rechte ausgeweitet, keine Dienste lahmgelegt (kein DoS) und keine Hintertüren "
      "hinterlassen."),
     ("Fail-closed Scope",
      "Nur was in der freigegebenen scope.yaml steht, wird betrachtet. Jede Aktion "
-     "ausserhalb des Rahmens wird technisch verweigert - nicht nur unterlassen."),
-    ("Aktive Scanner standardmaessig aus",
-     "Netzwerk-Scanner (z. B. nmap/nikto) sind deaktiviert und muessen pro Auftrag "
-     "ausdruecklich freigeschaltet werden - mit Freigabe und Vier-Augen-Prinzip."),
-    ("Keine Veraenderung Ihrer Systeme",
-     "Specter aendert, loescht oder installiert nichts in Ihrer Umgebung. Es prueft, "
+     "außerhalb des Rahmens wird technisch verweigert - nicht nur unterlassen."),
+    ("Aktive Scanner standardmäßig aus",
+     "Netzwerk-Scanner (z. B. nmap/nikto) sind deaktiviert und müssen pro Auftrag "
+     "ausdrücklich freigeschaltet werden - mit Freigabe und Vier-Augen-Prinzip."),
+    ("Keine Veränderung Ihrer Systeme",
+     "Specter ändert, löscht oder installiert nichts in Ihrer Umgebung. Es prüft, "
      "dokumentiert und empfiehlt - die Umsetzung bleibt bei Ihnen."),
-    ("Vollstaendiges Audit-Log",
-     "Jede ausgefuehrte Aktion wird protokolliert. Sie erhalten auf Wunsch einen "
-     "lueckenlosen Nachweis, was wann geprueft wurde."),
+    ("Vollständiges Audit-Log",
+     "Jede ausgeführte Aktion wird protokolliert. Sie erhalten auf Wunsch einen "
+     "lückenlosen Nachweis, was wann geprüft wurde."),
 ]
 
 # Datenschutz-/DSGVO-Zusagen.
 DATA_PROTECTION: list[tuple[str, str]] = [
     ("Datenminimierung",
-     "Es werden nur die fuer die Pruefung noetigen Export-Dateien angefordert - "
+     "Es werden nur die für die Prüfung nötigen Export-Dateien angefordert - "
      "nicht mehr."),
     ("Lokale Verarbeitung",
      "Die Auswertung erfolgt in Ihrer bzw. der vereinbarten Umgebung. Daten werden "
      "nicht an unbeteiligte Dritte weitergegeben."),
-    ("Loeschkonzept",
-     "Bereitgestellte Export-Dateien werden nach Abschluss des Auftrags gemaess "
-     "Vereinbarung geloescht."),
+    ("Löschkonzept",
+     "Bereitgestellte Export-Dateien werden nach Abschluss des Auftrags gemäß "
+     "Vereinbarung gelöscht."),
     ("Auftragsverarbeitung",
      "Auf Wunsch wird ein Auftragsverarbeitungsvertrag (AVV, Art. 28 DSGVO) "
      "geschlossen."),
     ("Besondere Kategorien",
-     "Personenbezogene und besonders schuetzenswerte Daten (Art. 9 DSGVO) werden, "
-     "soweit ueberhaupt beruehrt, gesondert behandelt und nicht im Klartext "
+     "Personenbezogene und besonders schützenswerte Daten (Art. 9 DSGVO) werden, "
+     "soweit überhaupt berührt, gesondert behandelt und nicht im Klartext "
      "berichtet."),
 ]
 
@@ -150,15 +150,15 @@ def build_trust_html(customer_name: str = "Ihr Unternehmen",
     p.append("<header class='brand'>" + _MARK_IMG +
              "<div><div class='name'>Specter</div>"
              "<div class='sub'>Defensive Security Intelligence</div></div></header>")
-    p.append(f"<div class='meta'>Vertrauens- &amp; Sicherheitszusage fuer "
+    p.append(f"<div class='meta'>Vertrauens- &amp; Sicherheitszusage für "
              f"{_e(customer_name)} &middot; Stand: {_e(ts)}</div>")
 
-    p.append("<h1 class='title'>Warum Sie Specter an Ihre Systeme lassen koennen</h1>")
-    p.append("<p>Eine Pruefung darf niemals selbst zum Risiko werden. Deshalb ist "
+    p.append("<h1 class='title'>Warum Sie Specter an Ihre Systeme lassen können</h1>")
+    p.append("<p>Eine Prüfung darf niemals selbst zum Risiko werden. Deshalb ist "
              "Specter von Grund auf defensiv gebaut.</p>")
 
     p.append("<h2>Unsere technischen Garantien</h2>")
-    p.append("<table><tr><th>Garantie</th><th>Was das fuer Sie bedeutet</th></tr>")
+    p.append("<table><tr><th>Garantie</th><th>Was das für Sie bedeutet</th></tr>")
     for title, detail in GUARANTEES:
         p.append(f"<tr><td class='g'>{title}</td><td>{detail}</td></tr>")
     p.append("</table>")
@@ -176,28 +176,28 @@ def build_trust_html(customer_name: str = "Ihr Unternehmen",
     p.append("</table>")
 
     p.append("<h2>Rechtlicher Rahmen</h2>")
-    p.append("<p>Jede Pruefung erfolgt ausschliesslich auf Basis einer "
+    p.append("<p>Jede Prüfung erfolgt ausschließlich auf Basis einer "
              "<strong>schriftlichen Beauftragung</strong> und innerhalb des "
              "vereinbarten Rahmens (&sect;202a-c StGB). Ohne Freigabe kein Zugriff. "
-             "Der Pruefumfang, die Ziele und die Ausnahmen werden vorab festgelegt "
+             "Der Prüfumfang, die Ziele und die Ausnahmen werden vorab festgelegt "
              "und dokumentiert.</p>")
 
     p.append("<h2>Nachweisbarkeit</h2>")
     p.append("<ul>"
-             "<li>Lueckenloses <strong>Audit-Log</strong> aller Aktionen.</li>"
+             "<li>Lückenloses <strong>Audit-Log</strong> aller Aktionen.</li>"
              "<li>Jedes Finding mit <strong>Beleg (Evidenz)</strong>, "
              "CVSS-Einstufung und <strong>BSI-IT-Grundschutz</strong>-Bezug.</li>"
              "<li><strong>Nachtest (Re-Test)</strong> belegt die Behebung nach der "
              "Umsetzung.</li></ul>")
 
-    p.append("<div class='ok'><strong>Kurz gesagt:</strong> Specter prueft wie ein "
-             "TueV - gruendlich, nachvollziehbar und ohne Ihre Systeme zu "
-             "gefaehrden. Sie behalten jederzeit die Kontrolle.</div>")
+    p.append("<div class='ok'><strong>Kurz gesagt:</strong> Specter prüft wie ein "
+             "TÜV - gründlich, nachvollziehbar und ohne Ihre Systeme zu "
+             "gefährden. Sie behalten jederzeit die Kontrolle.</div>")
 
     p.append("<footer>Vertrauens- &amp; Sicherheitszusage, erstellt mit Specter "
-             "(autorisierte, defensive Sicherheitspruefung). Zur PDF-Ausgabe im "
-             "Browser oeffnen und &bdquo;Drucken &rarr; Als PDF speichern&ldquo; "
-             "waehlen.</footer>")
+             "(autorisierte, defensive Sicherheitsprüfung). Zur PDF-Ausgabe im "
+             "Browser öffnen und &bdquo;Drucken &rarr; Als PDF speichern&ldquo; "
+             "wählen.</footer>")
     p.append("</div></body></html>")
     return "".join(p)
 
