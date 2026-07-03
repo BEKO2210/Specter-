@@ -1,0 +1,59 @@
+Specter — Proprietäre Software-Lizenz
+=====================================
+
+Copyright © 2026 Belkis Aslani. Alle Rechte vorbehalten.
+(All rights reserved.)
+
+Diese Software und der zugehörige Quellcode, die Dokumentation, die Marke
+„Specter" sowie sämtliche zugehörigen Materialien (zusammen die „Software")
+sind das alleinige und ausschließliche Eigentum von Belkis Aslani (die
+„Rechteinhaberin"). Die Software ist **proprietär** und wird **nicht** unter
+einer Open-Source-Lizenz bereitgestellt.
+
+1. Eigentum
+   Alle Rechte, Titel und Ansprüche an der Software — einschließlich sämtlicher
+   Urheberrechte, Marken-, Datenbank- und sonstiger Schutzrechte — verbleiben
+   vollständig und ausschließlich bei der Rechteinhaberin. Die
+   Veröffentlichung des Quellcodes (z. B. auf einer Code-Plattform) begründet
+   keinerlei Übertragung oder Einräumung von Rechten und macht die Software
+   nicht zu Open Source.
+
+2. Keine Lizenzgewährung
+   Ohne vorherige, ausdrückliche und schriftliche Genehmigung der
+   Rechteinhaberin ist es untersagt, die Software oder Teile davon zu
+   nutzen, zu kopieren, zu vervielfältigen, zu verändern, zu übersetzen,
+   zusammenzuführen, zu veröffentlichen, zu verbreiten, unterzulizenzieren,
+   zu verkaufen, zu vermieten, zu verleihen oder daraus abgeleitete Werke zu
+   erstellen. Zurückentwicklung (Reverse Engineering), Dekompilierung oder
+   Disassemblierung sind untersagt, soweit nicht zwingendes Recht dies
+   ausdrücklich erlaubt.
+
+3. Ansehen und Bewertung
+   Das Betrachten des öffentlich einsehbaren Quellcodes zu Zwecken der
+   Sicherheits- und Qualitätsbewertung ist gestattet. Daraus entsteht kein
+   Recht zur Nutzung, Ausführung oder Weitergabe im Sinne von Ziffer 2.
+
+4. Bestimmungsgemäße, defensive Nutzung
+   Sofern die Rechteinhaberin eine Nutzung schriftlich gestattet, darf die
+   Software ausschließlich zu **defensiven, autorisierten** Sicherheitsprüfungen
+   im Rahmen einer schriftlichen Beauftragung und innerhalb des vereinbarten,
+   rechtlich zulässigen Prüfumfangs eingesetzt werden (vgl. § 202a–c StGB,
+   DSGVO). Jede offensive oder unautorisierte Nutzung ist untersagt.
+
+5. Gewährleistungsausschluss
+   DIE SOFTWARE WIRD „WIE BESEHEN" OHNE JEGLICHE GEWÄHRLEISTUNG BEREITGESTELLT,
+   WEDER AUSDRÜCKLICH NOCH KONKLUDENT, EINSCHLIESSLICH — ABER NICHT BESCHRÄNKT
+   AUF — DER GEWÄHRLEISTUNG DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN
+   ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER.
+
+6. Haftungsbeschränkung
+   IN KEINEM FALL HAFTET DIE RECHTEINHABERIN FÜR ANSPRÜCHE, SCHÄDEN ODER SONSTIGE
+   HAFTUNG, GLEICH OB AUS VERTRAG, UNERLAUBTER HANDLUNG ODER ANDERWEITIG, DIE SICH
+   AUS DER SOFTWARE ODER IHRER NUTZUNG ERGEBEN, SOWEIT GESETZLICH ZULÄSSIG.
+
+7. Anfragen und Genehmigungen
+   Anfragen zu Lizenzierung, Nutzung oder Vertrieb sind an die Rechteinhaberin
+   zu richten: Belkis Aslani <belkis.aslani@gmail.com>.
+
+Dieser Hinweis ist in allen Kopien oder wesentlichen Teilen der Software zu
+belassen.

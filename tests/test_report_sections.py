@@ -139,8 +139,13 @@ def test_pipe_characters_escaped_in_bsi_table():
     cfg = _cfg()
     store = _store(Finding("A | B", "injection", "hoch", "x | y"))
     md = build_markdown(cfg, AssetGraph(), store, [])
-    # Kein rohes '|' aus Titel/Asset, das die Tabelle zerbricht.
-    assert "A / B" in md
+    # Pipe in der BSI-Tabellenzelle korrekt als \| escaped (rendert als echtes
+    # '|', zerbricht die Tabelle nicht) — besser als der frühere Ersatz durch '/'.
+    assert "A \\| B" in md
+    # Und die Tabellenzeile hat weiterhin die korrekte Spaltenzahl.
+    table_rows = [ln for ln in md.splitlines()
+                  if ln.startswith("| SPEC-") and "\\|" in ln]
+    assert table_rows and table_rows[0].count(" | ") >= 4
 
 
 def test_write_reports_with_scanner_runs(tmp_path):

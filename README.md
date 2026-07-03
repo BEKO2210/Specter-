@@ -11,7 +11,7 @@
 E-Mail-Betrug, offenes RDP, fehlende Backups: Specter deckt die Angriffspfade auf, erklärt sie verständlich und belegt jeden Fund.</p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-673%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-685%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
   <img alt="Benchmark" src="https://img.shields.io/badge/Erkennung-100%25%20%C2%B7%200%20Fehlalarme-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
@@ -88,7 +88,7 @@ Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **
    python examples/self_audit.py
    ```
 
-5. **673 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
+5. **685 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
 
 6. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
 
@@ -199,8 +199,15 @@ Einmalig einrichten:
 ```bash
 git clone https://github.com/BEKO2210/Specter-.git
 cd Specter-
-pip install -r requirements.txt
+pip install -r requirements.txt          # inkl. optionalem KI-Lauf
+# oder nur der defensive Offline-Kern (ohne KI-Abhängigkeit):
+# pip install -r requirements-core.txt
 ```
+
+> Der **Offline-Kern** (alle 14 Analyzer, Report, Scope-Policy, Benchmark, Labore)
+> läuft ohne KI-Abhängigkeit. Das Paket `anthropic` wird nur für den optionalen,
+> KI-gesteuerten Lauf gebraucht. Mit modernem Packaging: `pip install .` (Kern) bzw.
+> `pip install .[ai]` (mit KI).
 
 **1) Demo ansehen** — kompletter Ablauf gegen einen lokalen Test-Server, völlig gefahrlos:
 
@@ -368,7 +375,7 @@ richtige Schutz; Specter beantwortet den Teil, der im Mittelstand meist fehlt.
 
 ## Roadmap
 
-Die Softwarequalität steht (673 Tests, 100 % Coverage, Labor-Beweise,
+Die Softwarequalität steht (685 Tests, 100 % Coverage, Labor-Beweise,
 reproduzierbare Benchmark). Der Fokus liegt jetzt auf Marktreife und
 Vertrauensaufbau:
 
@@ -391,7 +398,7 @@ Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/
 
 ## Qualität
 
-**673 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**685 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
 Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle vierzehn Analyzer (jede Regel +
 Fehlerfälle), die vierundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
@@ -411,8 +418,19 @@ examples/           # Demo, Live-Check, Labore, Self-Audit, Marketing-Generatore
   benchmark/        # markierter Korpus + Scorecard (python examples/benchmark/run.py)
   live_lab/         # Läufe gegen echte Server/DB/Container
 docs/               # Website + Live-Demo (demo.html), Benchmark-Methodik, Trust-Dokumente
-tests/              # 673 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
+tests/              # 685 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
 ```
+
+---
+
+## Lizenz
+
+**Proprietär — © 2026 Belkis Aslani. Alle Rechte vorbehalten.** Specter ist
+**kein** Open Source; Quellcode, System und Marke gehören ausschließlich der
+Rechteinhaberin. Der öffentlich einsehbare Code darf zur Sicherheits- und
+Qualitätsbewertung angesehen werden; jede Nutzung, Vervielfältigung, Änderung
+oder Weitergabe bedarf der vorherigen schriftlichen Genehmigung. Details:
+[`LICENSE`](LICENSE). Nutzungsanfragen: belkis.aslani@gmail.com.
 
 ---
 
