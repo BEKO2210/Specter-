@@ -438,8 +438,8 @@ tests/              # 791 Tests (100 % Coverage), inkl. Benchmark- und Robusthei
 ## Lizenz
 
 **Proprietär — © 2026 Belkis Aslani. Alle Rechte vorbehalten.** Specter ist
-**kein** Open Source; Quellcode, System und Marke gehören ausschließlich der
-Rechteinhaberin. Der öffentlich einsehbare Code darf zur Sicherheits- und
+**kein** Open Source; Quellcode, System und Marke gehören ausschließlich dem
+Rechteinhaber. Der öffentlich einsehbare Code darf zur Sicherheits- und
 Qualitätsbewertung angesehen werden; jede Nutzung, Vervielfältigung, Änderung
 oder Weitergabe bedarf der vorherigen schriftlichen Genehmigung. Details:
 [`LICENSE`](LICENSE). Nutzungsanfragen: belkis.aslani@gmail.com.
