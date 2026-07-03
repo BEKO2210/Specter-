@@ -297,29 +297,24 @@ section.alt{background:linear-gradient(180deg,transparent,rgba(14,28,43,.5),tran
 .band .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
 /* FOOTER */
-footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area-inset-bottom));color:var(--muted);font-size:13.5px}
-.foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;margin-bottom:36px}
-.foot-top .brandmark{font-size:19px;color:var(--text)}
-.foot-top p{margin:12px 0 0;max-width:34ch}
-.foot-badge{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:12px;
-  letter-spacing:.03em;color:var(--text-2);border:1px solid var(--line);border-radius:999px;padding:6px 13px;
-  background:rgba(255,255,255,.02)}
-.foot-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex:none}
-.foot-col h4{font-family:'Space Grotesk','Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 14px}
-.foot-col a{display:block;color:var(--text-2);padding:9px 0}
-.foot-col a:hover{color:var(--teal-2)}
-.foot-bot{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-start;justify-content:space-between;
-  border-top:1px solid var(--line);padding-top:24px}
-.foot-legal{display:flex;flex-direction:column;gap:6px;line-height:1.55;min-width:0}
-.foot-legal .prop{color:var(--text-2)}
-.foot-legal .prop strong{color:var(--text);font-weight:600}
-.foot-bot .fr{display:flex;gap:12px 22px;flex-wrap:wrap;align-items:center}
-.foot-bot a:hover{color:var(--teal-2)}
-@media(max-width:560px){
-  .foot-bot{flex-direction:column;gap:18px}
-  .foot-legal{gap:8px}
-  .foot-bot .fr{gap:10px 18px}
+footer{border-top:1px solid var(--line);padding:26px 0 calc(24px + env(safe-area-inset-bottom));color:var(--muted);font-size:13.5px}
+.foot-row{display:flex;align-items:center;justify-content:space-between;gap:14px 28px;flex-wrap:wrap;padding-bottom:18px}
+.foot-row .logo .brandmark{font-size:18px}
+.foot-nav{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center}
+.foot-nav a{color:var(--text-2);white-space:nowrap}
+.foot-nav a:hover{color:var(--teal-2)}
+.foot-base{display:flex;align-items:center;justify-content:space-between;gap:12px 22px;flex-wrap:wrap;
+  border-top:1px solid var(--line);padding-top:16px}
+.foot-copy{display:flex;align-items:center;gap:9px 15px;flex-wrap:wrap}
+.foot-chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:rgba(255,255,255,.02);white-space:nowrap}
+.foot-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex:none}
+.foot-muted{color:var(--muted);font-size:12.5px}
+.foot-links{display:flex;gap:8px 20px;flex-wrap:wrap;align-items:center}
+.foot-links a{color:var(--text-2)}
+.foot-links a:hover{color:var(--teal-2)}
+@media(max-width:640px){
+  .foot-base{flex-direction:column;align-items:flex-start;gap:14px}
 }
 
 /* REVEAL */
@@ -876,35 +871,25 @@ footer{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area
 
 <footer>
   <div class="wrap">
-    <div class="foot-top">
-      <div>
-        <a class="logo" href="#top"><img src="assets/img/mark.png" alt="" style="height:24px"><span class="brandmark">Specter</span></a>
-        <p>Defensive Security Intelligence — automatische, verständliche IT-Sicherheitsprüfung für den Mittelstand.</p>
-        <span class="foot-badge"><span class="dot"></span>Proprietäre Software · kein Open Source</span>
-      </div>
-      <div class="foot-col">
-        <h4>Seite</h4>
+    <div class="foot-row">
+      <a class="logo" href="#top"><img src="assets/img/mark.png" alt="" style="height:22px"><span class="brandmark">Specter</span></a>
+      <nav class="foot-nav">
         <a href="#problem">Das Risiko</a>
         <a href="#pfade">Angriffspfade</a>
         <a href="#leistungen">Prüfumfang</a>
         <a href="#preise">Preise</a>
-        <a href="Specter-Beispielbericht.pdf" target="_blank" rel="noopener">Beispielbericht (PDF)</a>
-        <a href="#faq">Häufige Fragen</a>
-      </div>
-      <div class="foot-col">
-        <h4>Kontakt &amp; Recht</h4>
-        <a href="mailto:belkis.aslani@gmail.com">belkis.aslani@gmail.com</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
-      </div>
+        <a href="Specter-Beispielbericht.pdf" target="_blank" rel="noopener">Beispielbericht</a>
+        <a href="#faq">FAQ</a>
+        <a href="mailto:belkis.aslani@gmail.com">Kontakt</a>
+      </nav>
     </div>
-    <div class="foot-bot">
-      <div class="foot-legal">
+    <div class="foot-base">
+      <div class="foot-copy">
         <span>© 2026 Specter · Belkis Aslani</span>
-        <span class="prop"><strong>Proprietäre Software.</strong> Alle Rechte vorbehalten — kein Open Source.</span>
-        <span>Rein defensiv · DSGVO- &amp; §202-StGB-konform</span>
+        <span class="foot-chip"><span class="dot"></span>Proprietär · kein Open Source</span>
+        <span class="foot-muted">DSGVO- &amp; §202-StGB-konform</span>
       </div>
-      <div class="fr">
+      <div class="foot-links">
         <a href="impressum.html">Impressum</a>
         <a href="datenschutz.html">Datenschutz</a>
         <a href="https://github.com/BEKO2210/Specter-/blob/main/LICENSE" target="_blank" rel="noopener">Lizenz</a>
