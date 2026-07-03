@@ -33,7 +33,7 @@ PACKAGES: list[tuple[str, str, str, list[str], bool]] = [
      ["E-Mail-, TLS-, Firewall- und Backup-Prüfung",
       "Verständlicher Bericht mit Prioritäten",
       "Konkrete Handlungsempfehlungen",
-      "CVSS-Bewertung je Finding"], True),
+      "CVSS-Lite-Bewertung je Finding"], True),
     ("Voll-Audit", "ab 2.500 €",
      "Das vollständige Lagebild über alle Prüfbereiche.",
      ["Alle vierzehn Prüfbereiche (AD, M365, Cloud, Web, DNS, DB, Container, …)",
@@ -161,7 +161,7 @@ def build_offer_html(customer_name: str = "Ihr Unternehmen",
     p.append("<div class='trust'>Specter prüft rein <strong>defensiv</strong>: "
              "keine Angriffe, kein Eingriff in Ihre Systeme, nur bereitgestellte bzw. "
              "öffentliche Daten. Ausschließlich im schriftlich vereinbarten Rahmen "
-             "(&sect;202 StGB), DSGVO-konform, mit lückenlosem Audit-Log.</div>")
+             "(&sect;202 StGB), nach DSGVO-Grunds&auml;tzen, mit lückenlosem Audit-Log.</div>")
 
     p.append(f"<footer>Interesse oder Fragen? Schreiben Sie an "
              f"<a href='mailto:{mail}'>{mail}</a>. Dieses Angebot ist freibleibend; "

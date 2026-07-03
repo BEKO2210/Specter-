@@ -11,9 +11,9 @@
 E-Mail-Betrug, offenes RDP, fehlende Backups: Specter deckt die Angriffspfade auf, erklärt sie verständlich und belegt jeden Fund.</p>
 
 <p align="center">
-  <img alt="Tests" src="https://img.shields.io/badge/Tests-791%20passing-14B8A6">
+  <img alt="Tests" src="https://img.shields.io/badge/Tests-806%20passing-14B8A6">
   <img alt="Coverage" src="https://img.shields.io/badge/Coverage-100%25-14B8A6">
-  <img alt="Benchmark" src="https://img.shields.io/badge/Erkennung-100%25%20%C2%B7%200%20Fehlalarme-14B8A6">
+  <img alt="Regressionskorpus" src="https://img.shields.io/badge/Regressionskorpus-100%25%20Recall%20%C2%B7%200%20FP-14B8A6">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-0D1B2A">
   <img alt="Defensiv" src="https://img.shields.io/badge/Ausrichtung-rein%20defensiv-0D1B2A">
 </p>
@@ -35,7 +35,7 @@ Die großen Plattformen (EDR, Cloud Security, SIEM) **überwachen den laufenden 
 | **Aufgabe** | Prävention: Angriffspfade finden und schließen, *bevor* etwas passiert | Detektion: laufende Angriffe erkennen und stoppen |
 | **Zielgruppe** | Mittelstand ohne eigenes Security-Team | Konzerne mit SOC und Security-Budget |
 | **Eingriff ins System** | Keiner — offline, lesend, keine Agenten | Agenten auf jedem Endpoint, Dauerbetrieb |
-| **Ergebnis** | Verständlicher Bericht mit Prioritäten, CVSS und BSI-Zuordnung | Dashboards und Alerts für Spezialisten |
+| **Ergebnis** | Verständlicher Bericht mit Prioritäten, CVSS-Lite-Score und BSI-Zuordnung | Dashboards und Alerts für Spezialisten |
 | **Rechtsrahmen** | Fail-closed Scope, Audit-Log, § 202 StGB dokumentiert | Vom Betreiber selbst zu verantworten |
 | **Kosten** | Einzelne Prüfung statt Lizenz pro Endpoint | Laufende Abo-Kosten pro Gerät/Nutzer |
 
@@ -73,13 +73,13 @@ und rechtlich sauber.
 
 Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **nachprüfbar** ist — von jedem, in Minuten, auf dem eigenen Rechner:
 
-1. **Jeder Fund trägt seinen Beweis.** Die Analyzer arbeiten deterministisch und regelbasiert: Zu jedem Fund gehören die konkrete Evidenz (der DNS-Eintrag, der Header, die Firewall-Regel), ein CVSS-Score und die BSI-IT-Grundschutz-Zuordnung. Kein Fund ohne Beleg — dieselben Eingaben liefern denselben Bericht. Das hält die False-Positive-Diskussion kurz: Was im Bericht steht, lässt sich zeigen.
+1. **Jeder Fund trägt seinen Beweis.** Die Analyzer arbeiten deterministisch und regelbasiert: Zu jedem Fund gehören die konkrete Evidenz (der DNS-Eintrag, der Header, die Firewall-Regel), ein **CVSS-Lite**-Score (eine transparente Näherung — kein offizieller CVSS-Base-Score, der Bericht weist das aus) und die BSI-IT-Grundschutz-Zuordnung. Kein Fund ohne Beleg — dieselben Eingaben liefern denselben Bericht. Das hält die False-Positive-Diskussion kurz: Was im Bericht steht, lässt sich zeigen.
 
-2. **Messbare Erkennungs- und Falsch-Positiv-Rate.** Statt einer erfundenen Marketing-Quote misst Specter gegen einen **offengelegten, reproduzierbaren Korpus**: 64 markierte Szenarien über alle 14 Analyzer mit bekanntem Soll-Ergebnis. Das Resultat — **176/176 gepflanzte Lücken erkannt (Recall 100 %), null Fehlalarme (Präzision 100 %)** auch auf 23 gehärteten und adversarialen Täuschungs-Szenarien. Selbst nachrechnen (Millisekunden):
+2. **Ein offengelegter Regressionskorpus statt einer Marketing-Quote.** Specter misst gegen einen **offengelegten, reproduzierbaren Korpus**: 71 markierte Szenarien über alle 14 Analyzer (plus zwei Roh-Format-Routen für echte `docker inspect`-/AWS-CLI-Ausgaben) mit bekanntem Soll-Ergebnis — **197/197 gepflanzte Lücken erkannt, null Fehlalarme**, auch auf 27 gehärteten und adversarialen Täuschungs-Szenarien. Wichtig, ehrlich benannt: Korpus und Regeln stammen vom selben Autor — die 100 % sind eine **korpus-relative Regressions-Garantie** (keine bekannte Fehlerklasse geht je wieder verloren), **keine Real-World-Erkennungsrate**. Selbst nachrechnen (Millisekunden):
    ```bash
    python examples/benchmark/run.py
    ```
-   → [Methodik & Ergebnis](docs/BENCHMARK.md) · [Korpus](examples/benchmark/corpus.py). Der Korpus ist bewusst *schwer* gebaut (Werte exakt auf der Schwelle, numerischer Versionsvergleich, semantische Täuschungen wie „öffentlicher 443-Port ist legitim", schmutzige Exporte mit `"false"`/`"8"` als Strings) und läuft als Gate bei jedem Commit mit.
+   → [Methodik, Grenzen & Ergebnis](docs/BENCHMARK.md) · [Korpus](examples/benchmark/corpus.py). Der Korpus ist bewusst *schwer* gebaut (Werte exakt auf der Schwelle, numerischer Versionsvergleich, semantische Täuschungen wie „öffentlicher 443-Port ist legitim", schmutzige Exporte mit `"false"`/`"8"` als Strings) und läuft als Gate bei jedem Commit mit.
 
 3. **Geprüft gegen echte Server, nicht nur Fixtures.** Die mitgelieferten Labore starten reale, absichtlich verwundbare Systeme und weisen nach, dass Specter die Schwachstellen findet — siehe [Labor-Beweise](#labor-beweise-selbst-nachprüfbar) unten.
 
@@ -88,7 +88,7 @@ Sicherheitssoftware verspricht viel. Specter ist so gebaut, dass jede Aussage **
    python examples/self_audit.py
    ```
 
-5. **791 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
+5. **806 Tests, 100 % Coverage, als Gate erzwungen.** Nicht als Ziel, sondern per `--cov-fail-under=100` in der CI auf Python 3.11 und 3.12 — ein Commit, der die Abdeckung senkt, kommt nicht durch.
 
 6. **Nachtest mit Delta.** Nach der Behebung zeigt der zweite Lauf schwarz auf weiß, was geschlossen wurde — der messbare Nutzen steht im Bericht, nicht im Prospekt.
 
@@ -130,10 +130,10 @@ die gefährlichen Fehlkonfigurationen erkennt:
 python examples/live_lab/run_container_lab.py
 ```
 
-### Benchmark: Erkennung mit Zahl statt Behauptung
+### Benchmark: ein offengelegter Regressionskorpus
 
 Wo die Labore *einzelne* echte Systeme prüfen, misst die Benchmark die
-Analyzer-Logik **in der Breite** — gegen einen offengelegten Korpus aus 64
+Analyzer-Logik **in der Breite** — gegen einen offengelegten Korpus aus 71
 markierten Szenarien mit bekanntem Soll-Ergebnis:
 
 ```bash
@@ -142,16 +142,21 @@ python examples/benchmark/run.py
 
 | Kennzahl | Wert |
 |---|---|
-| Abgedeckte Analyzer | **14 / 14** |
-| Gepflanzte Lücken erkannt (Recall) | **176 / 176 = 100 %** |
-| Fehlalarme (auf 23 gehärteten/Täuschungs-Szenarien) | **0 → Präzision 100 %** |
+| Abgedeckte Analyzer | **14 / 14** (+ 2 Roh-Format-Routen) |
+| Gepflanzte Lücken erkannt (Recall) | **197 / 197 = 100 %** |
+| Fehlalarme (auf 27 gehärteten/Täuschungs-Szenarien) | **0 → Präzision 100 %** |
 | Schweregrade korrekt | **100 %** |
 
 Der Korpus ist bewusst **adversarial**: Werte liegen exakt auf der
 Entscheidungsschwelle, Versionsvergleiche sind numerisch statt alphabetisch
 (`2.9.0 < 2.10.0` **muss** greifen), und Täuschungen wie ein *legitimer*
 öffentlicher 443-Port oder eine *deaktivierte* Conditional-Access-Richtlinie
-dürfen nicht zu Fehlalarmen führen. Details: [`docs/BENCHMARK.md`](docs/BENCHMARK.md).
+dürfen nicht zu Fehlalarmen führen. Eine eigene **Roh-Format-Dimension** füttert
+die unveränderten Ausgaben echter Werkzeuge (`docker inspect`, AWS-CLI-Bündel)
+durch dieselben Normalisierer wie die Kundenanalyse. Zur Einordnung: Korpus und
+Regeln stammen vom selben Autor — die Zahl ist eine Regressions-Garantie auf
+offengelegtem Umfang, keine Real-World-Erkennungsrate. Methodik und Grenzen:
+[`docs/BENCHMARK.md`](docs/BENCHMARK.md).
 
 ---
 
@@ -171,7 +176,7 @@ flowchart LR
         C["Agent<br/>(mit oder ohne KI-Steuerung)"]
         D["14 Offline-Analyzer<br/>deterministisch, regelbasiert"]
         E["Angriffspfad- &<br/>Choke-Point-Analyse"]
-        F["CVSS-Score +<br/>BSI-Grundschutz-Zuordnung"]
+        F["CVSS-Lite-Score +<br/>BSI-Grundschutz-Zuordnung"]
     end
 
     subgraph Ausgaben
@@ -221,7 +226,7 @@ python examples/run_demo.py
 python examples/live_email_check.py kunde-domain.de
 ```
 
-**3) Tests laufen lassen** — 626 Tests, 100 % Coverage:
+**3) Tests laufen lassen** — 806 Tests, 100 % Coverage:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -287,7 +292,7 @@ Vierzehn Offline-Analyzer decken genau diese Einfallstore ab:
 | **Exchange** | veraltete Versionen, exponierte Dienste |
 | **Backup-Resilienz** | 3-2-1-Regel, Immutable-Backups, getestete Restores |
 
-Dazu: automatische **Angriffspfad-Analyse**, **Choke-Points**, ein **CVSS-Score** je
+Dazu: automatische **Angriffspfad-Analyse**, **Choke-Points**, ein **CVSS-Lite-Score** je
 Fund, **BSI-IT-Grundschutz**-Zuordnung und ein **Nachtest** (Delta gegen den letzten Bericht).
 
 ---
@@ -302,7 +307,7 @@ defensiv gebaut:
 - **Fail-closed Scope** — alles außerhalb der `scope.yaml` wird technisch verweigert.
 - **Aktive Scanner standardmäßig aus** — nmap/nikto nur mit ausdrücklicher Freigabe (Human-in-the-loop).
 - **Vollständiges Audit-Log** — jede Aktion ist nachweisbar.
-- **Nur mit schriftlicher Beauftragung** — im vereinbarten Rahmen (§ 202a-c StGB), DSGVO-konform.
+- **Nur mit schriftlicher Beauftragung** — im vereinbarten Rahmen (§ 202a-c StGB), unter Beachtung der DSGVO-Grundsätze (Datenminimierung, lokale Verarbeitung).
 
 ### Trust Center
 
@@ -364,7 +369,7 @@ Scope-Datei freigegeben ist; alles andere verweigert die Software technisch
 
 **Was bekommen wir am Ende?**
 Einen Bericht in verständlichem Deutsch: die Funde mit Beweis, ein Schweregrad
-(CVSS), die Zuordnung zum BSI-IT-Grundschutz und eine priorisierte Liste, was zuerst
+(CVSS-Lite), die Zuordnung zum BSI-IT-Grundschutz und eine priorisierte Liste, was zuerst
 zu tun ist. [So sieht er aus.](docs/Specter-Beispielbericht.pdf)
 
 **Woher wissen wir, dass die Behebung gewirkt hat?**
@@ -381,7 +386,7 @@ richtige Schutz; Specter beantwortet den Teil, der im Mittelstand meist fehlt.
 
 ## Roadmap
 
-Die Softwarequalität steht (791 Tests, 100 % Coverage, Labor-Beweise,
+Die Softwarequalität steht (806 Tests, 100 % Coverage, Labor-Beweise,
 reproduzierbare Benchmark). Der Fokus liegt jetzt auf Marktreife und
 Vertrauensaufbau:
 
@@ -404,7 +409,7 @@ Wünsche und Prioritäten gern als [Issue](https://github.com/BEKO2210/Specter-/
 
 ## Qualität
 
-**791 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
+**806 Tests, 100 % Code-Coverage** (per `pytest.ini` als Gate erzwungen,
 `--cov-fail-under=100`), CI auf Python 3.11 und 3.12. Abgedeckt sind u. a. Scope-
 Durchsetzung (Pfad-Traversal, CIDR, Sperrliste), alle vierzehn Analyzer (jede Regel +
 Fehlerfälle), die vierundzwanzig Werkzeuge, Angriffspfad-/Choke-Point-Analyse, CVSS-Lite,
@@ -433,7 +438,7 @@ examples/           # Demo, Live-Check, Labore, Self-Audit, Marketing-Generatore
   benchmark/        # markierter Korpus + Scorecard (python examples/benchmark/run.py)
   live_lab/         # Läufe gegen echte Server/DB/Container
 docs/               # Website + Live-Demo (demo.html), Benchmark-Methodik, Trust-Dokumente
-tests/              # 791 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
+tests/              # 806 Tests (100 % Coverage), inkl. Benchmark- und Robustheits-Gate
 ```
 
 ---

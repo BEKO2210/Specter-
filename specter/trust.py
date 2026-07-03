@@ -186,7 +186,7 @@ def build_trust_html(customer_name: str = "Ihr Unternehmen",
     p.append("<ul>"
              "<li>Lückenloses <strong>Audit-Log</strong> aller Aktionen.</li>"
              "<li>Jedes Finding mit <strong>Beleg (Evidenz)</strong>, "
-             "CVSS-Einstufung und <strong>BSI-IT-Grundschutz</strong>-Bezug.</li>"
+             "CVSS-Lite-Einstufung und <strong>BSI-IT-Grundschutz</strong>-Bezug.</li>"
              "<li><strong>Nachtest (Re-Test)</strong> belegt die Behebung nach der "
              "Umsetzung.</li></ul>")
 

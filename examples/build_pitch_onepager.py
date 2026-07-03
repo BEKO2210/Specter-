@@ -247,7 +247,7 @@ def render_html(m: dict) -> str:
 
 def main() -> int:
     m = compute_metrics()
-    m["tests"] = count_tests() or 626
+    m["tests"] = count_tests() or 806
     out = REPO_ROOT / "reports" / "specter-investoren-onepager.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render_html(m), encoding="utf-8")
