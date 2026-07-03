@@ -30,10 +30,10 @@ class AnalyzeDatabaseTool:
             "name": self.name,
             "description": (
                 "Analysiert einen bereitgestellten Export der Datenbank-Landschaft "
-                "rein defensiv und erfasst Expositionsluecken als Findings: "
-                "oeffentlich erreichbare DB-Ports, fehlende Authentifizierung "
+                "rein defensiv und erfasst Expositionslücken als Findings: "
+                "öffentlich erreichbare DB-Ports, fehlende Authentifizierung "
                 "(Redis/MongoDB), Standard-/Default-Zugangsdaten und "
-                "unverschluesselten Transport. Keine Live-Verbindung - nur die "
+                "unverschlüsselten Transport. Keine Live-Verbindung - nur die "
                 "lokale Datei im Scope."
             ),
             "input_schema": {
@@ -55,7 +55,7 @@ class AnalyzeDatabaseTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

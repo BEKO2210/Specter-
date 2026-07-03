@@ -1,13 +1,13 @@
-"""Re-Test-/Delta-Modus: Vergleich mit einem frueheren Bericht.
+"""Re-Test-/Delta-Modus: Vergleich mit einem früheren Bericht.
 
-Liest einen frueheren JSON-Bericht ein und stellt ihn den aktuellen Findings
-gegenueber:
+Liest einen früheren JSON-Bericht ein und stellt ihn den aktuellen Findings
+gegenüber:
   * behoben          - im alten Bericht, jetzt nicht mehr vorhanden
   * neu              - jetzt vorhanden, im alten Bericht nicht
   * weiterhin offen  - in beiden (mit Alter in Tagen)
 
-Der Abgleich erfolgt ueber die stabile Finding-ID (Hash aus Kategorie, Asset,
-Fundstelle und Titel), sodass identische Schwachstellen zuverlaessig
+Der Abgleich erfolgt über die stabile Finding-ID (Hash aus Kategorie, Asset,
+Fundstelle und Titel), sodass identische Schwachstellen zuverlässig
 wiedererkannt werden. Alles rein lokal - kein externer Dienst.
 """
 
@@ -50,7 +50,7 @@ class DeltaResult:
 def _parse_date(value: Any) -> _dt.date | None:
     if not isinstance(value, str) or not value.strip():
         return None
-    # Format des Berichts: "YYYY-MM-DD HH:MM" - nur der Datumsteil zaehlt.
+    # Format des Berichts: "YYYY-MM-DD HH:MM" - nur der Datumsteil zählt.
     head = value.strip().split(" ", 1)[0]
     try:
         return _dt.date.fromisoformat(head)
@@ -63,7 +63,7 @@ def compute_delta(
     current: FindingsStore,
     today: _dt.date | None = None,
 ) -> DeltaResult:
-    """Vergleicht einen frueheren JSON-Bericht mit den aktuellen Findings."""
+    """Vergleicht einen früheren JSON-Bericht mit den aktuellen Findings."""
     prev_findings = previous.get("findings") if isinstance(previous, dict) else None
     if not isinstance(prev_findings, list):
         prev_findings = []

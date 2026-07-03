@@ -1,4 +1,4 @@
-"""Tests fuer die produktionsreifen Report-Abschnitte."""
+"""Tests für die produktionsreifen Report-Abschnitte."""
 
 from __future__ import annotations
 
@@ -41,10 +41,10 @@ def test_report_has_all_sections():
     md = build_markdown(cfg, AssetGraph(), store, [])
     for heading in [
         "# Sicherheitsbericht", "## Executive Summary", "## Risiko-Einstufung",
-        "## Angriffspfade", "## Quick Wins", "## Langfristige Massnahmen",
+        "## Angriffspfade", "## Quick Wins", "## Langfristige Maßnahmen",
         "## Technische Findings", "## BSI-IT-Grundschutz-Mapping",
         "## Scanner-Ergebnisse", "## Scope-Hinweise", "## Limitierungen",
-        "## Naechste Schritte",
+        "## Nächste Schritte",
     ]:
         assert heading in md, f"Abschnitt fehlt: {heading}"
     # BSI-Bezug muss der Test-Substring finden.
@@ -84,7 +84,7 @@ def test_empty_long_term_message():
     cfg = _cfg()
     store = _store(Finding("Sonstiges", "other", "info", "x"))
     md = build_markdown(cfg, AssetGraph(), store, [])
-    assert "Keine strategischen Massnahmen" in md
+    assert "Keine strategischen Maßnahmen" in md
 
 
 def test_scanner_results_rendered():
@@ -92,7 +92,7 @@ def test_scanner_results_rendered():
     runs = [{"scanner": "nmap", "target": "10.10.0.5", "command": "nmap ...",
              "returncode": 0, "finding_count": 3, "truncated": True, "error": ""}]
     md = build_markdown(cfg, AssetGraph(), _store(), [], scanner_runs=runs)
-    assert "nmap" in md and "10.10.0.5" in md and "gekuerzt" in md
+    assert "nmap" in md and "10.10.0.5" in md and "gekürzt" in md
 
 
 def test_scanner_results_error_shown():
@@ -105,7 +105,7 @@ def test_scanner_results_error_shown():
 
 def test_no_scanners_message():
     md = build_markdown(_cfg(), AssetGraph(), _store(), [])
-    assert "Keine aktiven Scanner ausgefuehrt" in md
+    assert "Keine aktiven Scanner ausgeführt" in md
 
 
 def test_scope_section_reflects_config():

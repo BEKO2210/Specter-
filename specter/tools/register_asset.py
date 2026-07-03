@@ -71,9 +71,9 @@ class RegisterAssetTool:
         if relation and related_to:
             ok = self.state.assets.add_edge(asset.key, related_to, relation)
             edge_info = (
-                f" Kante '{relation}' -> {related_to} hinzugefuegt."
+                f" Kante '{relation}' -> {related_to} hinzugefügt."
                 if ok
-                else f" (Kante zu {related_to} nicht moeglich - Nachbar unbekannt.)"
+                else f" (Kante zu {related_to} nicht möglich - Nachbar unbekannt.)"
             )
 
         self.audit.record(

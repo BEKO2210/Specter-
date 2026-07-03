@@ -1,6 +1,6 @@
-"""Tests fuer die Scope-Durchsetzung - die kritischste Komponente.
+"""Tests für die Scope-Durchsetzung - die kritischste Komponente.
 
-Ausfuehren mit:  python -m pytest -q
+Ausführen mit:  python -m pytest -q
 """
 
 from __future__ import annotations

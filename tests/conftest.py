@@ -46,7 +46,7 @@ def mittelstand_config() -> Config:
     """Config, deren Datei-Scope auf die Muster-GmbH-Fixture zeigt."""
     return Config(
         engagement=Engagement(
-            "Pentest Mustermann GmbH", "Geschaeftsfuehrung Mustermann GmbH",
+            "Pentest Mustermann GmbH", "Geschaeftsführung Mustermann GmbH",
             "BEAUFTRAGUNG-2026-042", None,
         ),
         allowed_targets=["127.0.0.1", "10.10.0.0/16"],

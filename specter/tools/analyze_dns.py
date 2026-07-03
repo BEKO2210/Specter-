@@ -30,9 +30,9 @@ class AnalyzeDnsTool:
             "name": self.name,
             "description": (
                 "Analysiert einen bereitgestellten Export der DNS-Konfiguration "
-                "einer Domain rein defensiv und erfasst DNS-Sicherheitsluecken als "
+                "einer Domain rein defensiv und erfasst DNS-Sicherheitslücken als "
                 "Findings: fehlendes DNSSEC (ad-Flag), fehlende CAA-Records, offener "
-                "Zonentransfer (AXFR), Wildcard-Eintraege sowie dangling CNAMEs "
+                "Zonentransfer (AXFR), Wildcard-Einträge sowie dangling CNAMEs "
                 "(Subdomain-Takeover-Risiko). Keine Live-Abfrage - nur die lokale "
                 "Datei im Scope."
             ),
@@ -55,7 +55,7 @@ class AnalyzeDnsTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

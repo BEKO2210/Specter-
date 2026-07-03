@@ -1,4 +1,4 @@
-"""Tool: Abhaengigkeits-/SCA-Export (Dependencies + Advisories) offline analysieren."""
+"""Tool: Abhängigkeits-/SCA-Export (Dependencies + Advisories) offline analysieren."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ class AnalyzeDependenciesTool:
         return {
             "name": self.name,
             "description": (
-                "Analysiert einen bereitgestellten Abhaengigkeits-Export (JSON) "
+                "Analysiert einen bereitgestellten Abhängigkeits-Export (JSON) "
                 "gegen eine lokal mitgelieferte Advisory-/CVE-Liste rein defensiv "
                 "(Software Composition Analysis). Erfasst als Findings: bekannte "
                 "verwundbare Paketversionen (Log4Shell-Klasse), nicht mehr "
@@ -56,7 +56,7 @@ class AnalyzeDependenciesTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -68,8 +68,8 @@ class AnalyzeDependenciesTool:
         self.audit.record("analyze_dependencies.ok", path=str(path),
                           findings=len(findings), recorded=recorded)
         if not findings:
-            return ToolResult("SCA-/Abhaengigkeits-Analyse ohne Befunde (oder unbekannte Struktur).")
-        lines = [f"SCA-/Abhaengigkeits-Analyse: {len(findings)} Finding(s), {recorded} neu erfasst:"]
+            return ToolResult("SCA-/Abhängigkeits-Analyse ohne Befunde (oder unbekannte Struktur).")
+        lines = [f"SCA-/Abhängigkeits-Analyse: {len(findings)} Finding(s), {recorded} neu erfasst:"]
         for f in findings[:30]:
             lines.append(f"  [{f.severity.label}] {f.title}")
         return ToolResult("\n".join(lines))

@@ -1,6 +1,6 @@
-"""Szenario-Tests: vollstaendiges Engagement gegen einen deutschen Mittelstaendler.
+"""Szenario-Tests: vollständiges Engagement gegen einen deutschen Mittelständler.
 
-Deckt die typische Angriffsflaeche der Muster-GmbH ab: Webshop, Kunden-API,
+Deckt die typische Angriffsfläche der Muster-GmbH ab: Webshop, Kunden-API,
 ERP/DATEV, Infrastruktur (RDP/DB offen), personenbezogene Daten (DSGVO),
 veraltete Komponenten - inklusive der realistischen Angriffspfade.
 """
@@ -20,7 +20,7 @@ from specter.tools.base import build_registry
 MITTELSTAND_FIXTURE = Path(__file__).parent / "fixtures" / "mittelstand"
 
 
-# -- Hilfen fuer die simulierte Agenten-Steuerung --------------------------
+# -- Hilfen für die simulierte Agenten-Steuerung --------------------------
 
 def _text(t):
     return SimpleNamespace(type="text", text=t)
@@ -58,7 +58,7 @@ def test_scan_covers_full_attack_surface(ms_config, tmp_path):
     reg["scan_code"].run({"path": str(MITTELSTAND_FIXTURE)})
 
     cats = {f.category for f in state.findings.all()}
-    # Die fuer den Mittelstand typischen Klassen muessen auftauchen.
+    # Die für den Mittelstand typischen Klassen müssen auftauchen.
     for expected in {
         "secret_exposure", "injection", "crypto_weakness",
         "default_credentials", "personal_data", "outdated_component",
@@ -101,7 +101,7 @@ def test_domain_takeover_via_rdp(ms_config, tmp_path):
         "location": "10.10.0.5:3389", "evidence": "3389/tcp open ms-wbt-server",
     })
     paths = correlate(state.findings, state.assets)
-    # Zusammen mit Default-Credentials aus dem Scan -> Domaenenuebernahme.
+    # Zusammen mit Default-Credentials aus dem Scan -> Domänenübernahme.
     assert any("Domänenübernahme" in p.title for p in paths)
 
 
@@ -117,7 +117,7 @@ def test_outdated_component_path(ms_config, tmp_path):
     assert any("veralteter Komponente" in p.title for p in paths)
 
 
-# -- Vollstaendiger autonomer Lauf (simuliertes LLM) -----------------------
+# -- Vollständiger autonomer Lauf (simuliertes LLM) -----------------------
 
 def test_full_autonomous_engagement(ms_config, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
@@ -141,7 +141,7 @@ def test_full_autonomous_engagement(ms_config, tmp_path, monkeypatch):
         _resp([_text("Engagement abgeschlossen. ABGESCHLOSSEN")], "end_turn"),
     ])
     agent = SecurityAgent(ms_config, llm, audit, printer=lambda _m: None, state=state)
-    summary = agent.run("Fuehre einen vollstaendigen Pentest der Mustermann GmbH durch.")
+    summary = agent.run("Führe einen vollständigen Pentest der Mustermann GmbH durch.")
 
     assert "ABGESCHLOSSEN" in summary
     assert len(state.findings) >= 12

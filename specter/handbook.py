@@ -1,8 +1,8 @@
 """Markengerechtes Lern-/Bedien-Handbuch für Specter (HTML -> PDF).
 
-Erzeugt ein eigenstaendiges, druckoptimiertes HTML-Handbuch im Specter-Branding,
+Erzeugt ein eigenständiges, druckoptimiertes HTML-Handbuch im Specter-Branding,
 das die Bedienerin/den Bediener Schritt für Schritt durch die Software führt -
-in einfacher Sprache, ohne Vorwissen. Im Browser laesst es sich über
+in einfacher Sprache, ohne Vorwissen. Im Browser lässt es sich über
 "Drucken -> Als PDF speichern" in ein schönes PDF überführen, ganz ohne
 zusätzliche Abhängigkeit.
 
@@ -335,7 +335,7 @@ def build_handbook_html(company_name: str = "Ihr Unternehmen",
 
 def write_handbook(directory: str | Path = "reports",
                    company_name: str = "Ihr Unternehmen") -> Path:
-    """Schreibt das Handbuch als HTML-Datei und gibt den Pfad zurueck."""
+    """Schreibt das Handbuch als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-handbuch.html"

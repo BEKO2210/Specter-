@@ -1,4 +1,4 @@
-"""Tests fuer die reinen Live-DNS-Parser (offline, deterministisch)."""
+"""Tests für die reinen Live-DNS-Parser (offline, deterministisch)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Tests fuer die GitHub-Draft-PR-Integration (offline + online, gemockt)."""
+"""Tests für die GitHub-Draft-PR-Integration (offline + online, gemockt)."""
 
 from __future__ import annotations
 
@@ -247,7 +247,7 @@ def test_tool_online_success(tmp_path, monkeypatch):
     tool = _tool(tmp_path, _cfg(tmp_path, gh), state,
                  approval=lambda _a: True, factory=factory)
     r = tool.run({})
-    assert "1 Draft-PR(s) eroeffnet" in r.content
+    assert "1 Draft-PR(s) eröffnet" in r.content
     assert created["repo"] == "o/r"
 
 

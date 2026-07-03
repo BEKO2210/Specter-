@@ -1,4 +1,4 @@
-"""Gemeinsame Basis fuer sichere Scanner-Wrapper."""
+"""Gemeinsame Basis für sichere Scanner-Wrapper."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ _PORTS_RE = re.compile(r"^[0-9]{1,5}(?:[,-][0-9]{1,5})*$")
 
 
 class ScannerError(Exception):
-    """Validierungs-/Freigabefehler - die Ausfuehrung wird verweigert."""
+    """Validierungs-/Freigabefehler - die Ausführung wird verweigert."""
 
 
 @dataclass
@@ -48,13 +48,13 @@ class Scanner:
 
     name: str = ""
     binary: str = ""
-    # Immer erlaubte Flag-"Koepfe" (ohne angehaengten Wert).
+    # Immer erlaubte Flag-"Koepfe" (ohne angehängten Wert).
     SAFE_FLAGS: frozenset[str] = frozenset()
     # Nur mit allow_aggressive erlaubt.
     AGGRESSIVE_FLAGS: frozenset[str] = frozenset()
     # Nie erlaubt (hat Vorrang) - Evasion, Spoofing, DoS, Dateiausgabe ...
     FORBIDDEN_FLAGS: frozenset[str] = frozenset()
-    # Flags, deren naechstes Token ein Wert ist (wird separat validiert).
+    # Flags, deren nächstes Token ein Wert ist (wird separat validiert).
     VALUE_FLAGS: frozenset[str] = frozenset()
 
     # -- von Unterklassen zu implementieren --------------------------------
@@ -66,9 +66,9 @@ class Scanner:
         return []
 
     def validate_value(self, flag: str, value: str) -> None:
-        """Prueft den Wert eines VALUE_FLAG (Standard: Ports-Syntax fuer -p)."""
+        """Prüft den Wert eines VALUE_FLAG (Standard: Ports-Syntax für -p)."""
         if flag in {"-p", "-port", "--top-ports"} and not _PORTS_RE.match(value):
-            raise ScannerError(f"Ungueltiger Portwert fuer {flag}: {value!r}")
+            raise ScannerError(f"Ungültiger Portwert für {flag}: {value!r}")
 
     # -- gemeinsame Logik ---------------------------------------------------
 
@@ -85,13 +85,13 @@ class Scanner:
         return heads
 
     def validate_extra_args(self, args: list[str], policy: ScannerPolicy) -> None:
-        """Strikte Allowlist-Pruefung zusaetzlicher Argumente (fail-closed).
+        """Strikte Allowlist-Prüfung zusätzlicher Argumente (fail-closed).
 
         Reihenfolge:
           1. Ein *exakt* in scanners.<name>.extra_allowed_flags freigegebenes
-             Token ist immer erlaubt (uebersteuert auch das Default-Verbot -
-             aber nur fuer genau dieses Token, z. B. "--script=http-title").
-          2. Sonst: gefaehrliche Flags sind blockiert.
+             Token ist immer erlaubt (übersteuert auch das Default-Verbot -
+             aber nur für genau dieses Token, z. B. "--script=http-title").
+          2. Sonst: gefährliche Flags sind blockiert.
           3. Sonst: nur Flags aus der Allowlist (SAFE + ggf. AGGRESSIVE).
         """
         allowed = self._allowed_heads(policy)
@@ -108,13 +108,13 @@ class Scanner:
                 )
             head = self._flag_head(token)
             if token in explicit:
-                # Ausdruecklich freigegeben - auch wenn sonst verboten.
+                # Ausdrücklich freigegeben - auch wenn sonst verboten.
                 if head in self.VALUE_FLAGS and "=" not in token:
                     expect_value_for = head
                 continue
             if head in self.FORBIDDEN_FLAGS or token in self.FORBIDDEN_FLAGS:
                 raise ScannerError(
-                    f"Gefaehrliches Flag ist blockiert: {token!r} "
+                    f"Gefährliches Flag ist blockiert: {token!r} "
                     "(Evasion/Spoofing/DoS/Dateiausgabe)."
                 )
             if head not in allowed and token not in allowed:
@@ -125,12 +125,12 @@ class Scanner:
                     )
                 raise ScannerError(
                     f"Flag nicht in der Allowlist: {token!r}. "
-                    "Nur ausdruecklich freigegebene Flags sind erlaubt."
+                    "Nur ausdrücklich freigegebene Flags sind erlaubt."
                 )
             if head in self.VALUE_FLAGS and "=" not in token:
                 expect_value_for = head
         if expect_value_for is not None:
-            raise ScannerError(f"Wert fuer {expect_value_for} fehlt.")
+            raise ScannerError(f"Wert für {expect_value_for} fehlt.")
 
     def build_argv(
         self,
@@ -141,7 +141,7 @@ class Scanner:
         extra_args: list[str] | None = None,
     ) -> list[str]:
         if ports is not None and not _PORTS_RE.match(ports):
-            raise ScannerError(f"Ungueltige Portangabe: {ports!r}")
+            raise ScannerError(f"Ungültige Portangabe: {ports!r}")
         extra = list(extra_args or [])
         if extra:
             self.validate_extra_args(extra, policy)
@@ -164,7 +164,7 @@ class Scanner:
             )
         if aggressive and not policy.allow_aggressive:
             raise ScannerError(
-                f"Aggressiver Modus fuer '{self.name}' nicht freigegeben "
+                f"Aggressiver Modus für '{self.name}' nicht freigegeben "
                 f"(scanners.{self.name}.allow_aggressive: true)."
             )
         # Ziel muss im Netzwerk-Scope liegen (kann ScopeViolation werfen).
@@ -186,7 +186,7 @@ class Scanner:
             result.error = f"Programm nicht installiert: {self.binary}"
             return result
         except subprocess.TimeoutExpired:
-            result.error = f"Zeitlimit ({policy.timeout_seconds}s) ueberschritten."
+            result.error = f"Zeitlimit ({policy.timeout_seconds}s) überschritten."
             return result
 
         result.returncode = proc.returncode

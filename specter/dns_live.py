@@ -1,4 +1,4 @@
-"""Reine Hilfsfunktionen fuer den Live-DNS-Check (DNS-over-HTTPS -> Export).
+"""Reine Hilfsfunktionen für den Live-DNS-Check (DNS-over-HTTPS -> Export).
 
 Der eigentliche Netzwerkabruf lebt bewusst im Beispiel-Runner
 (`examples/live_email_check.py`); hier stehen nur die deterministischen,
@@ -7,8 +7,8 @@ geparsten dns.google-Antwort ziehen und daraus die Export-Struktur bauen, die
 der Offline-Analyzer `analyze_dns` erwartet.
 
 So bleibt die Kernlogik testbar (offline, 100 % Coverage) und identisch zur
-Kunden-Analyse - der Live-Check fuettert nur echte, oeffentliche DNS-Daten ein.
-Reine Leseabfragen oeffentlicher DNS-Eintraege, kein Eingriff.
+Kunden-Analyse - der Live-Check fuettert nur echte, öffentliche DNS-Daten ein.
+Reine Leseabfragen öffentlicher DNS-Einträge, kein Eingriff.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def extract_caa(doh_response: Any) -> list[str]:
 
 
 def build_dns_export(domain: str, soa_response: Any, caa_response: Any) -> dict[str, Any]:
-    """Setzt die Export-Struktur fuer `analyze_dns` aus echten DoH-Antworten zusammen."""
+    """Setzt die Export-Struktur für `analyze_dns` aus echten DoH-Antworten zusammen."""
     return {
         "domain": domain,
         "dnssec": extract_ad_flag(soa_response),

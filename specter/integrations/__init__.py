@@ -1,8 +1,8 @@
-"""Opt-in-Integrationen fuer ausgehende Aktionen (z. B. GitHub-Draft-PRs).
+"""Opt-in-Integrationen für ausgehende Aktionen (z. B. GitHub-Draft-PRs).
 
-Standardmaessig passiert nichts nach aussen: Specter arbeitet offline. Eine
-Integration wird erst aktiv, wenn sie in scope.yaml ausdruecklich freigegeben
-ist und (fuer GitHub) ein API-Token vorliegt.
+Standardmäßig passiert nichts nach außen: Specter arbeitet offline. Eine
+Integration wird erst aktiv, wenn sie in scope.yaml ausdrücklich freigegeben
+ist und (für GitHub) ein API-Token vorliegt.
 """
 
 from .github_pr import (

@@ -1,6 +1,6 @@
-"""Defensive SCA-/Abhaengigkeits-Analyse (Software Composition Analysis).
+"""Defensive SCA-/Abhängigkeits-Analyse (Software Composition Analysis).
 
-Wertet einen lokalen JSON-Export der eingesetzten Abhaengigkeiten (z. B. aus
+Wertet einen lokalen JSON-Export der eingesetzten Abhängigkeiten (z. B. aus
 requirements.txt, pip freeze, package.json, npm ls oder einer SBOM) gegen eine
 ebenfalls lokal bereitgestellte Advisory-/CVE-Liste aus. Ziel: bekannte
 verwundbare Komponenten (Log4Shell-Klasse), nicht mehr gepflegte Pakete und
@@ -8,7 +8,7 @@ ungepinnte Versionen erkennen - rein offline, ohne Abfrage von Paket-Registries
 oder CVE-Feeds, ohne jede Ausnutzung.
 
 Das ist im Mittelstand ein Haupteinfallstor: veraltete Bibliotheken mit
-oeffentlich bekannten Luecken (OWASP A06:2021 "Vulnerable and Outdated
+öffentlich bekannten Lücken (OWASP A06:2021 "Vulnerable and Outdated
 Components").
 
 Erwartete Struktur (alle Felder optional):
@@ -29,8 +29,8 @@ Erwartete Struktur (alle Felder optional):
       ]
     }
 
-Die Advisory-Liste ist die vom Betreiber/Pruefer bereitgestellte lokale
-Wissensbasis - so bleibt die Analyse deterministisch und vollstaendig offline.
+Die Advisory-Liste ist die vom Betreiber/Prüfer bereitgestellte lokale
+Wissensbasis - so bleibt die Analyse deterministisch und vollständig offline.
 """
 
 from __future__ import annotations
@@ -90,7 +90,7 @@ def _split_op(part: str) -> tuple[str, str]:
 
 
 def _satisfies(version: Any, constraint: str) -> bool:
-    """Prueft, ob eine Version die (kommagetrennten) Constraints erfuellt."""
+    """Prüft, ob eine Version die (kommagetrennten) Constraints erfüllt."""
     matched_any = False
     for raw in str(constraint).split(","):
         raw = raw.strip()
@@ -117,7 +117,7 @@ def _satisfies(version: Any, constraint: str) -> bool:
 
 
 def _advisory_matches(dep: dict[str, Any], adv: dict[str, Any]) -> bool:
-    """True, wenn ein Advisory auf eine Abhaengigkeit zutrifft."""
+    """True, wenn ein Advisory auf eine Abhängigkeit zutrifft."""
     if str(dep.get("name", "")).strip().lower() != str(adv.get("name", "")).strip().lower():
         return False
     adv_eco = str(adv.get("ecosystem", "")).strip().lower()
@@ -148,9 +148,9 @@ def _analyze_dependency(dep: dict[str, Any], advisories: list[dict[str, Any]],
         detail = f" - {adv_title}" if adv_title else ""
         fix_hint = f"; behoben in {fixed}" if fixed else ""
         out.append(_mk(
-            f"Verwundbare Abhaengigkeit: {name} {version} ({cve})",
+            f"Verwundbare Abhängigkeit: {name} {version} ({cve})",
             "outdated_component", sev, loc,
-            f"Version {version} erfuellt Advisory {cve} "
+            f"Version {version} erfüllt Advisory {cve} "
             f"(verwundbar: {adv.get('vulnerable')}{fix_hint}){detail}",
             location=loc, cwe="CWE-1395",
         ))
@@ -160,7 +160,7 @@ def _analyze_dependency(dep: dict[str, Any], advisories: list[dict[str, Any]],
 
     if dep.get("deprecated"):
         out.append(_mk(
-            f"Nicht mehr gepflegte Abhaengigkeit: {name}",
+            f"Nicht mehr gepflegte Abhängigkeit: {name}",
             "outdated_component", _UNMAINTAINED_VERSION_SEV, loc,
             f"deprecated=true (Version {version or 'unbekannt'}) - kein "
             "Sicherheits-Support mehr",
@@ -168,7 +168,7 @@ def _analyze_dependency(dep: dict[str, Any], advisories: list[dict[str, Any]],
         ))
     if version.lower() in _UNPINNED:
         out.append(_mk(
-            f"Ungepinnte Abhaengigkeit: {name}",
+            f"Ungepinnte Abhängigkeit: {name}",
             "outdated_component", Severity.NIEDRIG, loc,
             f"version={version or '(leer)'} - keine feste Version, "
             "reproduzierbare Builds und CVE-Zuordnung erschwert",
@@ -178,7 +178,7 @@ def _analyze_dependency(dep: dict[str, Any], advisories: list[dict[str, Any]],
 
 
 def analyze_dependencies(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle SCA-Pruefungen aus und liefert die Findings."""
+    """Führt alle SCA-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     project = str(data.get("project", "Projekt"))

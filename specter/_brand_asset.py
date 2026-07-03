@@ -1,7 +1,7 @@
 """Eingebettetes Specter-Mark (exakt aus dem Brand-Board) als Data-URI.
 
 Autogeneriert aus docs/brand/specter-mark.png (96px). Wird im HTML-Report
-inline eingebettet, damit der Bericht eigenstaendig (single file) bleibt.
+inline eingebettet, damit der Bericht eigenständig (single file) bleibt.
 """
 
 SPECTER_MARK_DATA_URI = (

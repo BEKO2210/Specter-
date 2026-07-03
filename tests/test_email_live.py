@@ -1,4 +1,4 @@
-"""Tests fuer die reinen Live-E-Mail-Check-Bausteine (offline, deterministisch)."""
+"""Tests für die reinen Live-E-Mail-Check-Bausteine (offline, deterministisch)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from specter.email_live import (
 
 
 def _der_len(length: int) -> bytes:
-    """DER-Laengenkodierung (kurz oder lang)."""
+    """DER-Längenkodierung (kurz oder lang)."""
     if length < 0x80:
         return bytes([length])
     body = length.to_bytes((length.bit_length() + 7) // 8, "big")
@@ -82,7 +82,7 @@ def test_dkim_entry_without_p_is_none():
 
 
 def test_dkim_entry_present_without_bits():
-    # p= vorhanden aber leer/ungueltig -> present ohne key_bits.
+    # p= vorhanden aber leer/ungültig -> present ohne key_bits.
     entry = dkim_entry("s1", ["v=DKIM1; k=rsa; p="])
     assert entry == {"selector": "s1", "present": True}
 
@@ -110,7 +110,7 @@ def test_build_export_and_analyze_weak_domain():
     assert export["domain"] == "kunde.de"
     assert export["spf"] == "v=spf1 include:_spf -all"
     assert export["dmarc"] == "v=DMARC1; p=none"
-    # Nur der Selector mit p= wird uebernommen.
+    # Nur der Selector mit p= wird übernommen.
     assert [d["selector"] for d in export["dkim"]] == ["s1"]
     # Der echte Analyzer erkennt p=none.
     findings = analyze_email_security(export)

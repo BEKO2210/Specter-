@@ -1,4 +1,4 @@
-"""Tests fuer die sicheren Scanner-Wrapper (Argument-Validierung + Ausfuehrung)."""
+"""Tests für die sicheren Scanner-Wrapper (Argument-Validierung + Ausführung)."""
 
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ def test_base_scanner_is_abstract():
 
 def test_explicit_value_flag_allowance():
     s = NmapScanner()
-    # Ein ausdruecklich freigegebenes VALUE-Flag ohne '=' erwartet einen Wert.
+    # Ein ausdrücklich freigegebenes VALUE-Flag ohne '=' erwartet einen Wert.
     pol = ScannerPolicy(enabled=True, extra_allowed_flags=["--top-ports"])
     s.validate_extra_args(["--top-ports", "500"], pol)
-    with pytest.raises(ScannerError, match="Wert fuer"):
+    with pytest.raises(ScannerError, match="Wert für"):
         s.validate_extra_args(["--top-ports"], pol)
 
 
@@ -94,13 +94,13 @@ def test_nmap_unknown_flag_denied():
 def test_nmap_extra_allowed_flags_from_scope():
     s = NmapScanner()
     pol = ScannerPolicy(enabled=True, extra_allowed_flags=["--script=http-title"])
-    # --script ist normal verboten, hier aber ausdruecklich freigegeben.
+    # --script ist normal verboten, hier aber ausdrücklich freigegeben.
     s.validate_extra_args(["--script=http-title"], pol)
 
 
 def test_nmap_value_flag_missing_value():
     s = NmapScanner()
-    with pytest.raises(ScannerError, match="Wert fuer"):
+    with pytest.raises(ScannerError, match="Wert für"):
         s.validate_extra_args(["-p"], ScannerPolicy(enabled=True))
 
 
@@ -110,7 +110,7 @@ def test_nmap_non_flag_argument_rejected():
         s.validate_extra_args(["evil.com"], ScannerPolicy(enabled=True))
 
 
-# ------------------------------ Ausfuehrung -------------------------------
+# ------------------------------ Ausführung -------------------------------
 
 def test_run_denied_when_disabled(tmp_path):
     s = NmapScanner()

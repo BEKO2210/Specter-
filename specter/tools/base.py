@@ -1,4 +1,4 @@
-"""Basisklassen und Registry fuer Agenten-Werkzeuge."""
+"""Basisklassen und Registry für Agenten-Werkzeuge."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from ..state import EngagementState
 
 @dataclass
 class ToolResult:
-    """Rueckgabe eines Tools an den Agenten."""
+    """Rückgabe eines Tools an den Agenten."""
 
     content: str
     is_error: bool = False
@@ -42,7 +42,7 @@ def build_registry(
     audit: AuditLog,
     state: EngagementState,
 ) -> dict[str, Tool]:
-    """Erzeugt alle verfuegbaren Tools und gibt sie als Name->Tool-Map zurueck."""
+    """Erzeugt alle verfügbaren Tools und gibt sie als Name->Tool-Map zurück."""
     # Import hier, um Zirkularimporte zu vermeiden.
     from .analyze_ad import AnalyzeAdTool
     from .analyze_aws import AnalyzeAwsTool
@@ -89,7 +89,7 @@ def build_registry(
         AnalyzeTlsTool(config, policy, audit, state),
         AnalyzeBackupTool(config, policy, audit, state),
         AnalyzeHttpHeadersTool(config, policy, audit, state),
-        # Aktiv / Haende
+        # Aktiv / Hände
         RunCommandTool(config, policy, audit),
         RunScannerTool(config, policy, audit, state),
         # Findings-Analyse -> Korrelation -> Fix & Report

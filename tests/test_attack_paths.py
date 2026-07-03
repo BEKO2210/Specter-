@@ -1,4 +1,4 @@
-"""Tests fuer die Angriffspfad-Korrelation und den Report."""
+"""Tests für die Angriffspfad-Korrelation und den Report."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ def test_aggregate_merges_same_title():
     assert len(result) == 2                       # zwei Titel
     top = result[0]
     assert top.title == "Kontoübernahme"
-    assert top.severity is Severity.KRITISCH      # hoechster Schweregrad
+    assert top.severity is Severity.KRITISCH      # höchster Schweregrad
     assert top.instances == 2
     assert set(top.finding_ids) == {"F1", "S1", "F2"}   # vereinigt, dedupliziert
     assert "Zusammengefasst aus 2" in top.rationale

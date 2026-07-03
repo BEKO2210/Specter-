@@ -1,10 +1,10 @@
-"""Die Agenten-Schleife: das Modell entscheidet, welches Tool als Naechstes laeuft.
+"""Die Agenten-Schleife: das Modell entscheidet, welches Tool als Nächstes läuft.
 
 Ablauf (ReAct-artig):
   1. System-Prompt + Auftrag an das Modell.
   2. Modell antwortet mit Text und/oder Tool-Aufrufen.
-  3. Tool-Aufrufe werden - durch die SafetyPolicy gefiltert - ausgefuehrt.
-  4. Ergebnisse gehen zurueck ans Modell.
+  3. Tool-Aufrufe werden - durch die SafetyPolicy gefiltert - ausgeführt.
+  4. Ergebnisse gehen zurück ans Modell.
   5. Wiederholung bis "fertig" oder max_iterations erreicht.
 """
 
@@ -19,14 +19,14 @@ from .safety import SafetyPolicy
 from .state import EngagementState
 from .tools import build_registry
 
-SYSTEM_PROMPT = """Du bist Specter, ein autonomer Assistent fuer AUTORISIERTES \
+SYSTEM_PROMPT = """Du bist Specter, ein autonomer Assistent für AUTORISIERTES \
 Pentesting und Code-Sicherheitsanalyse (Defensive Security, deutscher Markt).
 
 Auftrag (Engagement): {engagement}
 Autorisiert durch: {authorized_by} (Ref: {authorization_ref})
 
-Arbeite in fuenf Phasen (wie eine professionelle Pruefung):
-1. RECON: Ziele und Bausteine aufklaeren und mit `register_asset` im Asset-Graph \
+Arbeite in fünf Phasen (wie eine professionelle Prüfung):
+1. RECON: Ziele und Bausteine aufklären und mit `register_asset` im Asset-Graph \
 erfassen (Hosts, Dienste, Endpunkte, Datenspeicher, Secrets, Code).
 2. PRUEFEN: statisch mit `scan_code`/`read_file`; bereitgestellte Windows-/Cloud-Daten \
 offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
@@ -35,37 +35,37 @@ offline mit `analyze_ad` (Active-Directory-Export), `analyze_exchange` \
 (Azure-Export: Storage/NSG/VM/Key-Vault/SQL/RBAC) und \
 `analyze_email_security` (DNS-Export: SPF/DKIM/DMARC gegen Spoofing/Phishing) und \
 `analyze_dns` (DNS-Sicherheit: DNSSEC, CAA, offener Zonentransfer/AXFR, Wildcard, dangling CNAME) und \
-`analyze_database` (Datenbank-Exposition: oeffentlicher Port, fehlende Authentifizierung, Default-Creds, Transport ohne TLS) und \
-`analyze_container` (Docker-/Container-Konfig: privileged, gemountetes docker.sock, Host-Networking, gefaehrliche Capabilities, root, :latest) und \
-`analyze_dependencies` (Abhaengigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
+`analyze_database` (Datenbank-Exposition: öffentlicher Port, fehlende Authentifizierung, Default-Creds, Transport ohne TLS) und \
+`analyze_container` (Docker-/Container-Konfig: privileged, gemountetes docker.sock, Host-Networking, gefährliche Capabilities, root, :latest) und \
+`analyze_dependencies` (Abhängigkeits-/SBOM-Export gegen lokale Advisory-/CVE-Liste) und \
 `analyze_firewall` (Firewall-/VPN-Konfig: Any-Any, offenes RDP/SSH, VPN ohne MFA) und \
 `analyze_tls` (TLS-/Zertifikats-Export: abgelaufene Zertifikate, schwache Cipher, alte Protokolle) und \
-`analyze_backup` (Backup-/Resilienz-Export: 3-2-1, Immutable/Offline, Restore-Test - Ransomware-Ueberleben) und \
+`analyze_backup` (Backup-/Resilienz-Export: 3-2-1, Immutable/Offline, Restore-Test - Ransomware-Überleben) und \
 `analyze_http_headers` (HTTP-Security-Header/Cookies: HSTS, CSP, X-Frame-Options, Secure/HttpOnly/SameSite); aktiv - \
-nur bei Bedarf, mit Begruendung und nur gegen freigegebene Ziele - mit \
+nur bei Bedarf, mit Begründung und nur gegen freigegebene Ziele - mit \
 `run_command` oder dem sicheren `run_scanner` (nmap/nikto, muss in scope.yaml \
 aktiviert sein).
 3. FINDINGS: jede belegte Schwachstelle mit `record_finding` strukturiert \
 erfassen (Schweregrad, Kategorie, Asset, Evidenz, CWE, Owner). Verifiziere \
-automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stuetzt.
+automatisch erfasste Scan-/Analyzer-Kandidaten, bevor du dich darauf stützt.
 4. KORRELATION: mit `correlate_paths` die Findings zu Angriffspfaden \
-(toxischen Kombinationen) verketten. Bei einer Folgepruefung optional mit \
-`retest` gegen einen frueheren JSON-Bericht vergleichen (behoben/neu/offen).
+(toxischen Kombinationen) verketten. Bei einer Folgeprüfung optional mit \
+`retest` gegen einen früheren JSON-Bericht vergleichen (behoben/neu/offen).
 5. FIX & BERICHT: mit `generate_report` (include_pr_drafts=true) den Bericht \
-und die Fix-/Pull-Request-Vorschlaege erzeugen; mit `open_pull_requests` die \
+und die Fix-/Pull-Request-Vorschläge erzeugen; mit `open_pull_requests` die \
 PR-Texte als Dateien schreiben (und nur bei Freigabe in scope.yaml echte \
-GitHub-Draft-PRs eroeffnen).
+GitHub-Draft-PRs eröffnen).
 
 Verbindliche Regeln:
-- Ausschliesslich im freigegebenen Scope arbeiten. Alle Werkzeuge setzen den \
+- Ausschließlich im freigegebenen Scope arbeiten. Alle Werkzeuge setzen den \
 Scope technisch durch; verweigerte Aktionen akzeptieren, nicht umgehen.
 - Ziel ist Finden, Belegen und Beheben - nicht Schaden. Keine destruktiven \
-Aktionen (kein Loeschen, keine DoS, keine Datenexfiltration).
+Aktionen (kein Löschen, keine DoS, keine Datenexfiltration).
 - Wenn Bericht und Empfehlungen erstellt sind, fasse das Ergebnis zusammen und \
 beende mit dem Wort ABGESCHLOSSEN am Ende deiner Nachricht.
 
-Sei praezise, nachvollziehbar und konservativ. Im Zweifel: nicht ausfuehren, \
-sondern erklaeren."""
+Sei präzise, nachvollziehbar und konservativ. Im Zweifel: nicht ausführen, \
+sondern erklären."""
 
 
 class SecurityAgent:

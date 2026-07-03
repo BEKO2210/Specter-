@@ -242,7 +242,7 @@ def build_html(
         for m in mappings:
             p.append(f"<tr><td>{_e(m.finding_id)}</td><td>{_e(m.risiko)}</td>"
                      f"<td>{_e(m.bereich)}</td><td>{_e(m.bsi_bezug)}</td>"
-                     f"<td>{_e(m.prioritaet)}</td></tr>")
+                     f"<td>{_e(m.priorität)}</td></tr>")
         p.append("</table>")
 
     # Scanner-Ergebnisse

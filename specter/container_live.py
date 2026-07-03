@@ -1,4 +1,4 @@
-"""Reiner Parser fuer echte `docker inspect`-Ausgabe -> Analyzer-Export.
+"""Reiner Parser für echte `docker inspect`-Ausgabe -> Analyzer-Export.
 
 Der eigentliche `docker inspect`-Aufruf lebt im Labor-Runner
 (`examples/live_lab/run_container_lab.py`); hier steht nur die deterministische,
@@ -17,7 +17,7 @@ _DOCKER_SOCK = "/var/run/docker.sock"
 
 
 def _socket_mounted(host_config: dict[str, Any], mounts: Any) -> bool:
-    """Prueft, ob das Docker-Socket in den Container gemountet ist."""
+    """Prüft, ob das Docker-Socket in den Container gemountet ist."""
     for bind in host_config.get("Binds") or []:
         if str(bind).split(":", 1)[0] == _DOCKER_SOCK:
             return True

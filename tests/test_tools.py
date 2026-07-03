@@ -1,4 +1,4 @@
-"""Tests fuer alle Agenten-Werkzeuge (Erfolg + Scope-/Fehlerpfade)."""
+"""Tests für alle Agenten-Werkzeuge (Erfolg + Scope-/Fehlerpfade)."""
 
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def test_register_asset_edge_unknown_neighbor(kit):
     tool = RegisterAssetTool(state, audit)
     r = tool.run({"type": "host", "name": "h", "relation": "x",
                   "related_to": "host:unknown"})
-    assert "nicht moeglich" in r.content
+    assert "nicht möglich" in r.content
 
 
 def test_register_asset_missing_name(kit):
@@ -99,7 +99,7 @@ def test_read_file_too_large(kit, targets_dir):
     f = targets_dir / "big.py"
     f.write_text("x" * 100)
     r = ReadFileTool(config, policy, audit).run({"path": str(f)})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 # -- scan_code -------------------------------------------------------------
@@ -128,7 +128,7 @@ def test_scan_code_clean_dir(kit, targets_dir):
     config, policy, audit, state = kit
     (targets_dir / "clean.py").write_text("x = 1 + 2\n")
     r = CodeScanTool(config, policy, audit, state).run({"path": str(targets_dir)})
-    assert "Keine verdaechtigen Muster" in r.content
+    assert "Keine verdächtigen Muster" in r.content
     assert len(state.findings) == 0
 
 
@@ -183,12 +183,12 @@ def test_run_command_timeout(kit):
     config, policy, audit, _ = kit
     config.allowed_binaries.append("sleep")
     config.command_timeout = 1
-    # sleep braucht ein "ziel-aehnliches" Argument -> 127.0.0.1 ist ungueltig fuer
+    # sleep braucht ein "ziel-aehnliches" Argument -> 127.0.0.1 ist ungültig für
     # sleep, daher stattdessen echo mit langem Lauf simulieren wir nicht real;
-    # wir pruefen den Timeout-Pfad ueber ein echtes langsames Kommando.
+    # wir prüfen den Timeout-Pfad über ein echtes langsames Kommando.
     r = RunCommandTool(config, policy, audit).run({"command": "sleep 127.0.0.1"})
-    # 'sleep 127.0.0.1' -> sleep interpretiert Argument als ungueltig und endet
-    # schnell mit Exit != 0; kein Timeout. Daher nur pruefen: kein Crash.
+    # 'sleep 127.0.0.1' -> sleep interpretiert Argument als ungültig und endet
+    # schnell mit Exit != 0; kein Timeout. Daher nur prüfen: kein Crash.
     assert isinstance(r.content, str)
 
 
@@ -201,7 +201,7 @@ def test_record_finding_ok(kit):
                   "asset": "api", "location": "api.py:9", "cwe": "CWE-89"})
     assert not r.is_error
     assert len(state.findings) == 1
-    assert state.findings.all()[0].status == "bestaetigt"
+    assert state.findings.all()[0].status == "bestätigt"
 
 
 def test_record_finding_invalid_severity(kit):
@@ -245,7 +245,7 @@ def test_correlate_paths_empty(kit):
 
 def test_correlate_paths_bad_min_severity_defaults(kit):
     _, _, audit, state = kit
-    # Ungueltiger Wert faellt auf 'mittel' zurueck -> kein Crash.
+    # Ungültiger Wert fällt auf 'mittel' zurück -> kein Crash.
     r = CorrelatePathsTool(state, audit).run({"min_severity": "banane"})
     assert isinstance(r.content, str)
 

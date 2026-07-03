@@ -2,11 +2,11 @@
 
 Damit echte Firmen Specter an ihre Systeme lassen, braucht es einen klaren,
 kundentauglichen Nachweis, *warum* die Prüfung sicher ist. Dieses Modul
-buendelt die technischen Garantien maschinenlesbar (`trust_guarantees()`,
+bündelt die technischen Garantien maschinenlesbar (`trust_guarantees()`,
 `data_protection_points()`) und erzeugt daraus einen markengerechten,
 druckoptimierten One-Pager.
 
-Die Garantien sind keine Marketing-Aussagen, sondern spiegeln das tatsaechliche
+Die Garantien sind keine Marketing-Aussagen, sondern spiegeln das tatsächliche
 Verhalten der Software wider: offline-first, fail-closed Scope, keine
 Ausnutzung, aktive Scanner standardmäßig aus, vollständiges Audit-Log.
 """
@@ -204,7 +204,7 @@ def build_trust_html(customer_name: str = "Ihr Unternehmen",
 
 def write_trust_onepager(directory: str | Path = "reports",
                          customer_name: str = "Ihr Unternehmen") -> Path:
-    """Schreibt den Vertrauens-One-Pager als HTML-Datei und gibt den Pfad zurueck."""
+    """Schreibt den Vertrauens-One-Pager als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-vertrauen-onepager.html"

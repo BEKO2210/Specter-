@@ -1,4 +1,4 @@
-"""Tests fuer die Marketing-Landingpage (HTML-Erzeugung)."""
+"""Tests für die Marketing-Landingpage (HTML-Erzeugung)."""
 
 from __future__ import annotations
 

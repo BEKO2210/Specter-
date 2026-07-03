@@ -1,11 +1,11 @@
-"""Tests fuer den reinen docker-inspect-Normalisierer (offline, deterministisch)."""
+"""Tests für den reinen docker-inspect-Normalisierer (offline, deterministisch)."""
 
 from __future__ import annotations
 
 from specter.analyzers.container import analyze_container
 from specter.container_live import normalize_container, normalize_inspect
 
-# Echte (verkuerzte) `docker inspect`-Ausgabe eines absichtlich unsicheren Containers.
+# Echte (verkürzte) `docker inspect`-Ausgabe eines absichtlich unsicheren Containers.
 _INSPECT = [{
     "Id": "9f3a1c7e2b4d",
     "Name": "/legacy-web",

@@ -1,4 +1,4 @@
-"""Tests fuer den Re-Test-/Delta-Modus."""
+"""Tests für den Re-Test-/Delta-Modus."""
 
 from __future__ import annotations
 
@@ -95,14 +95,14 @@ def test_delta_section_in_markdown():
     current = _store(Finding("Neues Problem", "injection", "hoch", "api"))
     delta = compute_delta(previous, current, today=_dt.date(2026, 7, 1))
     md = build_markdown(_cfg_dummy(), AssetGraph(), current, [], delta=delta)
-    assert "Re-Test / Veraenderung" in md
+    assert "Re-Test / Veränderung" in md
     assert "Behobenes Problem" in md
     assert "Neues Problem" in md
 
 
 def test_delta_absent_no_section():
     md = build_markdown(_cfg_dummy(), AssetGraph(), _store(), [])
-    assert "## Re-Test / Veraenderung" not in md
+    assert "## Re-Test / Veränderung" not in md
 
 
 def test_delta_in_json():
@@ -111,7 +111,7 @@ def test_delta_in_json():
     delta = compute_delta(previous, _store(), today=_dt.date(2026, 7, 1))
     data = build_json(_cfg_dummy(), AssetGraph(), _store(), [], delta=delta)
     assert data["retest"]["counts"]["resolved"] == 1
-    # Ohne Delta ist der Schluessel None.
+    # Ohne Delta ist der Schlüssel None.
     assert build_json(_cfg_dummy(), AssetGraph(), _store(), [])["retest"] is None
 
 
@@ -178,7 +178,7 @@ def test_retest_tool_too_large(tmp_path):
     cfg.max_file_bytes = 5
     path = _write_prev(tmp_path, {"findings": [{"id": "x" * 50}]})
     r = tool.run({"previous_report": path})
-    assert r.is_error and "zu gross" in r.content
+    assert r.is_error and "zu groß" in r.content
 
 
 def test_deltaresult_defaults():

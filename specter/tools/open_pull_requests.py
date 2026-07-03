@@ -46,10 +46,10 @@ class OpenPullRequestsTool:
             "name": self.name,
             "description": (
                 "Erzeugt aus den erfassten Findings fertige Draft-Pull-Request-"
-                "Texte. Standardmaessig OFFLINE als Markdown-Dateien (nichts "
-                "verlaesst das Haus). Nur wenn integrations.github in scope.yaml "
-                "aktiviert ist und ein Token vorliegt, werden zusaetzlich echte "
-                "GitHub-Draft-PRs eroeffnet (kein Auto-Merge, kein Auto-Apply). "
+                "Texte. Standardmäßig OFFLINE als Markdown-Dateien (nichts "
+                "verlässt das Haus). Nur wenn integrations.github in scope.yaml "
+                "aktiviert ist und ein Token vorliegt, werden zusätzlich echte "
+                "GitHub-Draft-PRs eröffnet (kein Auto-Merge, kein Auto-Apply). "
                 "Vor dem Online-Schritt wird eine Freigabe eingeholt."
             ),
             "input_schema": {"type": "object", "properties": {}},
@@ -80,7 +80,7 @@ class OpenPullRequestsTool:
             lines.append(f"Kein Token in ${gh.token_env} - kein Online-Schritt.")
             return ToolResult("\n".join(lines))
 
-        action = f"{len(drafts)} Draft-PR(s) in {gh.repo} eroeffnen"
+        action = f"{len(drafts)} Draft-PR(s) in {gh.repo} eröffnen"
         if not self.approval_fn(action):
             lines.append("Online-Schritt vom Benutzer abgelehnt (nur offline).")
             self.audit.record("open_pull_requests.rejected_by_user", repo=gh.repo)
@@ -92,7 +92,7 @@ class OpenPullRequestsTool:
         failed = [r for r in results if r["error"]]
         self.audit.record("open_pull_requests.online", repo=gh.repo,
                           opened=len(ok), failed=len(failed))
-        lines.append(f"GitHub ({gh.repo}): {len(ok)} Draft-PR(s) eroeffnet, "
+        lines.append(f"GitHub ({gh.repo}): {len(ok)} Draft-PR(s) eröffnet, "
                      f"{len(failed)} fehlgeschlagen.")
         for r in ok[:20]:
             lines.append(f"  {r['finding_id']}: {r['url']}")

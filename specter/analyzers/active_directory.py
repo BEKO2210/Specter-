@@ -29,7 +29,7 @@ from typing import Any
 
 from ..findings import Finding, Severity
 
-# Schwellenwerte (an BSI-Empfehlungen / gaengiger Praxis orientiert).
+# Schwellenwerte (an BSI-Empfehlungen / gängiger Praxis orientiert).
 MIN_PASSWORD_LENGTH = 12
 STALE_LOGON_DAYS = 90
 KRBTGT_MAX_AGE_DAYS = 180
@@ -56,13 +56,13 @@ def _analyze_password_policy(pol: dict[str, Any], domain: str) -> list[Finding]:
     min_len = pol.get("min_length")
     if isinstance(min_len, int) and min_len < MIN_PASSWORD_LENGTH:
         out.append(_mk(
-            f"Passwort-Mindestlaenge zu gering ({min_len} < {MIN_PASSWORD_LENGTH})",
+            f"Passwort-Mindestlänge zu gering ({min_len} < {MIN_PASSWORD_LENGTH})",
             "auth_weakness", Severity.HOCH, domain,
             f"password_policy.min_length = {min_len}", cwe="CWE-521",
         ))
     if pol.get("complexity") is False:
         out.append(_mk(
-            "Passwort-Komplexitaet nicht erzwungen", "auth_weakness",
+            "Passwort-Komplexität nicht erzwungen", "auth_weakness",
             Severity.HOCH, domain, "password_policy.complexity = false", cwe="CWE-521",
         ))
     thr = pol.get("lockout_threshold")
@@ -75,7 +75,7 @@ def _analyze_password_policy(pol: dict[str, Any], domain: str) -> list[Finding]:
     max_age = pol.get("max_age_days")
     if isinstance(max_age, int) and max_age == 0:
         out.append(_mk(
-            "Passwoerter laufen nie ab", "auth_weakness", Severity.MITTEL,
+            "Passwörter laufen nie ab", "auth_weakness", Severity.MITTEL,
             domain, "password_policy.max_age_days = 0", cwe="CWE-262",
         ))
     hist = pol.get("history_length")
@@ -179,7 +179,7 @@ def _analyze_user(user: dict[str, Any], domain: str) -> list[Finding]:
 def normalize_bloodhound_users(data: Any) -> list[dict[str, Any]]:
     """Mappt einen BloodHound-`users`-Export auf die eigene User-Struktur.
 
-    Nur statische Felder (keine zeitabhaengige Stale-Erkennung).
+    Nur statische Felder (keine zeitabhängige Stale-Erkennung).
     """
     if not isinstance(data, dict):
         return []
@@ -209,10 +209,10 @@ def normalize_bloodhound_users(data: Any) -> list[dict[str, Any]]:
 
 
 def analyze_ad(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle AD-Pruefungen aus und liefert die Findings."""
+    """Führt alle AD-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
-    domain = str(data.get("domain", "AD-Domaene"))
+    domain = str(data.get("domain", "AD-Domäne"))
 
     users = data.get("users")
     if not isinstance(users, list):

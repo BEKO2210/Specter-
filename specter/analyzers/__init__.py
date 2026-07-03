@@ -1,6 +1,6 @@
-"""Offline-Analyzer fuer bereitgestellte Datenexporte (Active Directory, Exchange).
+"""Offline-Analyzer für bereitgestellte Datenexporte (Active Directory, Exchange).
 
-Rein defensiv: es werden ausschliesslich lokal bereitgestellte Exportdateien
+Rein defensiv: es werden ausschließlich lokal bereitgestellte Exportdateien
 ausgewertet. Keine Live-Verbindungen, keine Ausnutzung, keine Credential-Nutzung.
 """
 

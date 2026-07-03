@@ -4,7 +4,7 @@ Wertet einen lokalen JSON-Export einer Azure-Subscription aus (Storage, NSG,
 VMs, Key Vault, SQL, RBAC) und leitet typische Cloud-Risiken ab - ohne jede
 Live-Verbindung zur Subscription, ohne Credential-Nutzung, ohne Ausnutzung.
 
-Hinweis: Identitaets-/M365-Themen (MFA, Conditional Access, Legacy-Auth) deckt
+Hinweis: Identitäts-/M365-Themen (MFA, Conditional Access, Legacy-Auth) deckt
 `analyze_entra` ab; dieser Analyzer betrachtet die Azure-Infrastruktur.
 
 Erwartete Struktur (alle Felder optional):
@@ -61,14 +61,14 @@ def _analyze_storage(sa: dict[str, Any], sub: str) -> list[Finding]:
     loc = f"{sub}/storage/{name}"
     if sa.get("public_blob_access"):
         out.append(_mk(
-            f"Oeffentlicher Blob-Zugriff auf Storage-Account: {name}",
+            f"Öffentlicher Blob-Zugriff auf Storage-Account: {name}",
             "cloud_storage", Severity.HOCH, loc,
             "public_blob_access=true - Daten ohne Zugangskontrolle erreichbar",
             cwe="CWE-284",
         ))
     if sa.get("https_only") is False:
         out.append(_mk(
-            f"Storage-Account erlaubt unverschluesselten Zugriff (kein HTTPS-only): {name}",
+            f"Storage-Account erlaubt unverschlüsselten Zugriff (kein HTTPS-only): {name}",
             "transport_security", Severity.MITTEL, loc, "https_only=false", cwe="CWE-319",
         ))
     if str(sa.get("min_tls", "")).strip().lower() in WEAK_TLS:
@@ -79,7 +79,7 @@ def _analyze_storage(sa: dict[str, Any], sub: str) -> list[Finding]:
         ))
     if sa.get("encryption") is False:
         out.append(_mk(
-            f"Storage-Account ohne Verschluesselung im Ruhezustand: {name}",
+            f"Storage-Account ohne Verschlüsselung im Ruhezustand: {name}",
             "misconfiguration", Severity.NIEDRIG, loc, "encryption=false", cwe="CWE-311",
         ))
     return out
@@ -98,7 +98,7 @@ def _analyze_nsg(nsg: dict[str, Any], sub: str) -> list[Finding]:
         out.append(_mk(
             f"NSG offen ins Internet (0.0.0.0/0) auf Port {pnum}: {name}",
             "exposed_service", sev, f"{sub}/nsg/{name}",
-            f"open_to_internet_ports enthaelt {pnum}", location=f"{sub}/nsg/{name}",
+            f"open_to_internet_ports enthält {pnum}", location=f"{sub}/nsg/{name}",
             cwe="CWE-284",
         ))
     return out
@@ -121,7 +121,7 @@ def _analyze_vm(vm: dict[str, Any], sub: str) -> list[Finding]:
         ))
     if vm.get("disk_encryption") is False:
         out.append(_mk(
-            f"VM ohne Datentraegerverschluesselung: {name}", "misconfiguration",
+            f"VM ohne Datenträgerverschlüsselung: {name}", "misconfiguration",
             Severity.NIEDRIG, loc, "disk_encryption=false", cwe="CWE-311",
         ))
     return out
@@ -133,7 +133,7 @@ def _analyze_key_vault(kv: dict[str, Any], sub: str) -> list[Finding]:
     loc = f"{sub}/keyvault/{name}"
     if kv.get("public_network_access"):
         out.append(_mk(
-            f"Key Vault oeffentlich erreichbar: {name}", "misconfiguration",
+            f"Key Vault öffentlich erreichbar: {name}", "misconfiguration",
             Severity.HOCH, loc, "public_network_access=true - sollte privat sein",
             cwe="CWE-284",
         ))
@@ -151,7 +151,7 @@ def _analyze_sql(sql: dict[str, Any], sub: str) -> list[Finding]:
     loc = f"{sub}/sql/{name}"
     if sql.get("public_access"):
         out.append(_mk(
-            f"Azure-SQL-Server oeffentlich erreichbar: {name}", "exposed_service",
+            f"Azure-SQL-Server öffentlich erreichbar: {name}", "exposed_service",
             Severity.HOCH, loc, "public_access=true", cwe="CWE-284",
         ))
     if sql.get("tde_enabled") is False:
@@ -182,7 +182,7 @@ def _analyze_rbac(assignments: Any, sub: str) -> list[Finding]:
 
 
 def analyze_azure(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Azure-Pruefungen aus und liefert die Findings."""
+    """Führt alle Azure-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     sub = str(data.get("subscription_id", "Azure-Subscription"))

@@ -29,16 +29,16 @@ class GenerateReportTool:
             "description": (
                 "Erzeugt den Abschlussbericht (Markdown + JSON) aus Asset-Graph, "
                 "Findings und Angriffspfaden und schreibt ihn nach reports/. "
-                "Mit include_pr_drafts=true werden zusaetzlich Draft-Pull-Request-"
-                "Texte (Titel + Body) je Finding zurueckgegeben. Als letzten "
-                "Schritt der Pruefung aufrufen."
+                "Mit include_pr_drafts=true werden zusätzlich Draft-Pull-Request-"
+                "Texte (Titel + Body) je Finding zurückgegeben. Als letzten "
+                "Schritt der Prüfung aufrufen."
             ),
             "input_schema": {
                 "type": "object",
                 "properties": {
                     "include_pr_drafts": {
                         "type": "boolean",
-                        "description": "Zusaetzlich Draft-PR-Texte je Finding ausgeben.",
+                        "description": "Zusätzlich Draft-PR-Texte je Finding ausgeben.",
                     }
                 },
             },
@@ -73,7 +73,7 @@ class GenerateReportTool:
             f"Angriffspfade: {len(self.state.attack_paths)}",
         ]
         if include_drafts and len(self.state.findings):
-            out.append("\nDraft-Pull-Requests (Fix-Vorschlaege):")
+            out.append("\nDraft-Pull-Requests (Fix-Vorschläge):")
             for f in self.state.findings.all():
                 pr = draft_pr(f)
                 out.append(f"\n--- {f.id} ---\nTitel: {pr['title']}\n{pr['body']}")

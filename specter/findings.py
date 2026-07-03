@@ -3,7 +3,7 @@
 Entspricht der "Findings-Analyse"-Stufe von Esprit/Trident: jede Schwachstelle
 wird nicht als Freitext, sondern als nachvollziehbarer Datensatz erfasst -
 mit Schweregrad, CWE-Bezug, betroffenem Asset, Beleg (Evidenz), Owner und
-Empfehlung. Das ist die Grundlage fuer Reports und Angriffspfad-Korrelation.
+Empfehlung. Das ist die Grundlage für Reports und Angriffspfad-Korrelation.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from typing import Any, Iterable
 
 
 class Severity(enum.IntEnum):
-    """Schweregrad, sortierbar (hoeher = kritischer)."""
+    """Schweregrad, sortierbar (höher = kritischer)."""
 
     INFO = 0
     NIEDRIG = 1
@@ -61,14 +61,14 @@ CATEGORIES: dict[str, str] = {
     "crypto_weakness": "Schwache Kryptographie",
     "misconfiguration": "Fehlkonfiguration",
     "cloud_storage": "Offener/fehlkonfigurierter Cloud-Speicher",
-    "transport_security": "Unsichere Transportverschluesselung",
+    "transport_security": "Unsichere Transportverschlüsselung",
     "deserialization": "Unsichere Deserialisierung",
     "exposed_service": "Exponierter Dienst/Port",
     "sensitive_data": "Sensible Daten erreichbar",
-    # Fuer den deutschen Mittelstand besonders relevant:
+    # Für den deutschen Mittelstand besonders relevant:
     "remote_access": "Exponierter Fernzugang (RDP/VPN)",
     "default_credentials": "Standard-/Default-Zugangsdaten",
-    "outdated_component": "Veraltete Komponente/Abhaengigkeit (bekannte CVE)",
+    "outdated_component": "Veraltete Komponente/Abhängigkeit (bekannte CVE)",
     "personal_data": "Personenbezogene Daten (DSGVO-relevant)",
     "email_security": "E-Mail-Spoofing/Phishing (SPF/DKIM/DMARC)",
     "backup_resilience": "Backup-/Ransomware-Resilienz (3-2-1, Immutable, Restore-Test)",
@@ -91,9 +91,9 @@ class Finding:
     location: str = ""            # Datei:Zeile oder Host:Port
     cwe: str = ""                 # z. B. "CWE-89"
     owner: str = ""               # Verantwortlicher (Team/Person)
-    remediation: str = ""         # Empfohlene Gegenmassnahme
+    remediation: str = ""         # Empfohlene Gegenmaßnahme
     source: str = "agent"         # static_scan | network | agent | manual
-    status: str = "offen"         # offen | bestaetigt | verworfen | behoben
+    status: str = "offen"         # offen | bestätigt | verworfen | behoben
     id: str = ""
 
     def __post_init__(self) -> None:
@@ -137,13 +137,13 @@ class Finding:
 
 
 class FindingsStore:
-    """Sammelt Findings und dedupliziert ueber die stabile ID."""
+    """Sammelt Findings und dedupliziert über die stabile ID."""
 
     def __init__(self) -> None:
         self._by_id: dict[str, Finding] = {}
 
     def add(self, finding: Finding) -> tuple[Finding, bool]:
-        """Fuegt ein Finding hinzu. Rueckgabe: (Finding, is_new)."""
+        """Fügt ein Finding hinzu. Rückgabe: (Finding, is_new)."""
         if finding.id in self._by_id:
             return self._by_id[finding.id], False
         self._by_id[finding.id] = finding

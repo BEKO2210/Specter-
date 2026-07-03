@@ -1,4 +1,4 @@
-"""Tests fuer das Lern-/Bedien-Handbuch (HTML-Erzeugung)."""
+"""Tests für das Lern-/Bedien-Handbuch (HTML-Erzeugung)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Tests fuer den Anthropic-LLM-Wrapper (Fehlerpfade ohne echten Netzzugriff)."""
+"""Tests für den Anthropic-LLM-Wrapper (Fehlerpfade ohne echten Netzzugriff)."""
 
 from __future__ import annotations
 

@@ -1,9 +1,9 @@
-"""Markengerechte Landingpage für Specter (eigenstaendiges HTML).
+"""Markengerechte Landingpage für Specter (eigenständiges HTML).
 
 Erzeugt eine professionelle, responsive Ein-Seiten-Website im Specter-Branding,
 die den Nutzen für den Mittelstand erklärt, Vertrauen schafft und zum
-kostenlosen E-Mail-Sicherheits-Check (Türöffner) führt. Voll eigenstaendig
-(inline CSS + eingebettetes Mark), laesst sich also ohne Build-Schritt hosten
+kostenlosen E-Mail-Sicherheits-Check (Türöffner) führt. Voll eigenständig
+(inline CSS + eingebettetes Mark), lässt sich also ohne Build-Schritt hosten
 oder per Datei weitergeben.
 """
 
@@ -21,7 +21,7 @@ _MARK_IMG = (
     'width="34" height="41" style="display:block">'
 )
 
-# Die drei groessten Mittelstands-Risiken (Aufhänger im Problem-Abschnitt).
+# Die drei größten Mittelstands-Risiken (Aufhänger im Problem-Abschnitt).
 PROBLEMS: list[tuple[str, str]] = [
     ("E-Mail-Betrug (CEO-Fraud)",
      "Ohne SPF/DKIM/DMARC können Kriminelle in Ihrem Namen mailen - der "
@@ -281,7 +281,7 @@ def build_landing_html(brand: str = "Specter",
 def write_landing(directory: str | Path = "reports",
                   brand: str = "Specter",
                   contact_email: str = "belkis.aslani@gmail.com") -> Path:
-    """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurueck."""
+    """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     html_path = out / "specter-landingpage.html"

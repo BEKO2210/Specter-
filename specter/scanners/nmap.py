@@ -1,6 +1,6 @@
 """Sicherer nmap-Wrapper.
 
-Standardmaessig nur unprivilegierte, nicht-intrusive Scans (TCP-Connect,
+Standardmäßig nur unprivilegierte, nicht-intrusive Scans (TCP-Connect,
 Service-/Versionserkennung). Rohe/aggressive Scans, Evasion und Spoofing sind
 blockiert bzw. an allow_aggressive gebunden.
 """
@@ -19,8 +19,8 @@ _HIGH_RISK_PORTS = {
     3389: ("remote_access", "RDP aus dem Netz erreichbar"),
     445: ("exposed_service", "SMB aus dem Netz erreichbar"),
     139: ("exposed_service", "NetBIOS aus dem Netz erreichbar"),
-    23: ("exposed_service", "Telnet (unverschluesselt) erreichbar"),
-    21: ("exposed_service", "FTP (oft unverschluesselt) erreichbar"),
+    23: ("exposed_service", "Telnet (unverschlüsselt) erreichbar"),
+    21: ("exposed_service", "FTP (oft unverschlüsselt) erreichbar"),
     3306: ("exposed_service", "MySQL direkt erreichbar"),
     1433: ("exposed_service", "MS-SQL direkt erreichbar"),
     5900: ("remote_access", "VNC erreichbar"),
@@ -40,7 +40,7 @@ class NmapScanner(Scanner):
         "-A", "-sS", "-sU", "-O", "-T4", "-T5", "--version-all",
     })
     FORBIDDEN_FLAGS = frozenset({
-        # Evasion / Spoofing / gefaehrliche Skripte / Dateiausgabe
+        # Evasion / Spoofing / gefährliche Skripte / Dateiausgabe
         "-D", "-S", "--spoof-mac", "-e", "-f", "--mtu", "--data",
         "--data-string", "--data-length", "--send-eth", "--send-ip", "-b",
         "--badsum", "-g", "--source-port", "--proxies", "--script",
@@ -50,7 +50,7 @@ class NmapScanner(Scanner):
     VALUE_FLAGS = frozenset({"-p", "--top-ports"})
 
     def default_argv(self, target: str, ports: str | None, aggressive: bool) -> list[str]:
-        # Immer -Pn (keine Ping-Vorpruefung) und TCP-Connect (kein root noetig).
+        # Immer -Pn (keine Ping-Vorprüfung) und TCP-Connect (kein root nötig).
         args = ["-sT", "-sV", "-Pn", "--open"]
         if aggressive:
             args.append("--version-all")

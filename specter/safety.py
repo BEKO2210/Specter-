@@ -1,10 +1,10 @@
 """Scope-Durchsetzung ("Rules of Engagement").
 
 Diese Schicht steht zwischen dem Sprachmodell und der echten Welt. Sie ist
-absichtlich streng und schlaegt im Zweifel fehl (fail-closed): Was nicht
+absichtlich streng und schlägt im Zweifel fehl (fail-closed): Was nicht
 explizit erlaubt ist, wird verweigert.
 
-Drei Pruefungen:
+Drei Prüfungen:
   * check_path     - Datei liegt innerhalb der freigegebenen Verzeichnisse.
   * check_target   - Host/IP liegt im freigegebenen Netzwerk-Scope.
   * check_command  - Binary ist erlaubt und die Argumente zielen nur auf
@@ -22,7 +22,7 @@ from .config import Config
 
 
 class ScopeViolation(Exception):
-    """Wird ausgeloest, wenn eine Aktion den autorisierten Rahmen verlaesst."""
+    """Wird ausgelöst, wenn eine Aktion den autorisierten Rahmen verlässt."""
 
 
 class SafetyPolicy:
@@ -32,7 +32,7 @@ class SafetyPolicy:
     # -- Dateisystem --------------------------------------------------------
 
     def check_path(self, raw_path: str) -> Path:
-        """Loest einen Pfad auf und stellt sicher, dass er im Scope liegt."""
+        """Löst einen Pfad auf und stellt sicher, dass er im Scope liegt."""
         if not self.config.allowed_paths:
             raise ScopeViolation(
                 "Kein Datei-Scope konfiguriert (filesystem.allowed_paths ist leer)."
@@ -42,14 +42,14 @@ class SafetyPolicy:
             if resolved == base or base in resolved.parents:
                 return resolved
         raise ScopeViolation(
-            f"Pfad ausserhalb des Scope: {resolved}. "
+            f"Pfad außerhalb des Scope: {resolved}. "
             f"Erlaubt sind nur: {', '.join(str(p) for p in self.config.allowed_paths)}"
         )
 
     # -- Netzwerk-Ziele -----------------------------------------------------
 
     def check_target(self, target: str) -> str:
-        """Prueft einen einzelnen Host/eine IP gegen den Netzwerk-Scope."""
+        """Prüft einen einzelnen Host/eine IP gegen den Netzwerk-Scope."""
         host = self._normalize_host(target)
 
         # Verbotsliste hat immer Vorrang.
@@ -65,16 +65,16 @@ class SafetyPolicy:
             if self._matches(host, allowed):
                 return host
         raise ScopeViolation(
-            f"Ziel ausserhalb des autorisierten Scope: {host}. "
-            "Nur freigegebene Hosts/Netze duerfen aktiv geprueft werden."
+            f"Ziel außerhalb des autorisierten Scope: {host}. "
+            "Nur freigegebene Hosts/Netze dürfen aktiv geprüft werden."
         )
 
     # -- Terminal-Befehle ---------------------------------------------------
 
     def check_command(self, command: str) -> list[str]:
-        """Zerlegt einen Befehl, prueft Binary und enthaltene Ziele.
+        """Zerlegt einen Befehl, prüft Binary und enthaltene Ziele.
 
-        Gibt die Argumentliste (fuer subprocess ohne shell=True) zurueck.
+        Gibt die Argumentliste (für subprocess ohne shell=True) zurück.
         """
         try:
             argv = shlex.split(command)
@@ -96,8 +96,8 @@ class SafetyPolicy:
         targets = [a for a in argv[1:] if self._looks_like_target(a)]
         if not targets:
             raise ScopeViolation(
-                "Im Befehl wurde kein pruefbares Ziel gefunden. "
-                "Aktive Befehle muessen ein freigegebenes Ziel benennen."
+                "Im Befehl wurde kein prüfbares Ziel gefunden. "
+                "Aktive Befehle müssen ein freigegebenes Ziel benennen."
             )
         for tgt in targets:
             self.check_target(tgt)

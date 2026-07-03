@@ -1,4 +1,4 @@
-"""Tests fuer den Vertrauens-/Sicherheits-One-Pager und die Garantien."""
+"""Tests für den Vertrauens-/Sicherheits-One-Pager und die Garantien."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ def test_trust_guarantee_accessors_are_copies():
     g = trust_guarantees()
     d = data_protection_points()
     assert g == GUARANTEES and d == DATA_PROTECTION
-    # Rueckgabe ist eine Kopie - Aenderungen wirken nicht auf die Konstanten.
+    # Rückgabe ist eine Kopie - Änderungen wirken nicht auf die Konstanten.
     g.append(("x", "y"))
     assert len(trust_guarantees()) == len(GUARANTEES)
 

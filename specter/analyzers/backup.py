@@ -1,13 +1,13 @@
 """Defensive Backup-/Ransomware-Resilienzanalyse aus bereitgestellten Angaben.
 
 Wertet einen lokalen JSON-Export der Datensicherungs-Posture aus (Anzahl Kopien,
-Offsite, Offline/Immutable, Verschluesselung, Restore-Test, MFA auf der
-Backup-Konsole, Aufbewahrung) und leitet typische Resilienz-Luecken ab - ohne
+Offsite, Offline/Immutable, Verschlüsselung, Restore-Test, MFA auf der
+Backup-Konsole, Aufbewahrung) und leitet typische Resilienz-Lücken ab - ohne
 jede Live-Verbindung zum Backup-System, ohne Ausnutzung.
 
-Fuer Cyber-Versicherer ist das DER zentrale Pruefpunkt: Ob ein Unternehmen einen
-Ransomware-Vorfall ueberlebt, haengt an unveraenderbaren (immutable/offline)
-Backups und regelmaessig getesteten Wiederherstellungen. Grundlage ist die
+Für Cyber-Versicherer ist das DER zentrale Prüfpunkt: Ob ein Unternehmen einen
+Ransomware-Vorfall überlebt, hängt an unveränderbaren (immutable/offline)
+Backups und regelmäßig getesteten Wiederherstellungen. Grundlage ist die
 3-2-1-Regel (3 Kopien, 2 Medien, 1 Kopie offsite).
 
 Erwartete Struktur (alle Felder optional):
@@ -32,7 +32,7 @@ from ..findings import Finding, Severity
 
 MIN_COPIES = 3            # 3-2-1-Regel: mindestens 3 Kopien
 MIN_RETENTION_DAYS = 30   # unter der typischen Angreifer-Verweildauer riskant
-MAX_RESTORE_TEST_AGE = 365  # Restore mindestens jaehrlich testen
+MAX_RESTORE_TEST_AGE = 365  # Restore mindestens jährlich testen
 
 
 def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
@@ -66,7 +66,7 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
         ))
     elif copies is not None and copies < MIN_COPIES:
         out.append(_mk(
-            f"Zu wenige Backup-Kopien fuer die 3-2-1-Regel: {name}",
+            f"Zu wenige Backup-Kopien für die 3-2-1-Regel: {name}",
             "backup_resilience", Severity.MITTEL, loc,
             f"copies={copies} - empfohlen sind mindestens {MIN_COPIES}",
             location=loc, cwe="CWE-693",
@@ -74,10 +74,10 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
 
     if b.get("offline_or_immutable") is False:
         out.append(_mk(
-            f"Kein offline-/unveraenderbares (Immutable) Backup: {name}",
+            f"Kein offline-/unveränderbares (Immutable) Backup: {name}",
             "backup_resilience", Severity.HOCH, loc,
             "offline_or_immutable=false - Ransomware kann erreichbare Backups "
-            "mitverschluesseln/loeschen", location=loc, cwe="CWE-693",
+            "mitverschlüsseln/löschen", location=loc, cwe="CWE-693",
         ))
 
     if b.get("offsite") is False:
@@ -97,22 +97,22 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
         age = _int(b.get("last_restore_test_days"))
         if age is not None and age > MAX_RESTORE_TEST_AGE:
             out.append(_mk(
-                f"Restore-Test ueberfaellig ({age} Tage): {name}",
+                f"Restore-Test überfällig ({age} Tage): {name}",
                 "backup_resilience", Severity.HOCH, loc,
-                f"last_restore_test_days={age} - mindestens jaehrlich testen",
+                f"last_restore_test_days={age} - mindestens jährlich testen",
                 location=loc, cwe="CWE-754",
             ))
 
     if b.get("mfa_on_console") is False:
         out.append(_mk(
             f"Backup-Konsole ohne MFA: {name}", "backup_resilience",
-            Severity.MITTEL, loc, "mfa_on_console=false - Angreifer koennen "
-            "Backups aus der Konsole loeschen", location=loc, cwe="CWE-308",
+            Severity.MITTEL, loc, "mfa_on_console=false - Angreifer können "
+            "Backups aus der Konsole löschen", location=loc, cwe="CWE-308",
         ))
 
     if b.get("encrypted") is False:
         out.append(_mk(
-            f"Backup nicht verschluesselt: {name}", "backup_resilience",
+            f"Backup nicht verschlüsselt: {name}", "backup_resilience",
             Severity.MITTEL, loc, "encrypted=false - Datenabfluss aus Backups "
             "(DSGVO-relevant)", location=loc, cwe="CWE-311",
         ))
@@ -123,14 +123,14 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
             f"Zu kurze Backup-Aufbewahrung ({retention} Tage): {name}",
             "backup_resilience", Severity.MITTEL, loc,
             f"retention_days={retention} - unter {MIN_RETENTION_DAYS} Tagen kann "
-            "eine spaet entdeckte Kompromittierung alle Kopien betreffen",
+            "eine spät entdeckte Kompromittierung alle Kopien betreffen",
             location=loc, cwe="CWE-693",
         ))
     return out
 
 
 def analyze_backup(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Backup-/Resilienzpruefungen aus und liefert die Findings."""
+    """Führt alle Backup-/Resilienzprüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     org = str(data.get("organization", "Organisation"))

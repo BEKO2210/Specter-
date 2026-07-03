@@ -32,7 +32,7 @@ class AnalyzeTlsTool:
                 "Analysiert einen bereitgestellten TLS-/Zertifikats-Export (JSON) "
                 "rein defensiv und erfasst Transport-/Krypto-Risiken als Findings: "
                 "abgelaufene oder bald ablaufende Zertifikate, schwache Signatur "
-                "(SHA-1/MD5), zu kurze Schluessel, selbstsignierte Zertifikate, "
+                "(SHA-1/MD5), zu kurze Schlüssel, selbstsignierte Zertifikate, "
                 "veraltete Protokolle (SSLv3/TLS 1.0/1.1) und schwache Cipher-"
                 "Suites. Kein Live-Handshake, keine Ausnutzung - nur die lokale "
                 "Datei im Scope."
@@ -56,7 +56,7 @@ class AnalyzeTlsTool:
         if not path.is_file():
             return ToolResult(f"Datei existiert nicht: {path}", is_error=True)
         if path.stat().st_size > self.config.max_file_bytes:
-            return ToolResult("Datei zu gross.", is_error=True)
+            return ToolResult("Datei zu groß.", is_error=True)
         try:
             data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         except (OSError, json.JSONDecodeError) as exc:

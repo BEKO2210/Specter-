@@ -13,6 +13,6 @@
      "title": "Log4Shell Remote Code Execution"},
     {"name": "django", "ecosystem": "pypi", "vulnerable": ">=2.0,<2.2.28",
      "fixed": "2.2.28", "cve": "CVE-2022-28346", "severity": "hoch",
-     "title": "SQL Injection ueber QuerySet.annotate()"}
+     "title": "SQL Injection über QuerySet.annotate()"}
   ]
 }

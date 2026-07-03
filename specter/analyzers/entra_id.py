@@ -2,8 +2,8 @@
 
 Wertet einen lokalen JSON-Export einer Entra-ID-(Azure-AD-)/M365-Umgebung aus
 und leitet typische KMU-Risiken ab - ohne jede Live-Verbindung zum Tenant.
-Fast jeder deutsche Mittelstaendler nutzt M365; diese Pruefungen decken die
-haeufigsten Fehlkonfigurationen ab.
+Fast jeder deutsche Mittelständler nutzt M365; diese Prüfungen decken die
+häufigsten Fehlkonfigurationen ab.
 
 Erwartete Struktur (alle Felder optional):
 
@@ -141,7 +141,7 @@ def _analyze_apps(apps: Any, tenant: str) -> list[Finding]:
         perms = app.get("high_privilege_permissions") or []
         if app.get("admin_consent") and perms:
             out.append(_mk(
-                f"Ueberprivilegierte App-Registrierung: {name}", "access_control",
+                f"Überprivilegierte App-Registrierung: {name}", "access_control",
                 Severity.HOCH, tenant,
                 f"admin_consent=true, Berechtigungen={list(perms)[:3]}",
                 location=f"{tenant}/app/{name}", cwe="CWE-250",
@@ -160,7 +160,7 @@ def _analyze_sharing(sharing: Any, tenant: str) -> list[Finding]:
 
 
 def analyze_entra(data: dict[str, Any]) -> list[Finding]:
-    """Fuehrt alle Entra-ID-/M365-Pruefungen aus und liefert die Findings."""
+    """Führt alle Entra-ID-/M365-Prüfungen aus und liefert die Findings."""
     if not isinstance(data, dict):
         return []
     tenant = str(data.get("tenant", "M365-Tenant"))

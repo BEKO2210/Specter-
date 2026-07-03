@@ -1,4 +1,4 @@
-"""Tests fuer Remediation und Draft-PR-Generierung."""
+"""Tests für Remediation und Draft-PR-Generierung."""
 
 from __future__ import annotations
 

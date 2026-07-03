@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Erzeugt einen realistischen BEISPIEL-Sicherheitsbericht (Muster GmbH) als HTML.
 
-Fuettert die echten Offline-Analyzer mit den mitgelieferten Beispiel-Exporten
+Füttert die echten Offline-Analyzer mit den mitgelieferten Beispiel-Exporten
 (examples/data/*.example.json), korreliert daraus Angriffspfade und rendert den
 markengerechten HTML-Report. So entsteht ein authentischer Beispielbericht als
-Vertrauensbeweis fuer Interessenten - ohne echte Kundendaten.
+Vertrauensbeweis für Interessenten - ohne echte Kundendaten.
 
 So aufrufen (aus dem Repo-Wurzelverzeichnis):
     python examples/build_sample_report.py
 
-Danach die erzeugte HTML-Datei im Browser oeffnen und ueber
+Danach die erzeugte HTML-Datei im Browser öffnen und ueber
 "Drucken -> Als PDF speichern" ein PDF erstellen (oder per Chromium rendern).
 """
 
@@ -62,7 +62,7 @@ def _load(name: str) -> dict:
 def build_config() -> Config:
     eng = Engagement(
         name="Muster GmbH",
-        authorized_by="Geschaeftsfuehrung Muster GmbH",
+        authorized_by="Geschäftsführung Muster GmbH",
         authorization_ref="BEISPIEL-2026-0001 (fiktiv)",
     )
     return Config(
@@ -104,7 +104,7 @@ def main() -> int:
     print(f"[i] {len(findings)} Findings (Kritisch {counts.get('Kritisch',0)}, "
           f"Hoch {counts.get('Hoch',0)}, Mittel {counts.get('Mittel',0)}) "
           f"ueber {len(assets)} Assets, {len(paths)} Angriffspfade.")
-    print("[i] Im Browser oeffnen und 'Drucken -> Als PDF speichern' waehlen.")
+    print("[i] Im Browser öffnen und 'Drucken -> Als PDF speichern' wählen.")
     return 0
 
 
