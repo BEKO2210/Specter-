@@ -1,7 +1,7 @@
 # Specter-Benchmark — Methodik
 
-> **Kurzfassung:** Gegen einen offengelegten, reproduzierbaren Korpus aus **53
-> markierten Szenarien** über **alle 14 Analyzer** erkennt Specter **144 von 144**
+> **Kurzfassung:** Gegen einen offengelegten, reproduzierbaren Korpus aus **64
+> markierten Szenarien** über **alle 14 Analyzer** erkennt Specter **176 von 176**
 > gepflanzten Schwachstellen (**Recall 100 %**) und erzeugt dabei **null
 > Fehlalarme** (**Präzision 100 %**), auch auf 23 gehärteten und
 > Täuschungs-Szenarien. Jeder Schweregrad stimmt (100 %). Nachrechnen:
@@ -36,9 +36,9 @@ Zwei Kennzahlen zählen gleichermaßen:
 
 | Kennzahl | Wert |
 |---|---|
-| Szenarien | **53** |
+| Szenarien | **64** |
 | Abgedeckte Analyzer | **14 / 14** |
-| Markierte Soll-Funde (Ground Truth) | **144** |
+| Markierte Soll-Funde (Ground Truth) | **176** |
 | Gehärtete/negative Szenarien (Soll: 0 Funde) | **23** |
 
 Jedes Szenario ist ein realistischer, aber synthetischer Export (E-Mail-DNS,
@@ -49,8 +49,8 @@ Soll-Ergebnis. Es gibt vier Arten:
 |---|---|---|
 | **Gepflanzte Lücke** (`vuln`) | 16 | Bekannte Schwachstellen, die gefunden werden **müssen**. |
 | **Gehärtet** (`hardened`) | 14 | Sauberer Soll-Zustand — es darf **kein** Fund entstehen. |
-| **Schwellenwert** (`boundary`) | 9 | Werte exakt auf der Entscheidungsgrenze. |
-| **Täuschung** (`confuser`) | 14 | Sieht gefährlich aus, ist es nicht — oder umgekehrt. |
+| **Schwellenwert** (`boundary`) | 10 | Werte exakt auf der Entscheidungsgrenze. |
+| **Täuschung** (`confuser`) | 24 | Sieht gefährlich aus, ist es nicht — oder umgekehrt (inkl. „schmutziger" Exporte mit String-Werten). |
 
 ### Was die Benchmark „schwer" macht
 
@@ -80,6 +80,15 @@ an denen reale Werkzeuge scheitern:
 - **Fehlende Felder ≠ unsicher.** Ein Datenbank-Datensatz, der nur `engine` und
   `port` angibt, darf keinen Fund erzeugen — Specter bewertet nur, was explizit
   als unsicher belegt ist.
+
+- **Schmutzige Exporte.** Reale Exporte aus CSV, YAML oder PowerShell liefern
+  `"false"` statt `false` und `"8"` statt `8`. Der Korpus erzwingt beides:
+  `min_length: "8"` **muss** als schwache Policy erkannt werden (kein stiller
+  Skip), und ein String `"false"` darf **niemals** als „wahr" fehlgedeutet
+  werden (`zone_transfer: "false"` → kein Fehlalarm). Werkzeug-Schreibweisen
+  wie **`TLSv1`** (so nennt OpenSSL TLS 1.0 — genau das liefert der eigene
+  Live-Kollektor) müssen ebenso erkannt werden wie zu kurze **EC-Schlüssel**
+  (192 Bit zu kurz, 224 exakt sauber).
 
 ---
 

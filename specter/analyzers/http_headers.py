@@ -29,7 +29,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_list
 
 # HSTS gilt unter ~180 Tagen als zu kurz (Preload verlangt >= 1 Jahr).
 MIN_HSTS_SECONDS = 15552000
@@ -109,12 +109,12 @@ def _analyze_endpoint(ep: dict[str, Any]) -> list[Finding]:
         if not isinstance(c, dict):
             continue
         name = str(c.get("name", "cookie"))
-        if c.get("secure") is False:
+        if as_bool(c.get("secure")) is False:
             out.append(_mk(
                 f"Cookie ohne Secure-Flag: {name}", "web_security", Severity.MITTEL,
                 url, "secure=false - Übertragung auch unverschlüsselt möglich",
                 location=loc, cwe="CWE-614"))
-        if c.get("httponly") is False:
+        if as_bool(c.get("httponly")) is False:
             out.append(_mk(
                 f"Cookie ohne HttpOnly-Flag: {name}", "web_security", Severity.MITTEL,
                 url, "httponly=false - per JavaScript auslesbar (XSS-Diebstahl)",

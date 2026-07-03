@@ -28,7 +28,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_int, as_list
 
 # SPF-Qualifier für "alles andere": -all (streng), ~all (soft), ?all/+all (schwach).
 _SPF_SOFT = "~all"
@@ -105,7 +105,7 @@ def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
     out: list[Finding] = []
     loc = f"{domain}/DKIM"
     selectors = [d for d in as_list(dkim) if isinstance(d, dict)]
-    present = [d for d in selectors if d.get("present", True)]
+    present = [d for d in selectors if as_bool(d.get("present"), True)]
     if not present:
         out.append(_mk(
             f"Kein DKIM-Schlüssel für {domain}",
@@ -116,10 +116,7 @@ def _analyze_dkim(dkim: Any, domain: str) -> list[Finding]:
         return out
     for d in present:
         selector = str(d.get("selector", "?"))
-        try:
-            bits = int(d.get("key_bits", 0))
-        except (TypeError, ValueError):
-            bits = 0
+        bits = as_int(d.get("key_bits"), 0) or 0
         if 0 < bits < MIN_DKIM_BITS:
             out.append(_mk(
                 f"DKIM-Schlüssel zu schwach ({bits} Bit, Selector {selector}): {domain}",

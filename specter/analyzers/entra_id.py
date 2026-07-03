@@ -33,7 +33,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_int, as_list, as_str_list
 
 MAX_GLOBAL_ADMINS = 5
 STALE_GUEST_DAYS = 90
@@ -55,14 +55,14 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
 
 def _analyze_baseline(data: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
-    sec_defaults = bool(data.get("security_defaults_enabled", False))
+    sec_defaults = as_bool(data.get("security_defaults_enabled"), False)
     policies = data.get("conditional_access_policies")
     policies = policies if isinstance(policies, list) else []
     enabled = [p for p in policies
                if isinstance(p, dict) and str(p.get("state", "")).lower() == "enabled"]
-    requires_mfa = any((p or {}).get("requires_mfa") for p in enabled)
-    blocks_legacy = any((p or {}).get("blocks_legacy_auth") for p in enabled)
-    legacy_allowed = bool(data.get("legacy_auth_allowed", False))
+    requires_mfa = any(as_bool(p.get("requires_mfa"), False) for p in enabled)
+    blocks_legacy = any(as_bool(p.get("blocks_legacy_auth"), False) for p in enabled)
+    legacy_allowed = as_bool(data.get("legacy_auth_allowed"), False)
 
     if not sec_defaults and not enabled:
         out.append(_mk(
@@ -106,11 +106,11 @@ def _analyze_roles(roles: dict[str, Any], tenant: str) -> list[Finding]:
 def _analyze_user(user: dict[str, Any], tenant: str) -> list[Finding]:
     out: list[Finding] = []
     upn = str(user.get("upn", "unbekannt"))
-    enabled = bool(user.get("enabled", True))
-    priv = bool(user.get("privileged", False))
+    enabled = as_bool(user.get("enabled"), True)
+    priv = as_bool(user.get("privileged"), False)
     loc = f"{tenant}/{upn}"
 
-    if enabled and user.get("mfa_registered") is False:
+    if enabled and as_bool(user.get("mfa_registered")) is False:
         if priv:
             out.append(_mk(
                 f"Privilegiertes Konto ohne MFA: {upn}", "auth_weakness",
@@ -123,8 +123,9 @@ def _analyze_user(user: dict[str, Any], tenant: str) -> list[Finding]:
                 "mfa_registered=false", location=loc, cwe="CWE-308",
             ))
 
-    last = user.get("last_sign_in_days")
-    if enabled and user.get("guest") and isinstance(last, int) and last > STALE_GUEST_DAYS:
+    last = as_int(user.get("last_sign_in_days"))
+    if (enabled and as_bool(user.get("guest"), False)
+            and last is not None and last > STALE_GUEST_DAYS):
         out.append(_mk(
             f"Inaktives Gastkonto (seit {last} Tagen): {upn}", "access_control",
             Severity.MITTEL, upn, f"guest=true, last_sign_in_days={last}",
@@ -139,19 +140,19 @@ def _analyze_apps(apps: Any, tenant: str) -> list[Finding]:
         if not isinstance(app, dict):
             continue
         name = str(app.get("name", "App"))
-        perms = app.get("high_privilege_permissions") or []
-        if app.get("admin_consent") and perms:
+        perms = as_str_list(app.get("high_privilege_permissions"))
+        if as_bool(app.get("admin_consent"), False) and perms:
             out.append(_mk(
                 f"Überprivilegierte App-Registrierung: {name}", "access_control",
                 Severity.HOCH, tenant,
-                f"admin_consent=true, Berechtigungen={list(perms)[:3]}",
+                f"admin_consent=true, Berechtigungen={perms[:3]}",
                 location=f"{tenant}/app/{name}", cwe="CWE-250",
             ))
     return out
 
 
 def _analyze_sharing(sharing: Any, tenant: str) -> list[Finding]:
-    if isinstance(sharing, dict) and sharing.get("anonymous_links_enabled"):
+    if isinstance(sharing, dict) and as_bool(sharing.get("anonymous_links_enabled"), False):
         return [_mk(
             "Anonyme Freigabelinks aktiviert (SharePoint/OneDrive)", "personal_data",
             Severity.MITTEL, tenant,

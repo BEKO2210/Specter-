@@ -39,7 +39,7 @@ import re
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_list
 
 # Werte, die eine nicht festgelegte ("ungepinnte") Version markieren.
 _UNPINNED = {"", "*", "latest", "any", "x"}
@@ -159,7 +159,7 @@ def _analyze_dependency(dep: dict[str, Any], advisories: list[dict[str, Any]],
     if matches:
         return out
 
-    if dep.get("deprecated"):
+    if as_bool(dep.get("deprecated"), False):
         out.append(_mk(
             f"Nicht mehr gepflegte Abhängigkeit: {name}",
             "outdated_component", _UNMAINTAINED_VERSION_SEV, loc,

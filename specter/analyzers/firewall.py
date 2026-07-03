@@ -32,7 +32,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_list
 
 # Werte, die "beliebig / aus dem Internet" bedeuten.
 _ANY = {"any", "*", "all", "0.0.0.0/0", "0.0.0.0", "::/0", ""}
@@ -133,12 +133,12 @@ def _analyze_vpn(vpn: dict[str, Any], device: str) -> list[Finding]:
             Severity.MITTEL, loc, "ike_version=1 - auf IKEv2 umstellen",
             location=loc, cwe="CWE-327",
         ))
-    if vpn.get("mfa") is False:
+    if as_bool(vpn.get("mfa")) is False:
         out.append(_mk(
             f"VPN-Zugang ohne MFA: {name}", "remote_access", Severity.HOCH, loc,
             "mfa=false - Fernzugang ohne zweiten Faktor", location=loc, cwe="CWE-308",
         ))
-    if vpn.get("eol") or vpn.get("outdated"):
+    if as_bool(vpn.get("eol"), False) or as_bool(vpn.get("outdated"), False):
         out.append(_mk(
             f"Veraltetes/abgekündigtes VPN-Gateway: {name}", "outdated_component",
             Severity.HOCH, loc, "eol/outdated=true - kein Sicherheits-Support mehr",
@@ -148,7 +148,7 @@ def _analyze_vpn(vpn: dict[str, Any], device: str) -> list[Finding]:
 
 
 def _analyze_management(mgmt: dict[str, Any], device: str) -> list[Finding]:
-    if not mgmt.get("public"):
+    if not as_bool(mgmt.get("public"), False):
         return []
     loc = f"{device}/management"
     out: list[Finding] = []

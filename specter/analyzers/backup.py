@@ -29,7 +29,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_int, as_list
 
 MIN_COPIES = 3            # 3-2-1-Regel: mindestens 3 Kopien
 MIN_RETENTION_DAYS = 30   # unter der typischen Angreifer-Verweildauer riskant
@@ -45,19 +45,12 @@ def _mk(title, category, severity, asset, evidence, *, location="", cwe="",
     )
 
 
-def _int(value: Any) -> int | None:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
 def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(b.get("name", "Backup"))
     loc = f"{org}/backup/{name}"
 
-    copies = _int(b.get("copies"))
+    copies = as_int(b.get("copies"))
     if copies is not None and copies < 2:
         out.append(_mk(
             f"Höchstens eine Backup-Kopie (Single Point of Failure): {name}",
@@ -73,7 +66,7 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
             location=loc, cwe="CWE-693",
         ))
 
-    if b.get("offline_or_immutable") is False:
+    if as_bool(b.get("offline_or_immutable")) is False:
         out.append(_mk(
             f"Kein offline-/unveränderbares (Immutable) Backup: {name}",
             "backup_resilience", Severity.HOCH, loc,
@@ -81,21 +74,21 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
             "mitverschlüsseln/löschen", location=loc, cwe="CWE-693",
         ))
 
-    if b.get("offsite") is False:
+    if as_bool(b.get("offsite")) is False:
         out.append(_mk(
             f"Keine Offsite-Kopie des Backups: {name}", "backup_resilience",
             Severity.HOCH, loc, "offsite=false - kein Schutz gegen Standort-"
             "Totalverlust (Brand/Ransomware im LAN)", location=loc, cwe="CWE-693",
         ))
 
-    if b.get("restore_tested") is False:
+    if as_bool(b.get("restore_tested")) is False:
         out.append(_mk(
             f"Wiederherstellung nie getestet: {name}", "backup_resilience",
             Severity.HOCH, loc, "restore_tested=false - ungetestete Backups "
             "sind im Ernstfall oft nicht wiederherstellbar", location=loc, cwe="CWE-754",
         ))
     else:
-        age = _int(b.get("last_restore_test_days"))
+        age = as_int(b.get("last_restore_test_days"))
         if age is not None and age > MAX_RESTORE_TEST_AGE:
             out.append(_mk(
                 f"Restore-Test überfällig ({age} Tage): {name}",
@@ -104,21 +97,21 @@ def _analyze_backup(b: dict[str, Any], org: str) -> list[Finding]:
                 location=loc, cwe="CWE-754",
             ))
 
-    if b.get("mfa_on_console") is False:
+    if as_bool(b.get("mfa_on_console")) is False:
         out.append(_mk(
             f"Backup-Konsole ohne MFA: {name}", "backup_resilience",
             Severity.MITTEL, loc, "mfa_on_console=false - Angreifer können "
             "Backups aus der Konsole löschen", location=loc, cwe="CWE-308",
         ))
 
-    if b.get("encrypted") is False:
+    if as_bool(b.get("encrypted")) is False:
         out.append(_mk(
             f"Backup nicht verschlüsselt: {name}", "backup_resilience",
             Severity.MITTEL, loc, "encrypted=false - Datenabfluss aus Backups "
             "(DSGVO-relevant)", location=loc, cwe="CWE-311",
         ))
 
-    retention = _int(b.get("retention_days"))
+    retention = as_int(b.get("retention_days"))
     if retention is not None and retention < MIN_RETENTION_DAYS:
         out.append(_mk(
             f"Zu kurze Backup-Aufbewahrung ({retention} Tage): {name}",
@@ -140,7 +133,7 @@ def analyze_backup(data: dict[str, Any]) -> list[Finding]:
         if isinstance(b, dict):
             findings += _analyze_backup(b, org)
     policy = data.get("policy")
-    if isinstance(policy, dict) and policy.get("documented") is False:
+    if isinstance(policy, dict) and as_bool(policy.get("documented")) is False:
         findings.append(_mk(
             "Kein dokumentiertes Backup-/Wiederanlaufkonzept",
             "backup_resilience", Severity.NIEDRIG, f"{org}/policy",

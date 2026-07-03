@@ -29,7 +29,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_list
 
 # Capabilities, die praktisch einen Host-Ausbruch ermöglichen.
 DANGEROUS_CAPS = {
@@ -53,13 +53,13 @@ def _analyze_container(c: dict[str, Any]) -> list[Finding]:
     out: list[Finding] = []
     name = str(c.get("name") or "Container")
 
-    if c.get("privileged"):
+    if as_bool(c.get("privileged"), False):
         out.append(_mk(
             f"Privilegierter Container: {name}", Severity.KRITISCH, name,
             "--privileged hebt nahezu alle Isolation auf - faktisch Root-Zugriff "
             "auf den Host", cwe="CWE-250"))
 
-    if c.get("docker_socket_mounted"):
+    if as_bool(c.get("docker_socket_mounted"), False):
         out.append(_mk(
             f"Docker-Socket im Container gemountet: {name}", Severity.KRITISCH, name,
             "/var/run/docker.sock im Container = vollständige Kontrolle über den "
@@ -74,7 +74,7 @@ def _analyze_container(c: dict[str, Any]) -> list[Finding]:
             Severity.HOCH, name,
             f"cap_add={dangerous} - ermöglicht Ausbruch/Host-Zugriff", cwe="CWE-250"))
 
-    if c.get("host_network"):
+    if as_bool(c.get("host_network"), False):
         out.append(_mk(
             f"Host-Networking aktiv: {name}", Severity.MITTEL, name,
             "network=host hebt die Netzwerk-Isolation auf - der Container sieht "

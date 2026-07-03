@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_list
 
 SENSITIVE_PORTS = {22, 3389, 1433, 3306, 5432, 27017, 6379, 5985, 5986}
 WEAK_TLS = {"tls1.0", "tlsv1.0", "tls1.1", "tlsv1.1", "ssl3", "sslv3"}
@@ -60,14 +60,14 @@ def _analyze_storage(sa: dict[str, Any], sub: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(sa.get("name", "storage"))
     loc = f"{sub}/storage/{name}"
-    if sa.get("public_blob_access"):
+    if as_bool(sa.get("public_blob_access"), False):
         out.append(_mk(
             f"Öffentlicher Blob-Zugriff auf Storage-Account: {name}",
             "cloud_storage", Severity.HOCH, loc,
             "public_blob_access=true - Daten ohne Zugangskontrolle erreichbar",
             cwe="CWE-284",
         ))
-    if sa.get("https_only") is False:
+    if as_bool(sa.get("https_only")) is False:
         out.append(_mk(
             f"Storage-Account erlaubt unverschlüsselten Zugriff (kein HTTPS-only): {name}",
             "transport_security", Severity.MITTEL, loc, "https_only=false", cwe="CWE-319",
@@ -78,7 +78,7 @@ def _analyze_storage(sa: dict[str, Any], sub: str) -> list[Finding]:
             "transport_security", Severity.MITTEL, loc,
             f"min_tls={sa.get('min_tls')}", cwe="CWE-327",
         ))
-    if sa.get("encryption") is False:
+    if as_bool(sa.get("encryption")) is False:
         out.append(_mk(
             f"Storage-Account ohne Verschlüsselung im Ruhezustand: {name}",
             "misconfiguration", Severity.NIEDRIG, loc, "encryption=false", cwe="CWE-311",
@@ -110,7 +110,7 @@ def _analyze_vm(vm: dict[str, Any], sub: str) -> list[Finding]:
     name = str(vm.get("name", "vm"))
     loc = f"{sub}/vm/{name}"
     os_name = str(vm.get("os", ""))
-    if vm.get("public_ip"):
+    if as_bool(vm.get("public_ip"), False):
         out.append(_mk(
             f"VM direkt aus dem Internet erreichbar (Public IP): {name}",
             "exposed_service", Severity.MITTEL, loc, "public_ip=true", cwe="CWE-284",
@@ -120,7 +120,7 @@ def _analyze_vm(vm: dict[str, Any], sub: str) -> list[Finding]:
             f"VM mit veraltetem Betriebssystem: {name}", "outdated_component",
             Severity.HOCH, loc, f"os={os_name}", cwe="CWE-1104",
         ))
-    if vm.get("disk_encryption") is False:
+    if as_bool(vm.get("disk_encryption")) is False:
         out.append(_mk(
             f"VM ohne Datenträgerverschlüsselung: {name}", "misconfiguration",
             Severity.NIEDRIG, loc, "disk_encryption=false", cwe="CWE-311",
@@ -132,13 +132,13 @@ def _analyze_key_vault(kv: dict[str, Any], sub: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(kv.get("name", "kv"))
     loc = f"{sub}/keyvault/{name}"
-    if kv.get("public_network_access"):
+    if as_bool(kv.get("public_network_access"), False):
         out.append(_mk(
             f"Key Vault öffentlich erreichbar: {name}", "misconfiguration",
             Severity.HOCH, loc, "public_network_access=true - sollte privat sein",
             cwe="CWE-284",
         ))
-    if kv.get("purge_protection") is False:
+    if as_bool(kv.get("purge_protection")) is False:
         out.append(_mk(
             f"Key Vault ohne Purge-Protection: {name}", "misconfiguration",
             Severity.NIEDRIG, loc, "purge_protection=false",
@@ -150,12 +150,12 @@ def _analyze_sql(sql: dict[str, Any], sub: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(sql.get("name", "sql"))
     loc = f"{sub}/sql/{name}"
-    if sql.get("public_access"):
+    if as_bool(sql.get("public_access"), False):
         out.append(_mk(
             f"Azure-SQL-Server öffentlich erreichbar: {name}", "exposed_service",
             Severity.HOCH, loc, "public_access=true", cwe="CWE-284",
         ))
-    if sql.get("tde_enabled") is False:
+    if as_bool(sql.get("tde_enabled")) is False:
         out.append(_mk(
             f"Azure-SQL ohne Transparent Data Encryption (TDE): {name}",
             "crypto_weakness", Severity.MITTEL, loc, "tde_enabled=false", cwe="CWE-311",

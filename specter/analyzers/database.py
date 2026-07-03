@@ -32,6 +32,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_bool, as_int
 
 # Bekannte Datenbank-Standardports (nur für verständlichere Belege).
 DB_PORTS: dict[int, str] = {
@@ -53,10 +54,7 @@ def _mk(title, category, severity, asset, evidence, *, cwe="",
 def _label(db: dict[str, Any]) -> tuple[str, str]:
     """Liefert (Anzeigename, Ort) für eine Datenbank aus engine/port."""
     engine = str(db.get("engine", "")).strip()
-    try:
-        port = int(db.get("port", 0))
-    except (TypeError, ValueError):
-        port = 0
+    port = as_int(db.get("port"), 0) or 0
     if not engine and port in DB_PORTS:
         engine = DB_PORTS[port]
     name = engine or "Datenbank"
@@ -68,7 +66,7 @@ def _analyze_db(db: dict[str, Any]) -> list[Finding]:
     out: list[Finding] = []
     name, loc = _label(db)
 
-    if db.get("public"):
+    if as_bool(db.get("public"), False):
         out.append(_mk(
             f"Datenbank öffentlich erreichbar: {name}", "exposed_service",
             Severity.HOCH, loc,
@@ -76,7 +74,7 @@ def _analyze_db(db: dict[str, Any]) -> list[Finding]:
             "Firewall/VPN, niemals offen ins Internet", cwe="CWE-668"))
 
     # auth_required kann explizit False sein; fehlt der Schlüssel, nicht bewerten.
-    if db.get("auth_required") is False:
+    if as_bool(db.get("auth_required")) is False:
         out.append(_mk(
             f"Datenbank ohne Authentifizierung: {name}", "auth_weakness",
             Severity.HOCH, loc,
@@ -84,14 +82,14 @@ def _analyze_db(db: dict[str, Any]) -> list[Finding]:
             "schreiben (typisch bei Redis/MongoDB-Standardinstallationen)",
             cwe="CWE-306"))
 
-    if db.get("default_creds"):
+    if as_bool(db.get("default_creds"), False):
         out.append(_mk(
             f"Standard-/Default-Zugangsdaten: {name}", "default_credentials",
             Severity.KRITISCH, loc,
             "Aktive Default-Zugangsdaten - sofort ändern; öffentlich bekannt und "
             "erstes Angriffsziel", cwe="CWE-798"))
 
-    if db.get("tls") is False:
+    if as_bool(db.get("tls")) is False:
         out.append(_mk(
             f"Unverschlüsselter Datenbank-Transport: {name}", "transport_security",
             Severity.MITTEL, loc,

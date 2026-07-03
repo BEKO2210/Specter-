@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
+from ._util import as_bool, as_int, as_str_list
 
 # Schwellenwerte (an BSI-Empfehlungen / gängiger Praxis orientiert).
 MIN_PASSWORD_LENGTH = 12
@@ -53,33 +54,31 @@ def _analyze_password_policy(pol: dict[str, Any], domain: str) -> list[Finding]:
     out: list[Finding] = []
     if not isinstance(pol, dict) or not pol:
         return out
-    min_len = pol.get("min_length")
-    if isinstance(min_len, int) and min_len < MIN_PASSWORD_LENGTH:
+    min_len = as_int(pol.get("min_length"))
+    if min_len is not None and min_len < MIN_PASSWORD_LENGTH:
         out.append(_mk(
             f"Passwort-Mindestlänge zu gering ({min_len} < {MIN_PASSWORD_LENGTH})",
             "auth_weakness", Severity.HOCH, domain,
             f"password_policy.min_length = {min_len}", cwe="CWE-521",
         ))
-    if pol.get("complexity") is False:
+    if as_bool(pol.get("complexity")) is False:
         out.append(_mk(
             "Passwort-Komplexität nicht erzwungen", "auth_weakness",
             Severity.HOCH, domain, "password_policy.complexity = false", cwe="CWE-521",
         ))
-    thr = pol.get("lockout_threshold")
-    if isinstance(thr, int) and thr == 0:
+    if as_int(pol.get("lockout_threshold")) == 0:
         out.append(_mk(
             "Keine Account-Lockout-Policy (Brute-Force ungebremst)",
             "auth_weakness", Severity.HOCH, domain,
             "password_policy.lockout_threshold = 0", cwe="CWE-307",
         ))
-    max_age = pol.get("max_age_days")
-    if isinstance(max_age, int) and max_age == 0:
+    if as_int(pol.get("max_age_days")) == 0:
         out.append(_mk(
             "Passwörter laufen nie ab", "auth_weakness", Severity.MITTEL,
             domain, "password_policy.max_age_days = 0", cwe="CWE-262",
         ))
-    hist = pol.get("history_length")
-    if isinstance(hist, int) and hist < 5:
+    hist = as_int(pol.get("history_length"))
+    if hist is not None and hist < 5:
         out.append(_mk(
             f"Passwort-Historie zu kurz ({hist})", "auth_weakness",
             Severity.NIEDRIG, domain, f"password_policy.history_length = {hist}",
@@ -87,8 +86,9 @@ def _analyze_password_policy(pol: dict[str, Any], domain: str) -> list[Finding]:
     return out
 
 
-def _analyze_krbtgt(age: Any, domain: str) -> list[Finding]:
-    if isinstance(age, int) and age > KRBTGT_MAX_AGE_DAYS:
+def _analyze_krbtgt(raw_age: Any, domain: str) -> list[Finding]:
+    age = as_int(raw_age)
+    if age is not None and age > KRBTGT_MAX_AGE_DAYS:
         return [_mk(
             f"krbtgt-Passwort veraltet ({age} Tage) - Golden-Ticket-Risiko",
             "auth_weakness", Severity.HOCH, domain,
@@ -118,13 +118,14 @@ def _analyze_privileged_groups(groups: dict[str, Any], domain: str) -> list[Find
 def _analyze_user(user: dict[str, Any], domain: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(user.get("name", "unbekannt"))
-    enabled = bool(user.get("enabled", True))
-    priv = bool(user.get("privileged", False)) or any(
-        str(g).strip().lower() in HIGH_PRIV_GROUPS for g in user.get("groups", [])
+    enabled = as_bool(user.get("enabled"), True)
+    groups = as_str_list(user.get("groups"))
+    priv = as_bool(user.get("privileged"), False) or any(
+        g.strip().lower() in HIGH_PRIV_GROUPS for g in groups
     )
     loc = f"{domain}/{name}"
 
-    if enabled and priv and user.get("password_never_expires"):
+    if enabled and priv and as_bool(user.get("password_never_expires"), False):
         out.append(_mk(
             f"Privilegiertes Konto mit nie ablaufendem Passwort: {name}",
             "auth_weakness", Severity.HOCH, name,
@@ -132,8 +133,8 @@ def _analyze_user(user: dict[str, Any], domain: str) -> list[Finding]:
             cwe="CWE-262",
         ))
 
-    last = user.get("last_logon_days")
-    if enabled and isinstance(last, int) and last > STALE_LOGON_DAYS:
+    last = as_int(user.get("last_logon_days"))
+    if enabled and last is not None and last > STALE_LOGON_DAYS:
         sev = Severity.HOCH if priv else Severity.MITTEL
         out.append(_mk(
             f"Aktives, aber ungenutztes Konto (seit {last} Tagen): {name}",
@@ -149,25 +150,23 @@ def _analyze_user(user: dict[str, Any], domain: str) -> list[Finding]:
             cwe="CWE-269",
         ))
 
-    spns = user.get("service_principal_names") or []
+    spns = as_str_list(user.get("service_principal_names"))
     if enabled and spns:
         out.append(_mk(
             f"Service-Konto mit SPN (Kerberoasting-Exposition): {name}",
             "auth_weakness", Severity.MITTEL, name,
-            f"service_principal_names={list(spns)[:3]}", location=loc, cwe="CWE-522",
+            f"service_principal_names={spns[:3]}", location=loc, cwe="CWE-522",
         ))
 
-    if enabled and user.get("kerberos_preauth") is False:
+    if enabled and as_bool(user.get("kerberos_preauth")) is False:
         out.append(_mk(
             f"Kerberos-Pre-Auth deaktiviert (AS-REP-Roasting): {name}",
             "auth_weakness", Severity.HOCH, name,
             "kerberos_preauth=false", location=loc, cwe="CWE-522",
         ))
 
-    in_priv_group = any(
-        str(g).strip().lower() in HIGH_PRIV_GROUPS for g in user.get("groups", [])
-    )
-    if user.get("admin_count") == 1 and not in_priv_group:
+    in_priv_group = any(g.strip().lower() in HIGH_PRIV_GROUPS for g in groups)
+    if as_int(user.get("admin_count")) == 1 and not in_priv_group:
         out.append(_mk(
             f"adminCount=1 ohne aktuelle Privilegien (AdminSDHolder-Rest): {name}",
             "access_control", Severity.NIEDRIG, name,

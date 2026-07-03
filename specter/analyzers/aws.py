@@ -33,7 +33,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..findings import Finding, Severity
-from ._util import as_list
+from ._util import as_bool, as_int, as_list
 
 MIN_PASSWORD_LENGTH = 14
 ACCESS_KEY_MAX_AGE = 180
@@ -68,13 +68,13 @@ def _analyze_root(root: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
     if not isinstance(root, dict) or not root:
         return out
-    if root.get("mfa_enabled") is False:
+    if as_bool(root.get("mfa_enabled")) is False:
         out.append(_mk(
             "Root-Konto ohne MFA", "auth_weakness", Severity.KRITISCH, account,
             "root_account.mfa_enabled=false", cwe="CWE-308",
         ))
-    keys = root.get("access_keys")
-    if isinstance(keys, int) and keys > 0:
+    keys = as_int(root.get("access_keys"))
+    if keys is not None and keys > 0:
         out.append(_mk(
             "Root-Konto besitzt Access-Keys", "access_control", Severity.KRITISCH,
             account, f"root_account.access_keys={keys} (Root-Keys vermeiden)",
@@ -87,19 +87,19 @@ def _analyze_password_policy(pol: dict[str, Any], account: str) -> list[Finding]
     out: list[Finding] = []
     if not isinstance(pol, dict) or not pol:
         return out
-    ml = pol.get("minimum_length")
-    if isinstance(ml, int) and ml < MIN_PASSWORD_LENGTH:
+    ml = as_int(pol.get("minimum_length"))
+    if ml is not None and ml < MIN_PASSWORD_LENGTH:
         out.append(_mk(
             f"Schwache IAM-Passwort-Policy (Mindestlänge {ml})", "auth_weakness",
             Severity.MITTEL, account, f"password_policy.minimum_length={ml}",
             cwe="CWE-521",
         ))
-    if pol.get("require_symbols") is False:
+    if as_bool(pol.get("require_symbols")) is False:
         out.append(_mk(
             "IAM-Passwort-Policy ohne Sonderzeichen-Pflicht", "auth_weakness",
             Severity.NIEDRIG, account, "password_policy.require_symbols=false",
         ))
-    if pol.get("max_age_days") == 0:
+    if as_int(pol.get("max_age_days")) == 0:
         out.append(_mk(
             "IAM-Passwörter laufen nie ab", "auth_weakness", Severity.NIEDRIG,
             account, "password_policy.max_age_days=0",
@@ -111,7 +111,7 @@ def _analyze_user(user: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(user.get("name", "iam-user"))
     loc = f"{account}/user/{name}"
-    if user.get("console_access") and user.get("mfa_enabled") is False:
+    if as_bool(user.get("console_access"), False) and as_bool(user.get("mfa_enabled")) is False:
         out.append(_mk(
             f"IAM-Konsolenzugriff ohne MFA: {name}", "auth_weakness",
             Severity.HOCH, name, "console_access=true, mfa_enabled=false",
@@ -131,15 +131,16 @@ def _analyze_user(user: dict[str, Any], account: str) -> list[Finding]:
         # Schlüssel-Identität, damit zwei Keys desselben Users nicht durch die
         # Dedup (Kategorie/Asset/Location/Titel) zu einem Finding verschmelzen.
         kid = str(key.get("id") or key.get("access_key_id") or f"#{idx + 1}")
-        age = key.get("age_days")
-        if isinstance(age, int) and age > ACCESS_KEY_MAX_AGE:
+        age = as_int(key.get("age_days"))
+        if age is not None and age > ACCESS_KEY_MAX_AGE:
             out.append(_mk(
                 f"Alter Access-Key ({age} Tage): {name} [{kid}]", "access_control",
                 Severity.MITTEL, name, f"access_key {kid} age_days={age}",
                 location=f"{loc}#{kid}", cwe="CWE-798",
             ))
-        used = key.get("last_used_days")
-        if used is None or (isinstance(used, int) and used > ACCESS_KEY_UNUSED_DAYS):
+        raw_used = key.get("last_used_days")
+        used = as_int(raw_used)
+        if raw_used is None or (used is not None and used > ACCESS_KEY_UNUSED_DAYS):
             out.append(_mk(
                 f"Ungenutzter Access-Key: {name} [{kid}]", "access_control",
                 Severity.NIEDRIG, name, f"access_key {kid} last_used_days={used}",
@@ -171,12 +172,12 @@ def _analyze_bucket(bucket: dict[str, Any], account: str) -> list[Finding]:
     out: list[Finding] = []
     name = str(bucket.get("name", "s3-bucket"))
     loc = f"s3://{name}"
-    if bucket.get("public"):
+    if as_bool(bucket.get("public"), False):
         out.append(_mk(
             f"Öffentlicher S3-Bucket: {name}", "cloud_storage", Severity.HOCH,
             loc, "public=true - ohne Zugangskontrolle erreichbar", cwe="CWE-284",
         ))
-    if bucket.get("encryption") is False:
+    if as_bool(bucket.get("encryption")) is False:
         out.append(_mk(
             f"S3-Bucket ohne Verschlüsselung: {name}", "misconfiguration",
             Severity.NIEDRIG, loc, "encryption=false", cwe="CWE-311",
