@@ -335,8 +335,11 @@ Alles, was ein Kunde oder Partner vor der Beauftragung prüfen will, an einem Or
 | **Akquiseplan** | wen & wie ansprechen | `python examples/build_acquisition_plan.py` |
 | **Vertrauens-One-Pager** | Kunden überzeugen | `python examples/build_trust_onepager.py` |
 
-**Website veröffentlichen:** GitHub → *Settings → Pages → Deploy from a branch →
-`main` / `/docs`*. Danach live unter `https://beko2210.github.io/Specter-/`.
+**Website veröffentlichen:** GitHub → *Settings → Pages → Build and deployment →
+Source: **GitHub Actions***. Danach übernimmt der mitgelieferte Workflow
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) den
+Deploy aus `docs/` — mit automatischer Wiederholung gegen transiente
+Pages-Fehler. Live unter `https://beko2210.github.io/Specter-/`.
 
 ---
 

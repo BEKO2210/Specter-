@@ -1,0 +1,74 @@
+# Eigener GitHub-Pages-Deploy mit automatischer Wiederholung.
+#
+# Hintergrund: GitHubs eingebautes "Deploy from a branch" führt den Schritt
+# `actions/deploy-pages` OHNE Wiederholung aus. Dessen Status-Abfrage schlägt
+# gelegentlich mit dem transienten Backend-Fehler "Deployment failed, try again
+# later." fehl — obwohl der Build erfolgreich war. Dieser Workflow deployt aus
+# `docs/` und wiederholt genau diesen Schritt bis zu dreimal, sodass ein
+# einzelner transienter Fehler nicht mehr einen manuellen Re-Run erfordert.
+#
+# EINMALIGE UMSTELLUNG NÖTIG: Settings -> Pages -> Build and deployment ->
+# Source auf "GitHub Actions" setzen. Danach ist dieser Workflow der aktive
+# Deploy-Pfad und der flakige eingebaute Ablauf entfällt.
+
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nur ein Pages-Deploy gleichzeitig; laufende nicht abbrechen.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://beko2210.github.io/Specter-/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pages konfigurieren
+        uses: actions/configure-pages@v5
+
+      - name: Website-Artefakt (docs/) hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy (Versuch 1)
+        id: try1
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Warten vor Versuch 2
+        if: steps.try1.outcome == 'failure'
+        run: sleep 25
+
+      - name: Deploy (Versuch 2)
+        id: try2
+        if: steps.try1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Warten vor Versuch 3
+        if: steps.try1.outcome == 'failure' && steps.try2.outcome == 'failure'
+        run: sleep 40
+
+      - name: Deploy (Versuch 3, endgültig)
+        id: try3
+        if: steps.try1.outcome == 'failure' && steps.try2.outcome == 'failure'
+        uses: actions/deploy-pages@v5
