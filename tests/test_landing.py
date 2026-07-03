@@ -36,7 +36,7 @@ def test_landing_html_structure_and_content():
 
 def test_landing_html_defaults_branch():
     html = build_landing_html()
-    assert "belkis.aslani@gmail.com" in html
+    assert "kontakt@example.de" in html
     assert "Specter" in html
 
 

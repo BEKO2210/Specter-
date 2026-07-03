@@ -155,7 +155,7 @@ def _now_iso() -> str:
 
 
 def build_landing_html(brand: str = "Specter",
-                       contact_email: str = "belkis.aslani@gmail.com",
+                       contact_email: str = "kontakt@example.de",
                        generated_at: str | None = None) -> str:
     """Erzeugt die vollständige Landingpage als HTML-String."""
     ts = generated_at or _now_iso()
@@ -280,7 +280,7 @@ def build_landing_html(brand: str = "Specter",
 
 def write_landing(directory: str | Path = "reports",
                   brand: str = "Specter",
-                  contact_email: str = "belkis.aslani@gmail.com") -> Path:
+                  contact_email: str = "kontakt@example.de") -> Path:
     """Schreibt die Landingpage als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)

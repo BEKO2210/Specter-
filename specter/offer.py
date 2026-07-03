@@ -109,7 +109,7 @@ def _now_iso() -> str:
 
 
 def build_offer_html(customer_name: str = "Ihr Unternehmen",
-                     contact_email: str = "belkis.aslani@gmail.com",
+                     contact_email: str = "kontakt@example.de",
                      generated_at: str | None = None) -> str:
     """Erzeugt den Angebots-/Preis-One-Pager als HTML-String."""
     ts = generated_at or _now_iso()
@@ -173,7 +173,7 @@ def build_offer_html(customer_name: str = "Ihr Unternehmen",
 
 def write_offer(directory: str | Path = "reports",
                 customer_name: str = "Ihr Unternehmen",
-                contact_email: str = "belkis.aslani@gmail.com") -> Path:
+                contact_email: str = "kontakt@example.de") -> Path:
     """Schreibt den Angebots-One-Pager als HTML-Datei und gibt den Pfad zurück."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)

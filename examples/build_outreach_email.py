@@ -6,7 +6,7 @@ mit der Erstkontakt-Vorlage zu einer fertigen, individuellen Mail.
 
 Aufruf (aus dem Repo-Wurzelverzeichnis):
     python examples/build_outreach_email.py kunde-domain.de
-    python examples/build_outreach_email.py kunde-domain.de "Belkis Aslani" belkis@example.de
+    python examples/build_outreach_email.py kunde-domain.de "Max Mustermann" max@example.de
 
 RECHTLICHER HINWEIS: Unaufgeforderte Werbe-E-Mails an Unternehmen sind in
 Deutschland nach dem UWG heikel (i. d. R. ist eine vorherige Einwilligung oder

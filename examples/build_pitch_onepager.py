@@ -240,7 +240,7 @@ def render_html(m: dict) -> str:
 
   <footer>
     <div>Belkis Aslani &middot; Einzelunternehmen (IT-Sicherheit) &middot; 71691 Freiberg am Neckar</div>
-    <div><b>belkis.aslani@gmail.com</b> &middot; 0176 81462526</div>
+    <div><b>kontakt@example.de</b></div>
   </footer>
 </div></body></html>"""
 

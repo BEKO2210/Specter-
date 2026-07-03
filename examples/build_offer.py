@@ -3,7 +3,7 @@
 
 Aufruf (aus dem Repo-Wurzelverzeichnis):
     python examples/build_offer.py
-    python examples/build_offer.py "Muster GmbH" belkis.aslani@gmail.com
+    python examples/build_offer.py "Muster GmbH" kontakt@example.de
 
 Danach die Datei im Browser öffnen und über "Drucken -> Als PDF speichern"
 ein sauberes Kunden-PDF erstellen.
@@ -23,7 +23,7 @@ from specter.offer import write_offer  # noqa: E402
 def main() -> int:
     argv = sys.argv[1:]
     customer = argv[0] if argv else "Ihr Unternehmen"
-    contact = argv[1] if len(argv) > 1 else "belkis.aslani@gmail.com"
+    contact = argv[1] if len(argv) > 1 else "kontakt@example.de"
     out = write_offer(REPO_ROOT / "reports", customer_name=customer,
                       contact_email=contact)
     print("=" * 70)

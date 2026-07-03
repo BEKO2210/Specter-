@@ -239,7 +239,7 @@ python -m pytest
    nutze das Ergebnis als Aufhänger für den Erstkontakt:
    ```bash
    python examples/live_email_check.py kunde-domain.de
-   python examples/build_outreach_email.py kunde-domain.de "Belkis Aslani" belkis.aslani@gmail.com
+   python examples/build_outreach_email.py kunde-domain.de "Max Mustermann" max@example.de
    ```
 2. **Rahmen festlegen.** Trage die erlaubten Ziele/Pfade in eine `scope.yaml` ein
    (Vorlage: `scope.example.yaml`). **Nur was hier steht, wird geprüft** — alles andere
@@ -256,7 +256,7 @@ python -m pytest
    HTML im Browser öffnen → **Drucken → Als PDF speichern** → fertiges Kunden-PDF.
 6. **Angebot & Abschluss.** Angebots-One-Pager erzeugen und mitschicken:
    ```bash
-   python examples/build_offer.py "Kunde GmbH" belkis.aslani@gmail.com
+   python examples/build_offer.py "Kunde GmbH" kontakt@example.de
    ```
 7. **Nachtest.** Nach der Behebung erneut prüfen — der Bericht zeigt, was jetzt
    geschlossen ist.
